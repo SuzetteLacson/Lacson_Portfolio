@@ -1,0 +1,754 @@
+/* ==========================================================
+   style.css — all the design for my portfolio
+   Only 3 colors are used (see the variables below).
+   Sections are numbered — they match the order of index.html.
+========================================================== */
+
+/* ---------- 1. COLORS & FONTS (change once, updates everywhere) ---------- */
+:root {
+  --yellow: #E8F24C;
+  --black:  #111111;
+  --white:  #FFFFFF;
+  --mono:   'JetBrains Mono', monospace;  /* headings */
+  --sans:   'Inter', sans-serif;          /* body text */
+}
+
+/* ---------- 2. BASE (reset + defaults) ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;   /* menu links glide instead of jump */
+}
+
+body {
+  font-family: var(--sans);
+  color: var(--black);
+  background: var(--white);
+  line-height: 1.6;
+}
+
+h1, h2, h3 {
+  font-family: var(--mono);
+}
+
+h2 {
+  font-size: 1.8rem;
+  margin-bottom: 24px;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* .wrap keeps content centered with a max width */
+.wrap {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+section {
+  padding: 64px 0;
+}
+
+.yellow-bg {
+  background: var(--yellow);
+  border-top: 2px solid var(--black);
+  border-bottom: 2px solid var(--black);
+}
+
+.section-sub {
+  margin-top: -16px;
+  margin-bottom: 24px;
+}
+
+/* ---------- 3. NAVBAR ---------- */
+nav {
+  position: sticky;          /* stays at the top while scrolling */
+  top: 0;
+  z-index: 10;
+  background: var(--yellow);
+  border-bottom: 2px solid var(--black);
+}
+
+.nav-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--black);
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--black);
+  text-decoration: none;
+}
+
+.nav-links a:hover {
+  border-bottom: 2px solid var(--black);
+}
+
+.menu-btn {
+  display: none;             /* hidden on desktop, shown on phones */
+  font-size: 1.2rem;
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+/* ---------- 4. HERO ---------- */
+.hero {
+  background: var(--yellow);
+  border-bottom: 2px solid var(--black);
+  padding: 72px 0;
+}
+
+.hero-flex {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.hero-text h1 {
+  font-size: 3.2rem;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.hero-title {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.hero-tagline {
+  max-width: 480px;
+  margin-bottom: 24px;
+}
+
+.hero-photo {
+  width: 240px;
+  height: 240px;
+  object-fit: cover;         /* crops the photo nicely into a square */
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  background: var(--white);
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ---------- 5. BUTTONS (reused everywhere) ---------- */
+.btn {
+  display: inline-block;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  padding: 12px 20px;
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  transition: 0.15s;         /* smooth hover */
+}
+
+.btn-dark {
+  background: var(--black);
+  color: var(--yellow);
+}
+
+.btn-dark:hover {
+  background: var(--white);
+  color: var(--black);
+}
+
+.btn-light {
+  background: var(--white);
+  color: var(--black);
+}
+
+.btn-light:hover {
+  background: var(--black);
+  color: var(--yellow);
+}
+
+/* ---------- 6. CARDS (white box with black border) ---------- */
+.card {
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.about-card {
+  max-width: 700px;
+}
+
+.about-card p + p {
+  margin-top: 10px;
+}
+
+/* ---------- 7. GALLERY CAROUSEL ----------
+   How it works: all slides sit in a row inside .carousel-track.
+   The window only shows ONE slide. script.js slides the track
+   left/right with transform: translateX().
+*/
+.carousel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.carousel-window {
+  overflow: hidden;          /* hides the slides that are off-screen */
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  background: var(--white);
+  flex: 1;
+}
+
+.carousel-track {
+  display: flex;             /* puts all slides in one row */
+  transition: transform 0.4s ease;   /* the sliding animation */
+}
+
+.slide {
+  min-width: 100%;           /* each slide fills the whole window */
+}
+
+.slide img {
+  width: 100%;
+  height: 380px;
+  object-fit: cover;         /* crops photos to fit without stretching */
+}
+
+.slide figcaption {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 12px 16px;
+  border-top: 2px solid var(--black);
+}
+
+.carousel-btn {
+  font-size: 1.5rem;
+  font-weight: 700;
+  width: 44px;
+  height: 44px;
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.carousel-btn:hover {
+  background: var(--black);
+  color: var(--yellow);
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.carousel-dots button {
+  width: 12px;
+  height: 12px;
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 2px;        /* square dots = pixel style */
+  cursor: pointer;
+}
+
+.carousel-dots button.active {
+  background: var(--black);
+}
+
+/* ---------- 8. PROJECTS GRID ---------- */
+.grid {
+  display: grid;
+  /* auto-fill = cards wrap to new rows on small screens automatically */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.project {
+  padding: 0;                /* image touches the card edges */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: 0.18s;
+}
+
+.project:hover {
+  transform: rotate(-1deg) translateY(-4px);  /* "taped sticker" tilt */
+  box-shadow: 6px 6px 0 var(--black);
+}
+
+/* ---------- 8a. MINI-CAROUSEL on each project card ----------
+   Same trick as the gallery: a row of images inside a window
+   with overflow:hidden; JS slides the row with translateX.
+   The images, arrows, and dots are built by script.js from the
+   projectPhotos list — the HTML only has an empty
+   <div class="mini-carousel">. */
+.mini-carousel {
+  position: relative;        /* so arrows/dots can sit on top of the photo */
+  overflow: hidden;
+  border-bottom: 2px solid var(--black);
+  height: 170px;
+}
+
+.mini-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.4s ease;
+}
+
+.mini-track img {
+  min-width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* small arrow buttons floating over the photo */
+.mini-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  font-size: 1rem;
+  font-weight: 700;
+  background: var(--yellow);
+  border: 2px solid var(--black);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;                /* hidden until you hover the card */
+  transition: opacity 0.15s;
+}
+
+.project:hover .mini-btn {
+  opacity: 1;
+}
+
+.mini-btn.prev { left: 8px; }
+.mini-btn.next { right: 8px; }
+
+.mini-btn:hover {
+  background: var(--black);
+  color: var(--yellow);
+}
+
+/* tiny dots at the bottom of the photo */
+.mini-dots {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.mini-dots span {
+  width: 8px;
+  height: 8px;
+  background: var(--white);
+  border: 1.5px solid var(--black);
+  border-radius: 2px;
+}
+
+.mini-dots span.active {
+  background: var(--black);
+}
+
+.project h3 {
+  font-size: 1.05rem;
+  padding: 16px 20px 8px;
+}
+
+.project .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 20px;
+}
+
+.tag {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--yellow);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.project p {
+  font-size: 0.92rem;
+  padding: 10px 20px;
+  flex-grow: 1;              /* pushes the links to the bottom */
+}
+
+.card-links {
+  display: flex;
+  gap: 16px;
+  padding: 0 20px 18px;
+}
+
+.card-links a {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--black);
+  text-decoration: none;
+  border-bottom: 2px solid var(--black);
+}
+
+.card-links a:hover {
+  background: var(--yellow);
+}
+
+.project {
+  cursor: pointer;           /* shows the card is clickable */
+}
+
+.view-more {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0 20px 14px;
+  color: var(--black);
+}
+
+.project:hover .view-more {
+  background: none;
+  text-decoration: underline;
+}
+
+/* ---------- 8b. PROJECT PHOTO POPUP (modal) ----------
+   The overlay covers the whole screen (position:fixed).
+   It's hidden by default; script.js adds the "show" class.
+*/
+.modal-overlay {
+  display: none;             /* hidden until a card is clicked */
+  position: fixed;
+  inset: 0;                  /* shorthand: top/right/bottom/left = 0 */
+  background: rgba(17, 17, 17, 0.75);   /* dark see-through backdrop */
+  z-index: 100;
+  padding: 20px;
+}
+
+.modal-overlay.show {
+  display: flex;             /* script.js toggles this class */
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box {
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  box-shadow: 8px 8px 0 var(--yellow);   /* sticker-style hard shadow */
+  max-width: 760px;
+  width: 100%;
+  padding: 20px;
+}
+
+.modal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.modal-top h3 {
+  font-size: 1.05rem;
+}
+
+.modal-close {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 1rem;
+  width: 36px;
+  height: 36px;
+  background: var(--yellow);
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  background: var(--black);
+  color: var(--yellow);
+}
+
+.modal-view {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#modal-img {
+  flex: 1;
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border: 2px solid var(--black);
+  border-radius: 6px;
+}
+
+.modal-thumbs {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.modal-thumbs img {
+  width: 90px;
+  height: 60px;
+  object-fit: cover;
+  border: 2px solid var(--black);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.5;              /* dimmed unless selected */
+}
+
+.modal-thumbs img.active {
+  opacity: 1;
+  box-shadow: 3px 3px 0 var(--black);
+}
+
+/* ---------- 9. SKILLS ---------- */
+.skill-title {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 24px 0 12px;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pill {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  padding: 7px 14px;
+}
+
+.pill.hl {
+  background: var(--yellow); /* highlighted skill — but on the yellow
+                                section it stays white via the rule below */
+}
+
+.yellow-bg .pill.hl {
+  background: var(--black);
+  color: var(--yellow);
+}
+
+/* ---------- 10. EXPERIENCE TIMELINE ---------- */
+.timeline {
+  border-left: 2px solid var(--black);   /* the vertical line */
+  margin-left: 8px;
+  padding-left: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 700px;
+}
+
+.t-item {
+  position: relative;
+}
+
+/* the small square "dot" on the line */
+.t-item::before {
+  content: "";
+  position: absolute;
+  left: -37px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  background: var(--yellow);
+  border: 2px solid var(--black);
+}
+
+.t-item .when {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--yellow);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 2px 8px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.t-item h3 {
+  font-size: 1rem;
+}
+
+.t-item p {
+  font-size: 0.92rem;
+}
+
+/* ---------- 11. FOOTER / CONTACT ---------- */
+footer {
+  background: var(--black);
+  color: var(--white);
+  padding: 64px 0 32px;
+}
+
+footer h2 {
+  color: var(--yellow);
+}
+
+footer p {
+  max-width: 500px;
+  margin-bottom: 24px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.btn-resume {
+  background: var(--yellow);
+  color: var(--black);
+  border-color: var(--yellow);
+}
+
+.btn-resume:hover {
+  background: var(--white);
+  border-color: var(--white);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--white);
+  border-color: var(--white);
+}
+
+.btn-ghost:hover {
+  background: var(--white);
+  color: var(--black);
+}
+
+.copyright {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  border-top: 1px solid #444;
+  padding-top: 16px;
+}
+
+/* ---------- 12. MOBILE (phones, screens 680px and smaller) ---------- */
+@media (max-width: 680px) {
+
+  /* hamburger menu */
+  .menu-btn {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;             /* hidden until the button is tapped */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--yellow);
+    border-bottom: 2px solid var(--black);
+    flex-direction: column;
+    gap: 0;
+    padding: 8px 20px 16px;
+  }
+
+  .nav-links.open {
+    display: flex;             /* script.js toggles this class */
+  }
+
+  .nav-links a {
+    display: block;
+    padding: 10px 0;
+  }
+
+  /* hero: stack text above the photo */
+  .hero-flex {
+    flex-direction: column-reverse;
+    text-align: center;
+  }
+
+  .hero-text h1 {
+    font-size: 2.2rem;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+  }
+
+  .hero-photo {
+    width: 180px;
+    height: 180px;
+  }
+
+  /* smaller carousel photos on phones */
+  .slide img {
+    height: 220px;
+  }
+
+  /* smaller popup photos on phones */
+  #modal-img {
+    height: 240px;
+  }
+
+  .modal-thumbs img {
+    width: 64px;
+    height: 44px;
+  }
+
+  section {
+    padding: 48px 0;
+  }
+}

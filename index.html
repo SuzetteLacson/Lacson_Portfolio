@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<!-- ==========================================================
+  MY PORTFOLIO — index.html
+  This file = the CONTENT only (text, images, structure).
+  The design lives in style.css. The carousel logic in script.js.
+
+  HOW TO EDIT:
+  - Press Ctrl+F and search "EDIT-ME" to find every placeholder.
+  - Put your photos inside the "images" folder, then change the
+    src="images/..." to your own file names (jpg or png is fine).
+========================================================== -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- EDIT-ME: your name in the browser tab -->
+  <title>Suzette — Frontend Developer / Computer Engineer</title>
+
+  <!-- Fonts: JetBrains Mono (headings) + Inter (body text) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Connect the design file -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav>
+    <div class="nav-inner">
+      <!-- EDIT-ME: your logo text -->
+      <a class="logo" href="#top">suzette.dev</a>
+
+      <!-- hamburger button (only visible on phones) -->
+      <button class="menu-btn" onclick="toggleMenu()">☰</button>
+
+      <ul class="nav-links" id="navlinks">
+        <li><a href="#about">About</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ==================== HERO ==================== -->
+  <header class="hero" id="top">
+    <div class="wrap hero-flex">
+
+      <div class="hero-text">
+        <!-- EDIT-ME: your name -->
+        <h1>Hi, I'm Suzette </h1>
+        <!-- EDIT-ME: your title -->
+        <p class="hero-title"> Computer Engineer </p>
+        <!-- EDIT-ME: one line about what you do -->
+        <p class="hero-tagline"> Aspiring Software Developer passionate about QA automation, AI-powered solutions, App development, and Arduino projects.</p>
+        <div class="hero-buttons">
+          <a class="btn btn-dark" href="#projects">View projects</a>
+          <a class="btn btn-light" href="#contact">Contact me</a>
+        </div>
+      </div>
+
+      <!-- EDIT-ME: your profile photo (put it in the images folder) -->
+      <img class="hero-photo" src="images/Me.jpg" alt="Photo of Suzette">
+
+    </div>
+  </header>
+
+  <!-- ==================== ABOUT ==================== -->
+  <section id="about">
+    <div class="wrap">
+      <h2>01 / About</h2>
+      <div class="card about-card">
+        <!-- EDIT-ME: your real 2-3 sentence bio -->
+        <p>I'm a Computer Engineering student with an interest in software development, QA automation, AI-powered solutions, and Arduino projects. I enjoy building clean, user-friendly web applications and creating practical automation that solves everyday problems.</p>
+        <p>I'm continuously improving my development skills by exploring new technologies and building projects that combine software, AI, and embedded systems.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== GALLERY (CAROUSEL) ====================
+    Photos of your activities and experiences.
+    Each photo = one <figure class="slide"> block.
+    To add a photo: copy a whole <figure> block and change the
+    src + caption. The arrows and dots update automatically.
+  -->
+  <section id="gallery" class="yellow-bg">
+    <div class="wrap">
+      <h2>02 / Gallery</h2>
+      <p class="section-sub">Activities, events, and experiences.</p>
+
+      <div class="carousel">
+        <button class="carousel-btn" onclick="moveSlide(-1)">‹</button>
+
+        <div class="carousel-window">
+          <div class="carousel-track" id="track">
+
+            <!-- EDIT-ME: photo 1 -->
+            <figure class="slide">
+              <img src="images/interns.jpg" alt="Activity 1">
+              <figcaption> Pick-A-Roo Internship</figcaption>
+            </figure>
+
+            <!-- EDIT-ME: photo 2 -->
+            <figure class="slide">
+              <img src="images/withArduino.jpg" alt="Activity 2">
+              <figcaption>Working with Arduino Activities</figcaption>
+            </figure>
+
+            <!-- EDIT-ME: photo 3 -->
+            <figure class="slide">
+              <img src="images/PIC_EVENT.jpg" alt="Activity 3">
+              <figcaption>Philippine Innovation Conference 2025 - Tatak Future</figcaption>
+            </figure>
+
+            <!-- EDIT-ME: photo 4 (copy this block to add more) -->
+            <figure class="slide">
+              <img src="images/activity4.svg" alt="Activity 4">
+              <figcaption>Campus tech event with classmates</figcaption>
+            </figure>
+
+          </div>
+        </div>
+
+        <button class="carousel-btn" onclick="moveSlide(1)">›</button>
+      </div>
+
+      <!-- the little dots under the carousel (filled in by script.js) -->
+      <div class="carousel-dots" id="dots"></div>
+    </div>
+  </section>
+
+  <!-- ==================== PROJECTS ====================
+    Each project = one <article class="card project"> block.
+    Copy/paste a block to add a project.
+
+    PHOTOS: each card has a sliding mini-carousel showing 4 photos.
+    The photos come from the projectPhotos list at the TOP of
+    script.js — edit them there (one place for both the card
+    slider and the big popup).
+    - data-project="taskpilot" on the mini-carousel
+    - onclick="openProject('taskpilot')" on the card
+    ...must BOTH match the name in projectPhotos.
+  -->
+  <section id="projects">
+    <div class="wrap">
+      <h2>03 / Projects</h2>
+      <p class="section-sub">Photos slide automatically — click a card for the big view.</p>
+      <div class="grid">
+
+           <!--  project 1 -->
+        <article class="card project" onclick="openProject('SUZENTINEL')">
+          <div class="mini-carousel" data-project="SUZENTINEL"></div>
+          <h3>SUZENTINEL </h3>
+          <div class="tags"><span class="tag">Python</span><span class="tag">Computer Vision</span><span class="tag">Flask</span></div>
+          <p>An AI-powered computer vision system that monitors user activity, tracks screen time, and provides real-time productivity insights through an interactive dashboard.</p>
+          <span class="view-more">▸ view photos</span>  
+        </article>
+
+        <!--  project 2 -->
+        <article class="card project" onclick="openProject('mazebot')">
+          <div class="mini-carousel" data-project="mazebot"></div>
+          <h3> MazeBot 2026 </h3>
+          <div class="tags"><span class="tag">Arduino</span><span class="tag">Robotics</span><span class="tag">Sensors</span></div>
+          <p>An autonomous maze-solving robot built with Arduino that navigates through a maze using sensors and obstacle detection algorithms to find an efficient path.</p>
+          <span class="view-more">▸ view photos</span>
+        </article>
+
+        <!--  project 3 -->
+        <article class="card project" onclick="openProject('amari')">
+          <div class="mini-carousel" data-project="amari"></div>
+          <h3>Development of a Web-Based Platform for Amari Staycation - Alabang with Online Booking System </h3>
+          <div class="tags"><span class="tag">HTML/CSS</span><span class="tag">SQL</span><span class="tag">Web Development</span></div>
+          <p>A web-based booking platform developed for Amari Staycation that enables guests to browse accommodations, check availability, and make online reservations efficiently.</p>
+          <span class="view-more">▸ view photos</span>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== PROJECT PHOTO POPUP (modal) ====================
+    Hidden by default. openProject() in script.js fills it with the
+    right title + 4 photos and shows it. Click ✕, press Esc, or click
+    the dark background to close.
+  -->
+  <div class="modal-overlay" id="modal" onclick="closeProject()">
+    <!-- stopPropagation = clicking INSIDE the white box doesn't close it -->
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <h3 id="modal-title">Project</h3>
+        <button class="modal-close" onclick="closeProject()">✕</button>
+      </div>
+
+      <div class="modal-view">
+        <button class="carousel-btn" onclick="movePhoto(-1)">‹</button>
+        <img id="modal-img" src="" alt="Project photo">
+        <button class="carousel-btn" onclick="movePhoto(1)">›</button>
+      </div>
+
+      <!-- the 4 small thumbnails (filled in by script.js) -->
+      <div class="modal-thumbs" id="modal-thumbs"></div>
+    </div>
+  </div>
+
+  <!-- ==================== SKILLS ==================== -->
+  <section id="skills" class="yellow-bg">
+    <div class="wrap">
+      <h2>04 / Skills</h2>
+
+      <!-- LANGUAGES -->
+      <h3 class="skill-title">Languages</h3>
+      <div class="pills">
+        <span class="pill">Python</span>
+        <span class="pill">JavaScript</span>
+        <span class="pill">C++</span>
+        <span class="pill">HTML / CSS</span>
+        <span class="pill">Google Apps Script</span>
+      </div>
+
+      <!-- TOOLS & PLATFORMS -->
+      <h3 class="skill-title">Tools &amp; Platforms</h3>
+      <div class="pills">
+        <span class="pill">Git / GitHub</span>
+        <span class="pill">Arduino Uno</span>
+        <span class="pill">AI tools (ChatGPT, Claude)</span>
+        <span class="pill">VS Code</span>
+        <span class="pill">LM Studio</span>
+        <span class="pill">Autocad/Fusion 360</span>
+        <span class="pill">CISCO</span>
+        <span class="pill">Maestro Dev</span>
+        <span class="pill">Android Studio</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== EXPERIENCE ====================
+    Each entry = one <div class="t-item"> block. Newest on top.
+  -->
+  <section id="experience">
+    <div class="wrap">
+      <h2>05 / Experience & Education</h2>
+      <div class="timeline">
+
+        <div class="t-item">
+          <span class="when">June 2026 — August 2026</span>
+          <h3>IT Intern (QA Automation) — Pick.A.Roo</h3>
+          <p>Developed automation tests using Maestro and Android Studio for the Merchant App. Rotated across QA, iOS, and Android teams in an Agile/Scrum environment.</p>
+        </div>
+
+        <div class="t-item">
+          <span class="when">June 2025 — Present</span>
+          <h3>Airbnb Operations Coordinator — Amari Staycation</h3>
+          <p>Managed bookings, calendar coordination, and daily property operations. Implemented workflow improvements to enhance the overall guest experience.</p>
+        </div>
+        
+        <div class="t-item">
+          <span class="when">July 2023 — September 2023</span>
+          <h3>Sales Consultant — KIA Lipa</h3>
+          <p>Created sales funnels for cold and hot leads, assisting the company in implementing and enhancing their direct sales processes.</p>
+        </div>
+
+        <div class="t-item">
+          <span class="when">Present</span>
+          <h3>B.S. Computer Engineering — University of Batangas</h3>
+          <p>Student Member of the Institute of Computer Engineers of the Philippines. Multimedia Manager for Brahman Institute of Computer Engineering Students.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CONTACT / FOOTER ==================== -->
+  <footer id="contact">
+    <div class="wrap">
+      <h2>Let's build something.</h2>
+      <p>I'm open to internships, junior frontend roles, and freelance work.</p>
+      <div class="footer-links">
+        <!-- resume -->
+        <a class="btn btn-resume" href="SUZETTE B. LACSON_CV_Tech_Updated.pdf" download>Download resume</a>
+        <!-- links -->
+        <a class="btn btn-ghost" href="mailto:lacsonsuzette03@gmail.com">Email</a>
+        <a class="btn btn-ghost" href="https://github.com/SuzetteLacson" target="_blank">GitHub</a>
+        <a class="btn btn-ghost" href="https://www.linkedin.com/in/suzettelacson/" target="_blank">LinkedIn</a>
+      </div>
+      <p class="copyright">© 2026 Suzette · built with HTML, CSS &amp; a little JavaScript</p>
+    </div>
+  </footer>
+
+  <!-- Connect the JavaScript file (carousel + mobile menu) -->
+  <script src="script.js"></script>
+</body>
+</html>
