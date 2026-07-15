@@ -1,80 +1,85 @@
 <!DOCTYPE html>
 <!-- ==========================================================
-  MY PORTFOLIO — index.html
-  This file = the CONTENT only (text, images, structure).
-  The design lives in style.css. The carousel logic in script.js.
-
-  HOW TO EDIT:
-  - Press Ctrl+F and search "EDIT-ME" to find every placeholder.
-  - Put your photos inside the "images" folder, then change the
-    src="images/..." to your own file names (jpg or png is fine).
+    MY PORTFOLIO — index.html
+    This file handles the structural content.
+    Flipped to a premium white-dominant professional aesthetic.
 ========================================================== -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- NAME -->
+  <!-- TITLE -->
   <title>Suzette — Frontend Developer / Computer Engineer</title>
 
   <!-- Fonts: JetBrains Mono (headings) + Inter (body text) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Connect the design file -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
- <!-- ==================== NAVBAR ==================== -->
-  <nav>
-    <div class="nav-inner">
-      <a class="logo" href="#top">suzette.dev</a>
-      <button class="menu-btn" onclick="toggleMenu()">☰</button>
-      <ul class="nav-links" id="navlinks">
-        <li><a href="#about">About</a></li>
-        <li><a href="#gallery">Gallery</a></li>
-        <li><a href="#projects">Projects</a></li>
-        <li><a href="#skills">Skills</a></li>
-        <li><a href="#experience">Experience</a></li>
-        <li><a href="#contact">Contact</a></li>
+<!-- ==================== PREMIUM FLOATING NAV DOCK ==================== -->
+  <nav class="nav-dock">
+    <div class="nav-dock-inner">
+      <a href="#top" class="nav-brand">suzette.dev</a>
+      <button class="nav-toggle-btn" id="menuToggleBtn">
+        <span>•</span><span>•</span><span>•</span>
+      </button>
+    </div>
+    
+    <!-- Expanded Dropdown Card Panel (Hidden by default) -->
+    <div class="nav-dropdown" id="navDropdown">
+      <div class="dropdown-header">
+        <span class="dropdown-brand">suzette.dev</span>
+        <button class="dropdown-close-btn" id="menuCloseBtn">&times;</button>
+      </div>
+      <ul class="dropdown-links">
+        <li><a href="#top" class="dropdown-pill">Home</a></li>
+        <li><a href="#about" class="dropdown-pill">About Me</a></li>
+        <li><a href="#gallery" class="dropdown-pill">Projects</a></li>
+        <li><a href="#experience" class="dropdown-pill">Experience</a></li>
+        <li><a href="#skills" class="dropdown-pill">Education</a></li>
+        <li><a href="#contact" class="dropdown-pill">Contact</a></li>
       </ul>
     </div>
   </nav>
 
-  <!-- ==================== HERO ==================== -->
+  <!-- ==================== HIGH-IMPACT HERO SECTION ==================== -->
   <header class="hero" id="top">
-    <div class="wrap hero-flex">
-
-      <div class="hero-text">
-        <div class="badge">SYSTEM: ACTIVE</div>
-        <h1>Hi, I'm Suzette</h1>
+    <div class="wrap hero-centerpiece">
+      
+      <!-- Giant Typographic Layering Stack -->
+      <div class="massive-name-container">
+        <h1 class="massive-text-line">SUZETTE</h1>
         
-        <!-- Interactive Typing Element -->
-        <p class="hero-title">
-          &gt; <span id="typewriter"></span><span class="cursor">|</span>
-        </p>
-        
-        <p class="hero-tagline">Aspiring Software Developer passionate about QA automation, AI-powered solutions, App development, and Arduino projects.</p>
-        
-        <div class="hero-buttons">
-          <a class="btn btn-dark" href="#projects">View projects</a>
-          <a class="btn btn-light" href="#contact">Contact me</a>
+        <!-- Precision Capsule Mask Photo Frame -->
+        <div class="oval-photo-frame">
+          <img class="hero-photo" src="images/Me.jpg" alt="Suzette Lacson">
         </div>
+        
+        <h1 class="massive-text-line">LACSON</h1>
       </div>
 
-      <!-- Interactive 3D Card Hover -->
-      <div class="photo-card" id="profile-card">
-        <div class="card-inner">
-          <img class="hero-photo" src="images/Me.jpg" alt="Photo of Suzette">
-          <div class="card-glare"></div>
-        </div>
-      </div>
+      <!-- Minimalist Deco Divider -->
+      <div class="diamond-divider">✦</div>
 
+      <!-- Professional Subtitle Bio -->
+      <p class="hero-tagline">
+        I'm Suzette Lacson — an aspiring Software Developer passionately creating automated solutions, QA systems, and digital engineering experiences.
+      </p>
+      
+      <!-- Dynamic Scroll Asset -->
+      <div class="scroll-indicator">
+        <span class="scroll-line"></span>
+        <span class="scroll-text">SCROLL</span>
+      </div>
+      
     </div>
   </header>
-
   <!-- ==================== ABOUT (Interactive Terminal) ==================== -->
   <section id="about">
     <div class="wrap">
@@ -93,8 +98,8 @@
         
         <!-- Interactive Code Tabs -->
         <div class="terminal-tabs">
-          <button class="tab-btn active" onclick="switchTab('profile')">profile.json</button>
-          <button class="tab-btn" onclick="switchTab('bio')">bio.md</button>
+          <button class="tab-btn active" id="btn-profile" onclick="switchTab('profile')">profile.json</button>
+          <button class="tab-btn" id="btn-bio" onclick="switchTab('bio')">bio.md</button>
         </div>
 
         <div class="terminal-body">
@@ -120,12 +125,7 @@
     </div>
   </section>
 
-  <!-- ==================== GALLERY (CAROUSEL) ====================
-    Photos of your activities and experiences.
-    Each photo = one <figure class="slide"> block.
-    To add a photo: copy a whole <figure> block and change the
-    src + caption. The arrows and dots update automatically.
-  -->
+  <!-- ==================== GALLERY (CAROUSEL) ==================== -->
   <section id="gallery" class="yellow-bg">
     <div class="wrap">
       <h2>02 / Gallery</h2>
@@ -137,25 +137,21 @@
         <div class="carousel-window">
           <div class="carousel-track" id="track">
 
-            <!-- EDIT-ME: photo 1 -->
             <figure class="slide">
               <img src="images/interns.jpg" alt="Activity 1">
-              <figcaption> Pick-A-Roo Internship</figcaption>
+              <figcaption>Pick-A-Roo Internship</figcaption>
             </figure>
 
-            <!-- EDIT-ME: photo 2 -->
             <figure class="slide">
               <img src="images/withArduino.jpg" alt="Activity 2">
               <figcaption>Working with Arduino Activities</figcaption>
             </figure>
 
-            <!-- EDIT-ME: photo 3 -->
             <figure class="slide">
               <img src="images/PIC_EVENT.jpg" alt="Activity 3">
               <figcaption>Philippine Innovation Conference 2025 - Tatak Future</figcaption>
             </figure>
 
-            <!-- EDIT-ME: photo 4 (copy this block to add more) -->
             <figure class="slide">
               <img src="images/activity4.svg" alt="Activity 4">
               <figcaption>Campus tech event with classmates</figcaption>
@@ -167,30 +163,19 @@
         <button class="carousel-btn" onclick="moveSlide(1)">›</button>
       </div>
 
-      <!-- the little dots under the carousel (filled in by script.js) -->
+      <!-- Slider navigation dots (filled dynamically by script.js) -->
       <div class="carousel-dots" id="dots"></div>
     </div>
   </section>
 
-  <!-- ==================== PROJECTS ====================
-    Each project = one <article class="card project"> block.
-    Copy/paste a block to add a project.
-
-    PHOTOS: each card has a sliding mini-carousel showing 4 photos.
-    The photos come from the projectPhotos list at the TOP of
-    script.js — edit them there (one place for both the card
-    slider and the big popup).
-    - data-project="taskpilot" on the mini-carousel
-    - onclick="openProject('taskpilot')" on the card
-    ...must BOTH match the name in projectPhotos.
-  -->
+  <!-- ==================== PROJECTS ==================== -->
   <section id="projects">
     <div class="wrap">
       <h2>03 / Projects</h2>
       <p class="section-sub">Photos slide automatically — click a card for the big view.</p>
       <div class="grid">
 
-        <!--  project 1 -->
+        <!-- Project 1 -->
         <article class="card project" onclick="openProject('SUZENTINEL')">
           <div class="mini-carousel" data-project="SUZENTINEL"></div>
           <h3>SUZENTINEL</h3>
@@ -199,7 +184,7 @@
           <span class="view-more">▸ view details & photos</span>  
         </article>
 
-        <!--  project 2 -->
+        <!-- Project 2 -->
         <article class="card project" onclick="openProject('mazebot')">
           <div class="mini-carousel" data-project="mazebot"></div>
           <h3>MazeBot 2026</h3>
@@ -208,7 +193,7 @@
           <span class="view-more">▸ view details & photos</span>
         </article>
 
-        <!--  project 3 -->
+        <!-- Project 3 -->
         <article class="card project" onclick="openProject('amari')">
           <div class="mini-carousel" data-project="amari"></div>
           <h3>Amari Booking Platform</h3>
@@ -221,20 +206,14 @@
     </div>
   </section>
 
-  <!-- ==================== PROJECT PHOTO POPUP (modal) ====================
-    Hidden by default. openProject() in script.js fills it with the
-    right title + 4 photos and shows it. Click ✕, press Esc, or click
-    the dark background to close.
-  -->
+  <!-- ==================== PROJECT PHOTO POPUP (MODAL) ==================== -->
   <div class="modal-overlay" id="modal" onclick="closeProject()">
-    <!-- stopPropagation = clicking INSIDE the white box doesn't close it -->
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-top">
         <h3 id="modal-title">Project</h3>
         <button class="modal-close" onclick="closeProject()">✕</button>
       </div>
 
-      <!-- FIXED: This paragraph container was missing, which prevented your popup from opening -->
       <div id="modal-desc" class="modal-desc"></div>
 
       <div class="modal-view">
@@ -243,7 +222,6 @@
         <button class="carousel-btn" onclick="movePhoto(1)">›</button>
       </div>
 
-      <!-- the 4 small thumbnails (filled in by script.js) -->
       <div class="modal-thumbs" id="modal-thumbs"></div>
     </div>
   </div>
@@ -253,7 +231,6 @@
     <div class="wrap">
       <h2>04 / Skills</h2>
 
-      <!-- LANGUAGES -->
       <h3 class="skill-title">Languages</h3>
       <div class="pills">
         <span class="pill">Python</span>
@@ -263,7 +240,6 @@
         <span class="pill">Google Apps Script</span>
       </div>
 
-      <!-- TOOLS & PLATFORMS -->
       <h3 class="skill-title">Tools &amp; Platforms</h3>
       <div class="pills">
         <span class="pill">Git / GitHub</span>
@@ -279,12 +255,10 @@
     </div>
   </section>
 
-  <!-- ==================== EXPERIENCE ====================
-    Each entry = one <div class="t-item"> block. Newest on top.
-  -->
+  <!-- ==================== EXPERIENCE ==================== -->
   <section id="experience">
     <div class="wrap">
-      <h2>05 / Experience & Education</h2>
+      <h2>05 / Experience &amp; Education</h2>
       <div class="timeline">
 
         <div class="t-item">
@@ -321,9 +295,7 @@
       <h2>Let's build something.</h2>
       <p>I'm open to internships, junior frontend roles, and freelance work.</p>
       <div class="footer-links">
-        <!-- resume -->
         <a class="btn btn-resume" href="SUZETTE B. LACSON_CV_Tech_Updated.pdf" download>Download resume</a>
-        <!-- links -->
         <a class="btn btn-ghost" href="mailto:lacsonsuzette03@gmail.com">Email</a>
         <a class="btn btn-ghost" href="https://github.com/SuzetteLacson" target="_blank">GitHub</a>
         <a class="btn btn-ghost" href="https://www.linkedin.com/in/suzettelacson/" target="_blank">LinkedIn</a>
@@ -332,7 +304,60 @@
     </div>
   </footer>
 
-  <!-- Connect the JavaScript file (carousel + mobile menu) -->
+  <!-- Connect script.js + Add Nav Toggle Controller Event Logic directly -->
   <script src="script.js"></script>
+  <script>
+    // Safeguarded toggle controls for the clean floating dock panel layout
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    const menuCloseBtn = document.getElementById('menuCloseBtn');
+    const navDropdown = document.getElementById('navDropdown');
+    const dropdownPills = document.querySelectorAll('.dropdown-pill');
+
+    if (menuToggleBtn && menuCloseBtn && navDropdown) {
+      // Expand overlay panel
+      menuToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navDropdown.classList.add('show');
+      });
+
+      // Collapse overlay panel via close button
+      menuCloseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navDropdown.classList.remove('show');
+      });
+
+      // Automatically collapse the navigation card view once a route link pill is active
+      dropdownPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          navDropdown.classList.remove('show');
+        });
+      });
+
+      // Global click out to close menu seamlessly
+      document.addEventListener('click', (e) => {
+        if (!navDropdown.contains(e.target) && e.target !== menuToggleBtn) {
+          navDropdown.classList.remove('show');
+        }
+      });
+    }
+
+    // Interactive Terminal Tab Switcher logic handling
+    function switchTab(tabName) {
+      const tabs = ['profile', 'bio'];
+      tabs.forEach(t => {
+        const content = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`btn-${t}`);
+        if (content && btn) {
+          if (t === tabName) {
+            content.classList.add('active');
+            btn.classList.add('active');
+          } else {
+            content.classList.remove('active');
+            btn.classList.remove('active');
+          }
+        }
+      });
+    }
+  </script>
 </body>
 </html>

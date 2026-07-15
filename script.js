@@ -1,12 +1,15 @@
 /* ==========================================================
-   script.js — the small amount of JavaScript this site needs.
-   Three jobs:
-     1. the mobile hamburger menu
-     2. the gallery carousel (arrows + dots + auto-play)
-     3. the project photo popup (click a card → 4 photos)
+   script.js — Portfolio Core Engine
+   Handles: 
+     1. Floating Capsule Nav Dock Interactions
+     2. Main Gallery Carousel (Dynamic Dots + Auto-play)
+     3. Project Cards (Dynamic Mini-Carousels)
+     4. High-Performance Project View Modal (Fixed Missing Functions)
+     5. Developer Terminal Tab Interfaces
+     6. Hero Text Terminal Simulation Engine
 ========================================================== */
 
-/* ---------- PROJECT PHOTOS & DESCRIPTIONS (EDIT-ME!) ---------- */
+/* ---------- PROJECT PHOTOS & DESCRIPTIONS DATA ---------- */
 const projectPhotos = {
   SUZENTINEL: {
     title: "SUZENTINEL — AI Vision System",
@@ -40,66 +43,101 @@ const projectPhotos = {
   }
 };
 
-/* ---------- 1. MOBILE MENU ---------- */
-function toggleMenu() {
-  document.getElementById("navlinks").classList.toggle("open");
-}
+/* ---------- 1. FLOATING CAPSULE NAVIGATION DOCK ---------- */
+document.addEventListener("DOMContentLoaded", () => {
+  const menuToggleBtn = document.getElementById('menuToggleBtn');
+  const menuCloseBtn = document.getElementById('menuCloseBtn');
+  const navDropdown = document.getElementById('navDropdown');
+  const dropdownPills = document.querySelectorAll('.dropdown-pill');
 
-/* ---------- 2. CAROUSEL ---------- */
-const track  = document.getElementById("track");   
-const slides = track.children;                     
+  if (menuToggleBtn && menuCloseBtn && navDropdown) {
+    menuToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navDropdown.classList.add('show');
+    });
+
+    menuCloseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navDropdown.classList.remove('show');
+    });
+
+    dropdownPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        navDropdown.classList.remove('show');
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!navDropdown.contains(e.target) && e.target !== menuToggleBtn) {
+        navDropdown.classList.remove('show');
+      }
+    });
+  }
+});
+
+/* ---------- 2. MAIN GALLERY CAROUSEL ---------- */
+const track = document.getElementById("track");   
 const dotsBox = document.getElementById("dots");   
-
 let current = 0;                                   
 
-for (let i = 0; i < slides.length; i++) {
-  const dot = document.createElement("button");
-  dot.onclick = function () { goToSlide(i); };     
-  dotsBox.appendChild(dot);
-}
+if (track && dotsBox) {
+  const slides = track.children; 
 
-function goToSlide(n) {
-  current = n;
-  track.style.transform = "translateX(-" + current * 100 + "%)";
+  // Dynamically generate navigation dots
+  for (let i = 0; i < slides.length; i++) {
+    const dot = document.createElement("button");
+    dot.setAttribute("aria-label", `Go to slide ${i + 1}`);
+    dot.onclick = function () { goToSlide(i); };     
+    dotsBox.appendChild(dot);
+  }
+
+  function goToSlide(n) {
+    current = n;
+    track.style.transform = "translateX(-" + current * 100 + "%)";
+    updateDots();
+  }
+
+  function moveSlide(step) {
+    current = (current + step + slides.length) % slides.length;
+    goToSlide(current);
+  }
+
+  function updateDots() {
+    for (let i = 0; i < dotsBox.children.length; i++) {
+      if (i === current) {
+        dotsBox.children[i].classList.add("active");
+      } else {
+        dotsBox.children[i].classList.remove("active");
+      }
+    }
+  }
+
+  // Auto-play routine loop every 5 seconds
+  setInterval(function () { moveSlide(1); }, 5000);
   updateDots();
 }
 
-function moveSlide(step) {
-  const n = (current + step + slides.length) % slides.length;
-  goToSlide(n);
-}
-
-function updateDots() {
-  for (let i = 0; i < dotsBox.children.length; i++) {
-    if (i === current) {
-      dotsBox.children[i].classList.add("active");
-    } else {
-      dotsBox.children[i].classList.remove("active");
-    }
-  }
-}
-
-setInterval(function () { moveSlide(1); }, 5000);
-updateDots();
-
-/* ---------- 3. PROJECT PHOTO POPUP ---------- */
+/* ---------- 3. PROJECT PHOTO POPUP (MODAL ENGINE) ---------- */
 let currentProject = null;   
 let photoIndex = 0;          
 
 function openProject(name) {
   currentProject = projectPhotos[name];
+  if (!currentProject) return;
   photoIndex = 0;
 
-  // set the popup title & description
+  // Set structural details text content Safely
   document.getElementById("modal-title").textContent = currentProject.title;
   document.getElementById("modal-desc").textContent = currentProject.description;
 
-  // build the 4 thumbnails
+  // Render clickable interactive image thumbnails
   const thumbsBox = document.getElementById("modal-thumbs");
   thumbsBox.innerHTML = "";                    
+  
   for (let i = 0; i < currentProject.photos.length; i++) {
     const thumb = document.createElement("img");
     thumb.src = currentProject.photos[i];
+    thumb.alt = `${currentProject.title} thumbnail index ${i}`;
     thumb.onclick = function () { showPhoto(i); };  
     thumbsBox.appendChild(thumb);
   }
@@ -108,35 +146,75 @@ function openProject(name) {
   document.getElementById("modal").classList.add("show");   
 }
 
+// FIX: Added the missing core visibility controls
+function showPhoto(index) {
+  if (!currentProject) return;
+  
+  // Enforce array boundary circular wrapping
+  photoIndex = (index + currentProject.photos.length) % currentProject.photos.length;
+  
+  const modalImg = document.getElementById("modal-img");
+  if (modalImg) {
+    modalImg.src = currentProject.photos[photoIndex];
+  }
+  
+  // Highlight currently viewing thumbnail
+  const thumbs = document.getElementById("modal-thumbs").children;
+  for (let i = 0; i < thumbs.length; i++) {
+    if (i === photoIndex) {
+      thumbs[i].classList.add("active");
+    } else {
+      thumbs[i].classList.remove("active");
+    }
+  }
+}
 
-/* ---------- 4. MINI-CAROUSELS on the project cards ----------
-   Finds every <div class="mini-carousel" data-project="...">,
-   reads which project it belongs to, and builds a small slider
-   with the 4 photos from projectPhotos. So you only edit photos
-   in ONE place (the projectPhotos list at the top). */
+// FIX: Added missing structural next/previous step handler
+function movePhoto(step) {
+  showPhoto(photoIndex + step);
+}
 
+// FIX: Added missing modal destruction state method
+function closeProject() {
+  const modal = document.getElementById("modal");
+  if (modal) {
+    modal.classList.remove("show");
+  }
+  currentProject = null;
+}
+
+// Global Keyboard Accessibility Override Escape key to exit overlay
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeProject();
+  }
+});
+
+/* ---------- 4. PROJECT CARD AUTOMATED MINI-CAROUSELS ---------- */
 const minis = document.querySelectorAll(".mini-carousel");
-
 for (let m = 0; m < minis.length; m++) {
   buildMiniCarousel(minis[m]);
 }
 
 function buildMiniCarousel(box) {
-  // which project? read it from data-project="..."
-  const photos = projectPhotos[box.dataset.project].photos;
+  const projectKey = box.dataset.project;
+  if (!projectPhotos[projectKey]) return;
+  
+  const photos = projectPhotos[projectKey].photos;
   let index = 0;
 
-  // 1) the sliding row of images
+  // 1) Dynamic render tracks
   const miniTrack = document.createElement("div");
   miniTrack.className = "mini-track";
   for (let i = 0; i < photos.length; i++) {
     const img = document.createElement("img");
     img.src = photos[i];
+    img.alt = "Project Preview Grid Component Element";
     miniTrack.appendChild(img);
   }
   box.appendChild(miniTrack);
 
-  // 2) the dots
+  // 2) Navigation dots track builder
   const dots = document.createElement("div");
   dots.className = "mini-dots";
   for (let i = 0; i < photos.length; i++) {
@@ -144,8 +222,7 @@ function buildMiniCarousel(box) {
   }
   box.appendChild(dots);
 
-  // 3) the arrows — stopPropagation so clicking an arrow
-  //    slides the photo instead of opening the popup
+  // 3) Arrows handling bounds isolation controls
   const prev = document.createElement("button");
   prev.className = "mini-btn prev";
   prev.textContent = "‹";
@@ -158,7 +235,6 @@ function buildMiniCarousel(box) {
   next.onclick = function (e) { e.stopPropagation(); show(index + 1); };
   box.appendChild(next);
 
-  // slide to photo n (loops around at both ends)
   function show(n) {
     index = (n + photos.length) % photos.length;
     miniTrack.style.transform = "translateX(-" + index * 100 + "%)";
@@ -167,29 +243,27 @@ function buildMiniCarousel(box) {
     }
   }
 
-  show(0);                                   // start on the first photo
-  setInterval(function () { show(index + 1); }, 4000);   // auto-slide every 4s
+  show(0);
+  setInterval(function () { show(index + 1); }, 4000); 
 }
 
-/* ---------- 4. TERMINAL TAB SWITCHER ---------- */
+/* ---------- 5. DEVELOPER TERMINAL TAB SWITCHER ---------- */
 function switchTab(tabId) {
-  // Remove active state from all buttons
   const buttons = document.querySelectorAll('.tab-btn');
   buttons.forEach(btn => btn.classList.remove('active'));
 
-  // Remove active state from all tab panels
   const contents = document.querySelectorAll('.tab-content');
   contents.forEach(content => content.classList.remove('active'));
 
-  // Find targeted active elements
-  const clickedBtn = Array.from(buttons).find(btn => btn.textContent.includes(tabId));
+  // Target matching elements structural selection mapping
+  const clickedBtn = document.getElementById(`btn-${tabId}`) || Array.from(buttons).find(btn => btn.textContent.includes(tabId));
   if (clickedBtn) clickedBtn.classList.add('active');
 
   const targetContent = document.getElementById(`tab-${tabId}`);
   if (targetContent) targetContent.classList.add('active');
 }
 
-/* ---------- 5. HERO TYPEWRITER ANIMATION ---------- */
+/* ---------- 6. HERO TYPEWRITER SIMULATION PIPELINE ---------- */
 const phrases = ["Computer Engineer", "QA Automation Engineer", "Full-Stack Dev"];
 let phraseIndex = 0;
 let charIndex = 0;
@@ -197,6 +271,7 @@ let isDeleting = false;
 const typewriterElement = document.getElementById("typewriter");
 
 function type() {
+  if (!typewriterElement) return;
   const currentPhrase = phrases[phraseIndex];
   
   if (isDeleting) {
@@ -210,18 +285,18 @@ function type() {
   let typeSpeed = isDeleting ? 40 : 80;
 
   if (!isDeleting && charIndex === currentPhrase.length) {
-    typeSpeed = 1500; // Pause at full phrase
+    typeSpeed = 1500; // Complete word delay hold
     isDeleting = true;
   } else if (isDeleting && charIndex === 0) {
     isDeleting = false;
     phraseIndex = (phraseIndex + 1) % phrases.length;
-    typeSpeed = 400; // Pause before next word
+    typeSpeed = 400; // Next string sequence initiation pause delay
   }
 
   setTimeout(type, typeSpeed);
 }
 
-// Start typewriter effect on load
+// Attach event system initializer
 document.addEventListener("DOMContentLoaded", () => {
   if (typewriterElement) type();
 });
