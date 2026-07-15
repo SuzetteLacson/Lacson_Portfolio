@@ -11,6 +11,8 @@
 
 /* ---------- PROJECT PHOTOS & DESCRIPTIONS DATA ---------- */
 const projectPhotos = {
+  // EDIT-ME: SUZENTINEL & amari still use placeholder .svg images —
+  // drop real screenshots into images/ and update the paths below.
   SUZENTINEL: {
     title: "SUZENTINEL — AI Vision System",
     description: "Users previously lacked an automated way to track screen time and productivity. To address this, I was tasked with designing a real-time tracking architecture. I built an AI-powered computer vision system utilizing Python and an interactive Flask dashboard. This solution successfully delivered real-time productivity insights, effectively replacing manual time-logging and allowing users to optimize their workflow.",
@@ -25,10 +27,10 @@ const projectPhotos = {
     title: "MazeBot 2026 — Autonomous Robotics",
     description: "There was a need for a physical demonstration of algorithmic pathfinding to showcase autonomous navigation capabilities. I engineered an autonomous maze-solving unit using an Arduino microcontroller. By programming the robot to utilize advanced sensor arrays and obstacle detection algorithms, it successfully navigated complex physical mazes with highly optimized routing.",
     photos: [
-      "images/project2.svg",
-      "images/activity2.svg",
-      "images/activity4.svg",
-      "images/activity1.svg"
+      "images/mzebot_bot.jpg",
+      "images/mzebot_maze.jpg",
+      "images/me_w_bot.jpg",
+      "images/mzebotgrouppic.jpg"
     ]
   },
   amari: {
@@ -209,7 +211,8 @@ function buildMiniCarousel(box) {
   for (let i = 0; i < photos.length; i++) {
     const img = document.createElement("img");
     img.src = photos[i];
-    img.alt = "Project Preview Grid Component Element";
+    img.alt = projectPhotos[projectKey].title + " — photo " + (i + 1);
+    img.loading = "lazy";      // don't download until near the viewport
     miniTrack.appendChild(img);
   }
   box.appendChild(miniTrack);

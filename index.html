@@ -9,8 +9,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- TITLE -->
-  <title>Suzette — Frontend Developer / Computer Engineer</title>
+  <!-- TITLE + SEO -->
+  <title>Suzette Lacson — Computer Engineer / QA Automation</title>
+  <meta name="description" content="Portfolio of Suzette Lacson — Computer Engineering student focused on QA automation, AI-powered tools, web development, and Arduino/embedded projects.">
+  <meta property="og:title" content="Suzette Lacson — Computer Engineer">
+  <meta property="og:description" content="QA automation, AI tools, web development, and robotics projects.">
+  <meta property="og:image" content="images/Me.jpg">
 
   <!-- Fonts: JetBrains Mono (headings) + Inter (body text) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,7 +30,7 @@
   <nav class="nav-dock">
     <div class="nav-dock-inner">
       <a href="#top" class="nav-brand">suzette.dev</a>
-      <button class="nav-toggle-btn" id="menuToggleBtn">
+      <button class="nav-toggle-btn" id="menuToggleBtn" aria-label="Open navigation menu">
         <span>•</span><span>•</span><span>•</span>
       </button>
     </div>
@@ -35,51 +39,70 @@
     <div class="nav-dropdown" id="navDropdown">
       <div class="dropdown-header">
         <span class="dropdown-brand">suzette.dev</span>
-        <button class="dropdown-close-btn" id="menuCloseBtn">&times;</button>
+        <button class="dropdown-close-btn" id="menuCloseBtn" aria-label="Close navigation menu">&times;</button>
       </div>
+      <!-- FIX: labels now match the sections they scroll to
+           (Projects pointed to the Gallery, Education pointed to Skills) -->
       <ul class="dropdown-links">
         <li><a href="#top" class="dropdown-pill">Home</a></li>
         <li><a href="#about" class="dropdown-pill">About Me</a></li>
-        <li><a href="#gallery" class="dropdown-pill">Projects</a></li>
+        <li><a href="#gallery" class="dropdown-pill">Gallery</a></li>
+        <li><a href="#projects" class="dropdown-pill">Projects</a></li>
+        <li><a href="#skills" class="dropdown-pill">Skills</a></li>
         <li><a href="#experience" class="dropdown-pill">Experience</a></li>
-        <li><a href="#skills" class="dropdown-pill">Education</a></li>
         <li><a href="#contact" class="dropdown-pill">Contact</a></li>
       </ul>
     </div>
   </nav>
 
   <!-- ==================== HIGH-IMPACT HERO SECTION ==================== -->
-  <header class="hero" id="top">
-    <div class="wrap hero-centerpiece">
+<header class="hero" id="top">
+  <div class="wrap hero-centerpiece">
+    
+    <!-- Giant Typographic Layering Stack -->
+    <div class="massive-name-container">
+      <h1 class="massive-text-line">SUZETTE</h1>
       
-      <!-- Giant Typographic Layering Stack -->
-      <div class="massive-name-container">
-        <h1 class="massive-text-line">SUZETTE</h1>
-        
-        <!-- Precision Capsule Mask Photo Frame -->
-        <div class="oval-photo-frame">
-          <img class="hero-photo" src="images/Me.jpg" alt="Suzette Lacson">
+      <!-- Interactive 3D Flip Capsule (Now a link to the About section!) -->
+      <a href="#about" class="oval-photo-frame">
+        <div class="flip-card-inner">
+          
+          <!-- FRONT SIDE: Your main photo -->
+          <div class="flip-card-front">
+            <img class="hero-photo" src="images/Me.jpg" alt="Suzette Lacson Front">
+          </div>
+          
+          <!-- BACK SIDE: Your second photo (or alternative brand graphic) -->
+          <!-- FIX: file is ME2.png, not ME2.jpg (image was broken) -->
+          <div class="flip-card-back">
+            <img class="hero-photo" src="images/ME2.png" alt="Suzette Lacson Back">
+          </div>
+
         </div>
-        
-        <h1 class="massive-text-line">LACSON</h1>
-      </div>
-
-      <!-- Minimalist Deco Divider -->
-      <div class="diamond-divider">✦</div>
-
-      <!-- Professional Subtitle Bio -->
-      <p class="hero-tagline">
-        I'm Suzette Lacson — an aspiring Software Developer passionately creating automated solutions, QA systems, and digital engineering experiences.
-      </p>
+      </a>
       
-      <!-- Dynamic Scroll Asset -->
-      <div class="scroll-indicator">
-        <span class="scroll-line"></span>
-        <span class="scroll-text">SCROLL</span>
-      </div>
-      
+      <h1 class="massive-text-line">LACSON</h1>
     </div>
-  </header>
+
+    <!-- Minimalist Deco Divider -->
+    <div class="diamond-divider">✦</div>
+
+    <!-- Animated role typewriter (logic already lives in script.js) -->
+    <p class="typewriter-line"><span id="typewriter"></span><span class="type-cursor">▌</span></p>
+
+    <!-- Professional Subtitle Bio -->
+    <p class="hero-tagline">
+      I'm Suzette Lacson — an aspiring Software Developer passionately creating automated solutions, QA systems, and digital engineering experiences.
+    </p>
+    
+    <!-- Dynamic Scroll Asset -->
+    <div class="scroll-indicator">
+      <span class="scroll-line"></span>
+      <span class="scroll-text">SCROLL</span>
+    </div>
+
+  </div>
+</header>
   <!-- ==================== ABOUT (Interactive Terminal) ==================== -->
   <section id="about">
     <div class="wrap">
@@ -132,35 +155,40 @@
       <p class="section-sub">Activities, events, and experiences.</p>
 
       <div class="carousel">
-        <button class="carousel-btn" onclick="moveSlide(-1)">‹</button>
+        <button class="carousel-btn" onclick="moveSlide(-1)" aria-label="Previous photo">‹</button>
 
         <div class="carousel-window">
           <div class="carousel-track" id="track">
 
             <figure class="slide">
-              <img src="images/interns.jpg" alt="Activity 1">
+              <img src="images/interns.jpg" alt="Pick-A-Roo internship team">
               <figcaption>Pick-A-Roo Internship</figcaption>
             </figure>
 
             <figure class="slide">
-              <img src="images/withArduino.jpg" alt="Activity 2">
+              <img src="images/withArduino.jpg" alt="Working with Arduino" loading="lazy">
               <figcaption>Working with Arduino Activities</figcaption>
             </figure>
 
             <figure class="slide">
-              <img src="images/PIC_EVENT.jpg" alt="Activity 3">
+              <img src="images/PIC_EVENT.jpg" alt="Philippine Innovation Conference 2025" loading="lazy">
               <figcaption>Philippine Innovation Conference 2025 - Tatak Future</figcaption>
             </figure>
 
             <figure class="slide">
-              <img src="images/activity4.svg" alt="Activity 4">
-              <figcaption>Campus tech event with classmates</figcaption>
+              <img src="images/event_pickaroo.jpg" alt="Pick-A-Roo company event" loading="lazy">
+              <figcaption>Pick-A-Roo team event</figcaption>
+            </figure>
+
+            <figure class="slide">
+              <img src="images/internshipw_id.jpg" alt="First day of internship with company ID" loading="lazy">
+              <figcaption>Internship onboarding at AGILE Digital Ventures</figcaption>
             </figure>
 
           </div>
         </div>
 
-        <button class="carousel-btn" onclick="moveSlide(1)">›</button>
+        <button class="carousel-btn" onclick="moveSlide(1)" aria-label="Next photo">›</button>
       </div>
 
       <!-- Slider navigation dots (filled dynamically by script.js) -->
@@ -217,9 +245,9 @@
       <div id="modal-desc" class="modal-desc"></div>
 
       <div class="modal-view">
-        <button class="carousel-btn" onclick="movePhoto(-1)">‹</button>
+        <button class="carousel-btn" onclick="movePhoto(-1)" aria-label="Previous project photo">‹</button>
         <img id="modal-img" src="" alt="Project photo">
-        <button class="carousel-btn" onclick="movePhoto(1)">›</button>
+        <button class="carousel-btn" onclick="movePhoto(1)" aria-label="Next project photo">›</button>
       </div>
 
       <div class="modal-thumbs" id="modal-thumbs"></div>
@@ -248,9 +276,16 @@
         <span class="pill">VS Code</span>
         <span class="pill">LM Studio</span>
         <span class="pill">Autocad/Fusion 360</span>
-        <span class="pill">CISCO</span>
+        <span class="pill">Tinkercad / Multisim</span>
         <span class="pill">Maestro Dev</span>
         <span class="pill">Android Studio</span>
+        <span class="pill">Trello / Notion</span>
+      </div>
+
+      <!-- Certifications from CV — recruiters scan for these -->
+      <h3 class="skill-title">Certifications</h3>
+      <div class="pills">
+        <span class="pill hl">Cisco Certified Network Associate (CCNA) 1 &amp; 2</span>
       </div>
     </div>
   </section>
@@ -295,7 +330,8 @@
       <h2>Let's build something.</h2>
       <p>I'm open to internships, junior frontend roles, and freelance work.</p>
       <div class="footer-links">
-        <a class="btn btn-resume" href="SUZETTE B. LACSON_CV_Tech_Updated.pdf" download>Download resume</a>
+        <!-- FIX: the CV lives inside the images folder (link was broken) -->
+        <a class="btn btn-resume" href="images/SUZETTE B. LACSON_CV_Tech_Updated.pdf" download>Download resume</a>
         <a class="btn btn-ghost" href="mailto:lacsonsuzette03@gmail.com">Email</a>
         <a class="btn btn-ghost" href="https://github.com/SuzetteLacson" target="_blank">GitHub</a>
         <a class="btn btn-ghost" href="https://www.linkedin.com/in/suzettelacson/" target="_blank">LinkedIn</a>
@@ -304,60 +340,10 @@
     </div>
   </footer>
 
-  <!-- Connect script.js + Add Nav Toggle Controller Event Logic directly -->
+  <!-- Connect script.js.
+       FIX: removed the duplicate inline <script> — the nav toggle and
+       switchTab logic already live in script.js. Having both meant
+       double event listeners and two competing switchTab functions. -->
   <script src="script.js"></script>
-  <script>
-    // Safeguarded toggle controls for the clean floating dock panel layout
-    const menuToggleBtn = document.getElementById('menuToggleBtn');
-    const menuCloseBtn = document.getElementById('menuCloseBtn');
-    const navDropdown = document.getElementById('navDropdown');
-    const dropdownPills = document.querySelectorAll('.dropdown-pill');
-
-    if (menuToggleBtn && menuCloseBtn && navDropdown) {
-      // Expand overlay panel
-      menuToggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        navDropdown.classList.add('show');
-      });
-
-      // Collapse overlay panel via close button
-      menuCloseBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        navDropdown.classList.remove('show');
-      });
-
-      // Automatically collapse the navigation card view once a route link pill is active
-      dropdownPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-          navDropdown.classList.remove('show');
-        });
-      });
-
-      // Global click out to close menu seamlessly
-      document.addEventListener('click', (e) => {
-        if (!navDropdown.contains(e.target) && e.target !== menuToggleBtn) {
-          navDropdown.classList.remove('show');
-        }
-      });
-    }
-
-    // Interactive Terminal Tab Switcher logic handling
-    function switchTab(tabName) {
-      const tabs = ['profile', 'bio'];
-      tabs.forEach(t => {
-        const content = document.getElementById(`tab-${t}`);
-        const btn = document.getElementById(`btn-${t}`);
-        if (content && btn) {
-          if (t === tabName) {
-            content.classList.add('active');
-            btn.classList.add('active');
-          } else {
-            content.classList.remove('active');
-            btn.classList.remove('active');
-          }
-        }
-      });
-    }
-  </script>
 </body>
 </html>
