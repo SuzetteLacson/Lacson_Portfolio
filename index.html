@@ -14,7 +14,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- EDIT-ME: your name in the browser tab -->
+  <!-- NAME -->
   <title>Suzette — Frontend Developer / Computer Engineer</title>
 
   <!-- Fonts: JetBrains Mono (headings) + Inter (body text) -->
@@ -27,15 +27,11 @@
 </head>
 <body>
 
-  <!-- ==================== NAVBAR ==================== -->
+ <!-- ==================== NAVBAR ==================== -->
   <nav>
     <div class="nav-inner">
-      <!-- EDIT-ME: your logo text -->
       <a class="logo" href="#top">suzette.dev</a>
-
-      <!-- hamburger button (only visible on phones) -->
       <button class="menu-btn" onclick="toggleMenu()">☰</button>
-
       <ul class="nav-links" id="navlinks">
         <li><a href="#about">About</a></li>
         <li><a href="#gallery">Gallery</a></li>
@@ -52,33 +48,75 @@
     <div class="wrap hero-flex">
 
       <div class="hero-text">
-        <!-- EDIT-ME: your name -->
-        <h1>Hi, I'm Suzette </h1>
-        <!-- EDIT-ME: your title -->
-        <p class="hero-title"> Computer Engineer </p>
-        <!-- EDIT-ME: one line about what you do -->
-        <p class="hero-tagline"> Aspiring Software Developer passionate about QA automation, AI-powered solutions, App development, and Arduino projects.</p>
+        <div class="badge">SYSTEM: ACTIVE</div>
+        <h1>Hi, I'm Suzette</h1>
+        
+        <!-- Interactive Typing Element -->
+        <p class="hero-title">
+          &gt; <span id="typewriter"></span><span class="cursor">|</span>
+        </p>
+        
+        <p class="hero-tagline">Aspiring Software Developer passionate about QA automation, AI-powered solutions, App development, and Arduino projects.</p>
+        
         <div class="hero-buttons">
           <a class="btn btn-dark" href="#projects">View projects</a>
           <a class="btn btn-light" href="#contact">Contact me</a>
         </div>
       </div>
 
-      <!-- EDIT-ME: your profile photo (put it in the images folder) -->
-      <img class="hero-photo" src="images/Me.jpg" alt="Photo of Suzette">
+      <!-- Interactive 3D Card Hover -->
+      <div class="photo-card" id="profile-card">
+        <div class="card-inner">
+          <img class="hero-photo" src="images/Me.jpg" alt="Photo of Suzette">
+          <div class="card-glare"></div>
+        </div>
+      </div>
 
     </div>
   </header>
 
-  <!-- ==================== ABOUT ==================== -->
+  <!-- ==================== ABOUT (Interactive Terminal) ==================== -->
   <section id="about">
     <div class="wrap">
       <h2>01 / About</h2>
-      <div class="card about-card">
-        <!-- EDIT-ME: your real 2-3 sentence bio -->
-        <p>I'm a Computer Engineering student with an interest in software development, QA automation, AI-powered solutions, and Arduino projects. I enjoy building clean, user-friendly web applications and creating practical automation that solves everyday problems.</p>
-        <p>I'm continuously improving my development skills by exploring new technologies and building projects that combine software, AI, and embedded systems.</p>
+      
+      <!-- Developer Terminal UI -->
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-buttons">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="terminal-title">suzette@dev-machine: ~</div>
+        </div>
+        
+        <!-- Interactive Code Tabs -->
+        <div class="terminal-tabs">
+          <button class="tab-btn active" onclick="switchTab('profile')">profile.json</button>
+          <button class="tab-btn" onclick="switchTab('bio')">bio.md</button>
+        </div>
+
+        <div class="terminal-body">
+          <!-- Tab 1: profile.json -->
+          <div id="tab-profile" class="tab-content active">
+<pre><code><span class="key">"candidate"</span>: {
+  <span class="key">"name"</span>: <span class="string">"Suzette Lacson"</span>,
+  <span class="key">"role"</span>: <span class="string">"Computer Engineer"</span>,
+  <span class="key">"passions"</span>: [<span class="string">"QA Automation"</span>, <span class="string">"AI Dashboards"</span>, <span class="string">"Embedded Systems"</span>],
+  <span class="key">"focus"</span>: <span class="string">"Building robust automation frameworks & user interfaces"</span>
+}</code></pre>
+          </div>
+
+          <!-- Tab 2: bio.md -->
+          <div id="tab-bio" class="tab-content">
+            <h3># Bio</h3>
+            <p>Hi, I'm Suzette Lacson, a Computer Engineering student with a deep focus in software development, QA automation, and hardware integrations. I enjoy building clean, interactive web experiences and programming smart devices that streamline operational pipelines.</p>
+            <p>I thrive on turning manual processes into automated, efficient software architectures, bridging the gap between hardware systems and web frontends.</p>
+          </div>
+        </div>
       </div>
+
     </div>
   </section>
 
@@ -152,31 +190,31 @@
       <p class="section-sub">Photos slide automatically — click a card for the big view.</p>
       <div class="grid">
 
-           <!--  project 1 -->
+        <!--  project 1 -->
         <article class="card project" onclick="openProject('SUZENTINEL')">
           <div class="mini-carousel" data-project="SUZENTINEL"></div>
-          <h3>SUZENTINEL </h3>
+          <h3>SUZENTINEL</h3>
           <div class="tags"><span class="tag">Python</span><span class="tag">Computer Vision</span><span class="tag">Flask</span></div>
-          <p>An AI-powered computer vision system that monitors user activity, tracks screen time, and provides real-time productivity insights through an interactive dashboard.</p>
-          <span class="view-more">▸ view photos</span>  
+          <p>An AI-powered computer vision system that monitors user activity, tracks screen time, and provides real-time productivity insights.</p>
+          <span class="view-more">▸ view details & photos</span>  
         </article>
 
         <!--  project 2 -->
         <article class="card project" onclick="openProject('mazebot')">
           <div class="mini-carousel" data-project="mazebot"></div>
-          <h3> MazeBot 2026 </h3>
+          <h3>MazeBot 2026</h3>
           <div class="tags"><span class="tag">Arduino</span><span class="tag">Robotics</span><span class="tag">Sensors</span></div>
-          <p>An autonomous maze-solving robot built with Arduino that navigates through a maze using sensors and obstacle detection algorithms to find an efficient path.</p>
-          <span class="view-more">▸ view photos</span>
+          <p>An autonomous maze-solving robot built with Arduino that navigates using sensors and obstacle detection algorithms.</p>
+          <span class="view-more">▸ view details & photos</span>
         </article>
 
         <!--  project 3 -->
         <article class="card project" onclick="openProject('amari')">
           <div class="mini-carousel" data-project="amari"></div>
-          <h3>Development of a Web-Based Platform for Amari Staycation - Alabang with Online Booking System </h3>
+          <h3>Amari Booking Platform</h3>
           <div class="tags"><span class="tag">HTML/CSS</span><span class="tag">SQL</span><span class="tag">Web Development</span></div>
-          <p>A web-based booking platform developed for Amari Staycation that enables guests to browse accommodations, check availability, and make online reservations efficiently.</p>
-          <span class="view-more">▸ view photos</span>
+          <p>A web-based booking platform developed for Amari Staycation that enables guests to check availability and make online reservations.</p>
+          <span class="view-more">▸ view details & photos</span>
         </article>
 
       </div>
@@ -195,6 +233,9 @@
         <h3 id="modal-title">Project</h3>
         <button class="modal-close" onclick="closeProject()">✕</button>
       </div>
+
+      <!-- FIXED: This paragraph container was missing, which prevented your popup from opening -->
+      <div id="modal-desc" class="modal-desc"></div>
 
       <div class="modal-view">
         <button class="carousel-btn" onclick="movePhoto(-1)">‹</button>

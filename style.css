@@ -14,20 +14,29 @@
 }
 
 /* ---------- 2. BASE (reset + defaults) ---------- */
-* {
-  margin: 0;
-  padding: 0;
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 html {
-  scroll-behavior: smooth;   /* menu links glide instead of jump */
+  scroll-behavior: smooth;
+  background-color: var(--white);
 }
 
 body {
   font-family: var(--sans);
   color: var(--black);
-  background: var(--white);
+  background-color: var(--white);
   line-height: 1.6;
 }
 
@@ -65,6 +74,14 @@ section {
 .section-sub {
   margin-top: -16px;
   margin-bottom: 24px;
+}
+
+/* Ensure sections have zero horizontal leakage */
+nav, header, section, footer {
+  width: 100% !important;
+  max-width: 100% !important;
+  border-left: none !important;
+  border-right: none !important;
 }
 
 /* ---------- 3. NAVBAR ---------- */
@@ -121,17 +138,36 @@ nav {
   cursor: pointer;
 }
 
-/* ---------- 4. HERO ---------- */
+/* ---------- 4. HERO (Sleek, Compact & Highly Professional) ---------- */
 .hero {
   background: var(--yellow);
   border-bottom: 2px solid var(--black);
-  padding: 72px 0;
+  padding: 80px 0;
+}
+
+.badge {
+  display: inline-block;
+  background: var(--black);
+  color: var(--yellow);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  font-weight: bold;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
 }
 
 .hero-flex {
   display: flex;
   align-items: center;
-  gap: 40px;
+  justify-content: space-between;
+  gap: 60px;
+}
+
+.hero-text {
+  flex: 1.2;
+  max-width: 600px;
 }
 
 .hero-text h1 {
@@ -147,24 +183,70 @@ nav {
   margin-bottom: 10px;
 }
 
+.cursor {
+  animation: blink 0.8s infinite;
+  color: var(--black);
+  font-weight: bold;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
 .hero-tagline {
   max-width: 480px;
   margin-bottom: 24px;
-}
-
-.hero-photo {
-  width: 240px;
-  height: 240px;
-  object-fit: cover;         /* crops the photo nicely into a square */
-  border: 2px solid var(--black);
-  border-radius: 8px;
-  background: var(--white);
 }
 
 .hero-buttons {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+/* === Clean Professional Photo Card === */
+.photo-card {
+  flex: 0.8;
+  width: 100%;
+  max-width: 250px;           /* RESTRICTED: Picture is now a neat, compact laptop size */
+  perspective: 1000px;       /* Activates 3D workspace for card hover physics */
+  margin: 0 auto;
+}
+
+.card-inner {
+  position: relative;
+  border: 3px solid var(--black);
+  border-radius: 12px;
+  background: var(--white);  /* CLEAN: Keeps background natural so colors stay perfect */
+  padding: 0;
+  overflow: hidden;          /* Keeps the zooming photo neatly within borders */
+  
+  /* Super smooth custom transition curve */
+  transition: 
+    transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+    box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: 6px 6px 0px var(--black);
+  cursor: pointer;
+}
+
+.hero-photo {
+  display: block;
+  width: 100%;
+  height: 290px;             /* Perfectly balanced height proportion */
+  object-fit: cover;
+  border-radius: 9px;
+  mix-blend-mode: normal;    /* NATURAL: No strange yellow overlays on your skin tone */
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* --- Double-Action Hover Micro-interactions --- */
+.card-inner:hover {
+  transform: translateY(-6px) rotateX(1.5deg) rotateY(-1.5deg); /* Professional 3D lift */
+  box-shadow: 10px 10px 0px var(--black);
+}
+
+.card-inner:hover .hero-photo {
+  transform: scale(1.04);     /* Elegant optical lens zoom inside the card */
 }
 
 /* ---------- 5. BUTTONS (reused everywhere) ---------- */
@@ -177,7 +259,7 @@ nav {
   padding: 12px 20px;
   border: 2px solid var(--black);
   border-radius: 6px;
-  transition: 0.15s;         /* smooth hover */
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.15s;
 }
 
 .btn-dark {
@@ -200,6 +282,12 @@ nav {
   color: var(--yellow);
 }
 
+/* Button Physical Press Effect */
+.btn:active {
+  transform: translate(3px, 3px) !important;
+  box-shadow: 1px 1px 0px var(--black) !important;
+}
+
 /* ---------- 6. CARDS (white box with black border) ---------- */
 .card {
   background: var(--white);
@@ -216,11 +304,7 @@ nav {
   margin-top: 10px;
 }
 
-/* ---------- 7. GALLERY CAROUSEL ----------
-   How it works: all slides sit in a row inside .carousel-track.
-   The window only shows ONE slide. script.js slides the track
-   left/right with transform: translateX().
-*/
+/* ---------- 7. GALLERY CAROUSEL ---------- */
 .carousel {
   display: flex;
   align-items: center;
@@ -228,7 +312,7 @@ nav {
 }
 
 .carousel-window {
-  overflow: hidden;          /* hides the slides that are off-screen */
+  overflow: hidden;
   border: 2px solid var(--black);
   border-radius: 8px;
   background: var(--white);
@@ -236,18 +320,18 @@ nav {
 }
 
 .carousel-track {
-  display: flex;             /* puts all slides in one row */
-  transition: transform 0.4s ease;   /* the sliding animation */
+  display: flex;
+  transition: transform 0.4s ease;
 }
 
 .slide {
-  min-width: 100%;           /* each slide fills the whole window */
+  min-width: 100%;
 }
 
 .slide img {
   width: 100%;
   height: 380px;
-  object-fit: cover;         /* crops photos to fit without stretching */
+  object-fit: cover;
 }
 
 .slide figcaption {
@@ -287,7 +371,7 @@ nav {
   height: 12px;
   background: var(--white);
   border: 2px solid var(--black);
-  border-radius: 2px;        /* square dots = pixel style */
+  border-radius: 2px;
   cursor: pointer;
 }
 
@@ -298,32 +382,27 @@ nav {
 /* ---------- 8. PROJECTS GRID ---------- */
 .grid {
   display: grid;
-  /* auto-fill = cards wrap to new rows on small screens automatically */
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
 }
 
 .project {
-  padding: 0;                /* image touches the card edges */
+  padding: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: 0.18s;
+  cursor: pointer;
 }
 
 .project:hover {
-  transform: rotate(-1deg) translateY(-4px);  /* "taped sticker" tilt */
+  transform: rotate(-1deg) translateY(-4px);
   box-shadow: 6px 6px 0 var(--black);
 }
 
-/* ---------- 8a. MINI-CAROUSEL on each project card ----------
-   Same trick as the gallery: a row of images inside a window
-   with overflow:hidden; JS slides the row with translateX.
-   The images, arrows, and dots are built by script.js from the
-   projectPhotos list — the HTML only has an empty
-   <div class="mini-carousel">. */
+/* ---------- 8a. MINI-CAROUSEL on each project card ---------- */
 .mini-carousel {
-  position: relative;        /* so arrows/dots can sit on top of the photo */
+  position: relative;
   overflow: hidden;
   border-bottom: 2px solid var(--black);
   height: 170px;
@@ -341,7 +420,6 @@ nav {
   object-fit: cover;
 }
 
-/* small arrow buttons floating over the photo */
 .mini-btn {
   position: absolute;
   top: 50%;
@@ -354,7 +432,7 @@ nav {
   border: 2px solid var(--black);
   border-radius: 4px;
   cursor: pointer;
-  opacity: 0;                /* hidden until you hover the card */
+  opacity: 0;
   transition: opacity 0.15s;
 }
 
@@ -370,7 +448,6 @@ nav {
   color: var(--yellow);
 }
 
-/* tiny dots at the bottom of the photo */
 .mini-dots {
   position: absolute;
   bottom: 8px;
@@ -418,7 +495,7 @@ nav {
 .project p {
   font-size: 0.92rem;
   padding: 10px 20px;
-  flex-grow: 1;              /* pushes the links to the bottom */
+  flex-grow: 1;
 }
 
 .card-links {
@@ -440,10 +517,6 @@ nav {
   background: var(--yellow);
 }
 
-.project {
-  cursor: pointer;           /* shows the card is clickable */
-}
-
 .view-more {
   font-family: var(--mono);
   font-size: 0.75rem;
@@ -457,21 +530,18 @@ nav {
   text-decoration: underline;
 }
 
-/* ---------- 8b. PROJECT PHOTO POPUP (modal) ----------
-   The overlay covers the whole screen (position:fixed).
-   It's hidden by default; script.js adds the "show" class.
-*/
+/* ---------- 8b. PROJECT PHOTO POPUP (modal) ---------- */
 .modal-overlay {
-  display: none;             /* hidden until a card is clicked */
+  display: none;
   position: fixed;
-  inset: 0;                  /* shorthand: top/right/bottom/left = 0 */
-  background: rgba(17, 17, 17, 0.75);   /* dark see-through backdrop */
+  inset: 0;
+  background: rgba(17, 17, 17, 0.75);
   z-index: 100;
   padding: 20px;
 }
 
 .modal-overlay.show {
-  display: flex;             /* script.js toggles this class */
+  display: flex;
   align-items: center;
   justify-content: center;
 }
@@ -480,7 +550,7 @@ nav {
   background: var(--white);
   border: 2px solid var(--black);
   border-radius: 8px;
-  box-shadow: 8px 8px 0 var(--yellow);   /* sticker-style hard shadow */
+  box-shadow: 8px 8px 0 var(--yellow);
   max-width: 760px;
   width: 100%;
   padding: 20px;
@@ -495,6 +565,14 @@ nav {
 
 .modal-top h3 {
   font-size: 1.05rem;
+}
+
+.modal-desc {
+  font-size: 0.95rem;
+  text-align: justify;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  color: var(--black);
 }
 
 .modal-close {
@@ -543,7 +621,7 @@ nav {
   border: 2px solid var(--black);
   border-radius: 4px;
   cursor: pointer;
-  opacity: 0.5;              /* dimmed unless selected */
+  opacity: 0.5;
 }
 
 .modal-thumbs img.active {
@@ -576,8 +654,7 @@ nav {
 }
 
 .pill.hl {
-  background: var(--yellow); /* highlighted skill — but on the yellow
-                                section it stays white via the rule below */
+  background: var(--yellow);
 }
 
 .yellow-bg .pill.hl {
@@ -587,7 +664,7 @@ nav {
 
 /* ---------- 10. EXPERIENCE TIMELINE ---------- */
 .timeline {
-  border-left: 2px solid var(--black);   /* the vertical line */
+  border-left: 2px solid var(--black);
   margin-left: 8px;
   padding-left: 28px;
   display: flex;
@@ -600,7 +677,6 @@ nav {
   position: relative;
 }
 
-/* the small square "dot" on the line */
 .t-item::before {
   content: "";
   position: absolute;
@@ -684,16 +760,128 @@ footer p {
   padding-top: 16px;
 }
 
-/* ---------- 12. MOBILE (phones, screens 680px and smaller) ---------- */
-@media (max-width: 680px) {
+/* ---------- 12. INTERACTIVE TERMINAL (ABOUT SECTION) ---------- */
+.terminal {
+  background: #1a1a1a;
+  border: 4px solid var(--black);
+  border-radius: 12px;
+  box-shadow: 10px 10px 0px var(--black);
+  overflow: hidden;
+  margin-top: 30px;
+}
 
-  /* hamburger menu */
+.terminal-header {
+  background: #2d2d2d;
+  border-bottom: 4px solid var(--black);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.terminal-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid var(--black);
+}
+
+.dot.red { background: #ff5f56; }
+.dot.yellow { background: #ffbd2e; }
+.dot.green { background: #27c93f; }
+
+.terminal-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.terminal-tabs {
+  display: flex;
+  background: #232323;
+  border-bottom: 3px solid var(--black);
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  border-right: 3px solid var(--black);
+  color: #888;
+  padding: 10px 20px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.tab-btn.active {
+  background: #1a1a1a;
+  color: var(--yellow);
+  font-weight: bold;
+}
+
+.terminal-body {
+  padding: 25px;
+  min-height: 220px;
+  color: #f8f8f2;
+  font-family: var(--mono);
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Terminal Syntax Highlighting colors */
+pre {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.key { color: #ff79c6; }
+.string { color: #f1fa8c; }
+
+#tab-bio h3 {
+  color: var(--yellow);
+  margin-top: 0;
+}
+
+#tab-bio p {
+  color: #ccc;
+  line-height: 1.7;
+  font-family: var(--sans);
+}
+
+/* ---------- 13. MOBILE RESPONSIVE (screens 680px and smaller) ---------- */
+@media (max-width: 680px) {
   .menu-btn {
     display: block;
   }
 
   .nav-links {
-    display: none;             /* hidden until the button is tapped */
+    display: none;
     position: absolute;
     top: 100%;
     left: 0;
@@ -706,7 +894,7 @@ footer p {
   }
 
   .nav-links.open {
-    display: flex;             /* script.js toggles this class */
+    display: flex;
   }
 
   .nav-links a {
@@ -714,10 +902,11 @@ footer p {
     padding: 10px 0;
   }
 
-  /* hero: stack text above the photo */
+  /* Stack hero section on mobile screens */
   .hero-flex {
     flex-direction: column-reverse;
     text-align: center;
+    gap: 30px;
   }
 
   .hero-text h1 {
@@ -728,17 +917,18 @@ footer p {
     justify-content: center;
   }
 
+  .photo-card {
+    max-width: 200px; /* Even smaller for mobile devices */
+  }
+  
   .hero-photo {
-    width: 180px;
-    height: 180px;
+    height: 220px;
   }
 
-  /* smaller carousel photos on phones */
   .slide img {
     height: 220px;
   }
 
-  /* smaller popup photos on phones */
   #modal-img {
     height: 240px;
   }

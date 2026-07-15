@@ -6,14 +6,11 @@
      3. the project photo popup (click a card → 4 photos)
 ========================================================== */
 
-/* ---------- PROJECT PHOTOS (EDIT-ME!) ----------
-   4 photos per project. Put your real pictures in the images
-   folder and change the paths below. The name before the colon
-   ('taskpilot' etc.) must match the onclick="openProject('...')"
-   on each project card in index.html. */
+/* ---------- PROJECT PHOTOS & DESCRIPTIONS (EDIT-ME!) ---------- */
 const projectPhotos = {
-  taskpilot: {
-    title: "TaskPilot — Automation Dashboard",
+  SUZENTINEL: {
+    title: "SUZENTINEL — AI Vision System",
+    description: "Users previously lacked an automated way to track screen time and productivity. To address this, I was tasked with designing a real-time tracking architecture. I built an AI-powered computer vision system utilizing Python and an interactive Flask dashboard. This solution successfully delivered real-time productivity insights, effectively replacing manual time-logging and allowing users to optimize their workflow.",
     photos: [
       "images/project1.svg",
       "images/activity1.svg",
@@ -21,8 +18,9 @@ const projectPhotos = {
       "images/activity3.svg"
     ]
   },
-  promptdesk: {
-    title: "PromptDesk — AI Writing Helper",
+  mazebot: {
+    title: "MazeBot 2026 — Autonomous Robotics",
+    description: "There was a need for a physical demonstration of algorithmic pathfinding to showcase autonomous navigation capabilities. I engineered an autonomous maze-solving unit using an Arduino microcontroller. By programming the robot to utilize advanced sensor arrays and obstacle detection algorithms, it successfully navigated complex physical mazes with highly optimized routing.",
     photos: [
       "images/project2.svg",
       "images/activity2.svg",
@@ -30,8 +28,9 @@ const projectPhotos = {
       "images/activity1.svg"
     ]
   },
-  greensense: {
-    title: "GreenSense — Arduino Plant Monitor",
+  amari: {
+    title: "Amari Staycation — Booking Platform",
+    description: "Amari Staycation originally relied on manual reservation tracking, which led to operational bottlenecks. I was tasked with developing an automated digital booking solution to streamline their process. I engineered a comprehensive web-based platform featuring a SQL backend to accurately check availability and manage data. This implementation successfully modernized their online reservations, drastically improving the property's overall operational efficiency.",
     photos: [
       "images/project3.svg",
       "images/activity3.svg",
@@ -41,47 +40,35 @@ const projectPhotos = {
   }
 };
 
-/* ---------- 1. MOBILE MENU ----------
-   The ☰ button calls this. It adds/removes the "open" class,
-   and style.css shows the menu when "open" is present. */
+/* ---------- 1. MOBILE MENU ---------- */
 function toggleMenu() {
   document.getElementById("navlinks").classList.toggle("open");
 }
 
 /* ---------- 2. CAROUSEL ---------- */
+const track  = document.getElementById("track");   
+const slides = track.children;                     
+const dotsBox = document.getElementById("dots");   
 
-// Get the parts of the carousel from the page
-const track  = document.getElementById("track");   // the row of slides
-const slides = track.children;                     // every <figure class="slide">
-const dotsBox = document.getElementById("dots");   // container for the dots
+let current = 0;                                   
 
-let current = 0;                                   // which slide is showing (0 = first)
-
-// Create one dot button per slide, automatically
 for (let i = 0; i < slides.length; i++) {
   const dot = document.createElement("button");
-  dot.onclick = function () { goToSlide(i); };     // clicking a dot jumps to that slide
+  dot.onclick = function () { goToSlide(i); };     
   dotsBox.appendChild(dot);
 }
 
-// Jump directly to slide number n
 function goToSlide(n) {
   current = n;
-  // Slide the track left by n × 100%.
-  // Example: slide 2 → translateX(-200%) → third photo is visible.
   track.style.transform = "translateX(-" + current * 100 + "%)";
   updateDots();
 }
 
-// Move one step: moveSlide(1) = next, moveSlide(-1) = previous
 function moveSlide(step) {
-  // The % (remainder) keeps the number inside 0..slides.length-1,
-  // so after the last photo it loops back to the first.
   const n = (current + step + slides.length) % slides.length;
   goToSlide(n);
 }
 
-// Highlight the dot that matches the current slide
 function updateDots() {
   for (let i = 0; i < dotsBox.children.length; i++) {
     if (i === current) {
@@ -92,73 +79,35 @@ function updateDots() {
   }
 }
 
-// Auto-play: go to the next photo every 5 seconds
 setInterval(function () { moveSlide(1); }, 5000);
-
-// Show the first dot as active when the page loads
 updateDots();
 
-/* ---------- 3. PROJECT PHOTO POPUP ----------
-   openProject('taskpilot') runs when you click a card.
-   It looks up that project's title + 4 photos (from the
-   projectPhotos list at the top) and fills the popup. */
-
-let currentProject = null;   // which project is open
-let photoIndex = 0;          // which of its photos is showing
+/* ---------- 3. PROJECT PHOTO POPUP ---------- */
+let currentProject = null;   
+let photoIndex = 0;          
 
 function openProject(name) {
   currentProject = projectPhotos[name];
   photoIndex = 0;
 
-  // set the popup title
+  // set the popup title & description
   document.getElementById("modal-title").textContent = currentProject.title;
+  document.getElementById("modal-desc").textContent = currentProject.description;
 
-  // build the 4 thumbnails (one small img per photo)
+  // build the 4 thumbnails
   const thumbsBox = document.getElementById("modal-thumbs");
-  thumbsBox.innerHTML = "";                    // clear old thumbnails
+  thumbsBox.innerHTML = "";                    
   for (let i = 0; i < currentProject.photos.length; i++) {
     const thumb = document.createElement("img");
     thumb.src = currentProject.photos[i];
-    thumb.onclick = function () { showPhoto(i); };  // click thumb → jump to it
+    thumb.onclick = function () { showPhoto(i); };  
     thumbsBox.appendChild(thumb);
   }
 
-  showPhoto(0);                                // start on the first photo
-  document.getElementById("modal").classList.add("show");   // reveal popup
+  showPhoto(0);                                
+  document.getElementById("modal").classList.add("show");   
 }
 
-function closeProject() {
-  document.getElementById("modal").classList.remove("show");
-}
-
-// Display photo number n in the big image + highlight its thumbnail
-function showPhoto(n) {
-  photoIndex = n;
-  document.getElementById("modal-img").src = currentProject.photos[n];
-
-  const thumbs = document.getElementById("modal-thumbs").children;
-  for (let i = 0; i < thumbs.length; i++) {
-    if (i === n) {
-      thumbs[i].classList.add("active");
-    } else {
-      thumbs[i].classList.remove("active");
-    }
-  }
-}
-
-// Arrow buttons inside the popup: movePhoto(1)=next, movePhoto(-1)=back
-function movePhoto(step) {
-  const total = currentProject.photos.length;
-  const n = (photoIndex + step + total) % total;   // loops around
-  showPhoto(n);
-}
-
-// Pressing the Esc key also closes the popup
-document.addEventListener("keydown", function (e) {
-  if (e.key === "Escape") {
-    closeProject();
-  }
-});
 
 /* ---------- 4. MINI-CAROUSELS on the project cards ----------
    Finds every <div class="mini-carousel" data-project="...">,
@@ -221,3 +170,58 @@ function buildMiniCarousel(box) {
   show(0);                                   // start on the first photo
   setInterval(function () { show(index + 1); }, 4000);   // auto-slide every 4s
 }
+
+/* ---------- 4. TERMINAL TAB SWITCHER ---------- */
+function switchTab(tabId) {
+  // Remove active state from all buttons
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  // Remove active state from all tab panels
+  const contents = document.querySelectorAll('.tab-content');
+  contents.forEach(content => content.classList.remove('active'));
+
+  // Find targeted active elements
+  const clickedBtn = Array.from(buttons).find(btn => btn.textContent.includes(tabId));
+  if (clickedBtn) clickedBtn.classList.add('active');
+
+  const targetContent = document.getElementById(`tab-${tabId}`);
+  if (targetContent) targetContent.classList.add('active');
+}
+
+/* ---------- 5. HERO TYPEWRITER ANIMATION ---------- */
+const phrases = ["Computer Engineer", "QA Automation Engineer", "Full-Stack Dev"];
+let phraseIndex = 0;
+let charIndex = 0;
+let isDeleting = false;
+const typewriterElement = document.getElementById("typewriter");
+
+function type() {
+  const currentPhrase = phrases[phraseIndex];
+  
+  if (isDeleting) {
+    typewriterElement.textContent = currentPhrase.substring(0, charIndex - 1);
+    charIndex--;
+  } else {
+    typewriterElement.textContent = currentPhrase.substring(0, charIndex + 1);
+    charIndex++;
+  }
+
+  let typeSpeed = isDeleting ? 40 : 80;
+
+  if (!isDeleting && charIndex === currentPhrase.length) {
+    typeSpeed = 1500; // Pause at full phrase
+    isDeleting = true;
+  } else if (isDeleting && charIndex === 0) {
+    isDeleting = false;
+    phraseIndex = (phraseIndex + 1) % phrases.length;
+    typeSpeed = 400; // Pause before next word
+  }
+
+  setTimeout(type, typeSpeed);
+}
+
+// Start typewriter effect on load
+document.addEventListener("DOMContentLoaded", () => {
+  if (typewriterElement) type();
+});
