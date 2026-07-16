@@ -2,13 +2,18 @@
    script.js — Portfolio Core Engine
    Handles:
      1. Project data (photos + blog-style write-ups)
-     2. Capsule nav (mobile dropdown + scrollspy active pill)
-     3. Gallery photo strip (expanding accordion + auto-cycle)
+     2. Capsule nav (mobile dropdown + scrollspy + scroll-reveal)
+     3. Gallery 3D ring (tabs + drag-to-spin + auto-spin)
      4. Project detail modal (photo viewer + write-up renderer)
      5. Project card mini-carousels
      6. About terminal tab switcher
      7. Hero typewriter
-     8. Scroll-reveal animations
+     8. Hero ID lanyard (free rope physics: gravity, throw, dangle, flip)
+     9. Skills keyboard (press a key → read its definition)
+    10. Interactive dot-grid background (canvas)
+    11. Scroll progress line
+    12. Cursor trail (the yellow diamond chasing the mouse)
+   (The falling code glyphs are pure CSS — see #floatLayer in style.css)
 ========================================================== */
 
 /* ---------- 1. PROJECT DATA ----------
@@ -45,10 +50,11 @@ const projectPhotos = {
     challenges: "Getting the vision pipeline to run continuously without eating the CPU was the hardest part. I had to tune how often frames get processed and keep the dashboard queries light, so the tool never slows down the machine it's supposed to be monitoring.",
     contribution: "Solo project — I designed the architecture, wrote the Python detection logic, and built the Flask dashboard end to end.",
     photos: [
-      "images/project1.svg",
-      "images/activity1.svg",
-      "images/activity2.svg",
-      "images/activity3.svg"
+      "images/SUZENTINEL_CS_IMAGES_DOCU/DASHBOARDTIMER.png",
+      "images/SUZENTINEL_CS_IMAGES_DOCU/WORKINGSTAT.png",
+      "images/SUZENTINEL_CS_IMAGES_DOCU/ABSENTSTAT.png",
+      "images/SUZENTINEL_CS_IMAGES_DOCU/EATING_DRINKSTAT.png",
+      "images/SUZENTINEL_CS_IMAGES_DOCU/SLEEPINGSTAT.png"
     ]
   },
 
@@ -174,6 +180,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* --- 2c. scroll-reveal: fade/slide elements in as they appear --- */
+  // section titles join the reveal system automatically (no HTML edits
+  // needed) — each "01 / ..." heading lifts in as you reach its section
+  document.querySelectorAll("section .wrap > h2").forEach(h2 => h2.classList.add("reveal"));
+
   const revealEls = document.querySelectorAll(".reveal");
 
   if ("IntersectionObserver" in window && revealEls.length) {
@@ -191,51 +201,145 @@ document.addEventListener("DOMContentLoaded", () => {
     // very old browser? just show everything
     revealEls.forEach(el => el.classList.add("visible"));
   }
+
+  /* --- 2c-bis. section slide transitions ---
+     Whole sections glide up into place the first time you reach them
+     (CSS does the motion — this only hands out the .section-in class). */
+  const slideSections = document.querySelectorAll("section, footer");
+  if ("IntersectionObserver" in window) {
+    const slider = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("section-in");
+          slider.unobserve(entry.target);   // slide in once, then stay
+        }
+      });
+    }, { threshold: 0.06 });
+    slideSections.forEach(sec => slider.observe(sec));
+  } else {
+    slideSections.forEach(sec => sec.classList.add("section-in"));
+  }
+
+  /* --- 2d. weighty scrolling: anchor clicks glide with a spring ---
+     Instead of the browser's flat smooth-scroll, clicking a nav link
+     runs a small spring simulation on the scroll position itself:
+       acceleration = (target − position) × SPRING − velocity × DAMPING
+     The damping is set slightly under critical, so the page overshoots
+     the target by a hair and settles back — that's the "weight".
+     A wheel/touch from the user cancels it instantly (they're the boss). */
+  function springScrollTo(targetY) {
+    let pos = window.scrollY;
+    let vel = 0;
+    let last = null;
+    let cancelled = false;
+
+    const cancel = () => { cancelled = true; };
+    window.addEventListener("wheel", cancel, { once: true, passive: true });
+    window.addEventListener("touchstart", cancel, { once: true, passive: true });
+
+    function step(t) {
+      if (cancelled) return;
+      if (last === null) last = t;
+      const dt = Math.min((t - last) / 1000, 0.033);
+      last = t;
+
+      const accel = (targetY - pos) * 42 - vel * 11;
+      vel += accel * dt;
+      pos += vel * dt;
+      window.scrollTo({ top: pos, behavior: "instant" });
+
+      if (Math.abs(targetY - pos) > 0.5 || Math.abs(vel) > 12) {
+        requestAnimationFrame(step);
+      } else {
+        window.scrollTo({ top: targetY, behavior: "instant" });
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  // wire it to every in-page link (nav, dropdown, scroll key, brand)
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener("click", (e) => {
+        const target = document.querySelector(link.getAttribute("href"));
+        if (!target) return;
+        e.preventDefault();
+        const y = link.getAttribute("href") === "#top"
+          ? 0
+          : target.getBoundingClientRect().top + window.scrollY;
+        springScrollTo(y);
+      });
+    });
+  }
 });
 
-/* ---------- 3. GALLERY PHOTO STRIP (tabs + expanding accordion) ----------
-   The category tabs show only the photos whose data-category matches.
-   Visible photos share one flex row; the .active one gets flex: 3.5
-   and CSS animates the change. Hover, tap, or focus any photo to
-   expand it. Auto-cycles like a carousel until the visitor interacts. */
-const photoStrip  = document.getElementById("photoStrip");
+/* ---------- 3. GALLERY 3D RING (tabs + drag-to-spin + auto-spin) ----------
+   The math: photo i sits at  rotateY(i * step) translateZ(radius),
+   where step = 360° / photo count. Rotating the parent .ring by
+   -i * step brings photo i to the front — so JS only ever changes
+   ONE number (the ring's angle) and CSS 3D does the rest. */
+const photoRing   = document.getElementById("photoRing");
+const ringScene   = document.getElementById("ringScene");
 const galleryTabs = document.querySelectorAll(".gallery-tab");
 
-if (photoStrip) {
-  const allItems = Array.from(photoStrip.querySelectorAll(".strip-item"));
-  let visibleItems = [];
-  let stripIndex = 0;
-  let stripHovered = false;
+if (photoRing && ringScene) {
+  const allRingItems = Array.from(photoRing.querySelectorAll(".ring-item"));
+  let ringVisible = [];        // photos of the currently chosen tab
+  let ringStep    = 0;         // degrees between neighboring photos
+  let ringAngle   = 0;         // the ring's current rotation
+  let ringHovered = false;
+  let draggingRing = false;
 
-  function setStripActive(n) {
-    if (!visibleItems.length) return;
-    stripIndex = (n + visibleItems.length) % visibleItems.length;
-    visibleItems.forEach((item, i) => {
-      item.classList.toggle("active", i === stripIndex);
+  // the circle sizes itself from the PHOTO COUNT, so the gaps stay
+  // balanced no matter how many photos a tab has (add more photos →
+  // the ring simply grows). Geometry: neighboring photos sit one
+  // chord apart, and chord = 2 × radius × sin(180° / count), so the
+  // radius that makes them *just about* touch (+24px of air) is:
+  function ringRadius() {
+    const count = Math.max(ringVisible.length, 2);
+    const itemW = ringVisible[0] ? ringVisible[0].offsetWidth : 260;
+    const snug   = (itemW + 24) / (2 * Math.sin(Math.PI / count));
+    const maxFit = ringScene.clientWidth / 2 - itemW / 4;  // don't spill out
+    return Math.max(170, Math.min(snug, Math.max(maxFit, 200)));
+  }
+
+  // place the visible photos evenly around the circle
+  function layoutRing() {
+    if (!ringVisible.length) return;
+    const r = ringRadius();
+    ringStep = 360 / ringVisible.length;
+    ringVisible.forEach((item, i) => {
+      item.style.transform = `rotateY(${i * ringStep}deg) translateZ(${r}px)`;
     });
   }
 
-  // show only the photos of one category, then expand its first photo
+  // rotate the ring + mark whichever photo now faces the viewer
+  function applyRingRotation() {
+    photoRing.style.transform = `rotateY(${ringAngle}deg)`;
+    const n = ringVisible.length;
+    let idx = Math.round(-ringAngle / ringStep) % n;
+    if (idx < 0) idx += n;
+    ringVisible.forEach((item, i) => item.classList.toggle("front", i === idx));
+  }
+
+  function spinRing(steps) {
+    ringAngle -= steps * ringStep;
+    applyRingRotation();
+  }
+
+  // show one category and rebuild the circle for it
   function applyFilter(category) {
-    allItems.forEach(item => {
+    allRingItems.forEach(item => {
       item.classList.toggle("hidden", item.dataset.category !== category);
-      item.classList.remove("active");
+      item.classList.remove("front");
     });
-    visibleItems = allItems.filter(item => !item.classList.contains("hidden"));
-    setStripActive(0);
+    ringVisible = allRingItems.filter(item => !item.classList.contains("hidden"));
+    ringAngle = 0;
+    layoutRing();
+    applyRingRotation();
   }
 
-  allItems.forEach(item => {
-    const activate = () => {
-      const i = visibleItems.indexOf(item);
-      if (i !== -1) setStripActive(i);
-    };
-    item.addEventListener("mouseenter", activate);  // desktop hover
-    item.addEventListener("click",      activate);  // mobile tap
-    item.addEventListener("focus",      activate);  // keyboard
-  });
-
-  // tab clicks: move the .active pill + re-filter the strip
+  // tab clicks: move the .active pill + rebuild the ring
   galleryTabs.forEach(tab => {
     tab.addEventListener("click", () => {
       galleryTabs.forEach(t => {
@@ -246,16 +350,55 @@ if (photoStrip) {
     });
   });
 
-  // pause the auto-cycle while the visitor is exploring
-  photoStrip.addEventListener("mouseenter", () => { stripHovered = true; });
-  photoStrip.addEventListener("mouseleave", () => { stripHovered = false; });
+  // arrow buttons
+  document.getElementById("ringPrev").addEventListener("click", () => spinRing(-1));
+  document.getElementById("ringNext").addEventListener("click", () => spinRing(1));
 
-  // auto-advance every 4.5s (skipped for reduced-motion users)
+  // drag to spin — pointer events cover mouse AND touch
+  let dragStartX = 0;
+  let dragStartAngle = 0;
+
+  ringScene.addEventListener("pointerdown", (e) => {
+    draggingRing = true;
+    dragStartX = e.clientX;
+    dragStartAngle = ringAngle;
+    photoRing.classList.add("dragging");   // kills the CSS transition
+    ringScene.classList.add("dragging");   // shows the grabbing cursor
+    ringScene.setPointerCapture(e.pointerId);
+  });
+
+  ringScene.addEventListener("pointermove", (e) => {
+    if (!draggingRing) return;
+    // 0.25 = drag sensitivity: 4px of mouse travel = 1° of spin
+    ringAngle = dragStartAngle + (e.clientX - dragStartX) * 0.25;
+    applyRingRotation();
+  });
+
+  function endRingDrag() {
+    if (!draggingRing) return;
+    draggingRing = false;
+    photoRing.classList.remove("dragging");
+    ringScene.classList.remove("dragging");
+    // snap to the nearest photo so the ring never rests crooked
+    ringAngle = Math.round(ringAngle / ringStep) * ringStep;
+    applyRingRotation();
+  }
+  ringScene.addEventListener("pointerup", endRingDrag);
+  ringScene.addEventListener("pointercancel", endRingDrag);
+
+  // pause auto-spin while the visitor is exploring
+  ringScene.addEventListener("mouseenter", () => { ringHovered = true; });
+  ringScene.addEventListener("mouseleave", () => { ringHovered = false; });
+
+  // auto-spin every 5s (skipped for reduced-motion users)
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     setInterval(() => {
-      if (!stripHovered) setStripActive(stripIndex + 1);
-    }, 4500);
+      if (!ringHovered && !draggingRing) spinRing(1);
+    }, 5000);
   }
+
+  // re-space the circle if the window is resized
+  window.addEventListener("resize", layoutRing);
 
   applyFilter("events");   // matches the tab marked active in the HTML
 }
@@ -452,3 +595,398 @@ function type() {
 document.addEventListener("DOMContentLoaded", () => {
   if (typewriterElement) type();
 });
+
+/* ---------- 8. HERO ID LANYARD (free-moving rope physics) ----------
+   The card is a FREE BODY, like the trending 3D lanyard sites:
+     · gravity pulls it down every frame
+     · the strap is a rope constraint — it only pulls when TAUT.
+       Lift the card above the hang point and the strap goes slack,
+       so the card simply free-falls until the strap catches it.
+     · the card's tilt is a spring chasing the strap's direction,
+       so it dangles, leans into throws, and wobbles as it settles.
+   Grab it, throw it, drop it. A tap (< 8px of travel) flips it. */
+const lanyardWrap  = document.getElementById("lanyardWrap");
+const lanyardStrap = document.getElementById("lanyardStrap");
+const idBadge      = document.getElementById("idBadge");
+const badgeInner   = document.getElementById("badgeInner");
+
+if (lanyardWrap && lanyardStrap && idBadge) {
+  const GRAVITY   = 2600;  // px/s² — how hard the card falls
+  const ROPE_GIVE = 10;    // how quickly a taut strap reels the card in
+  const AIR_DRAG  = 0.9;   // air resistance (per second)
+  const TILT_K    = 30;    // tilt spring: chase the strap's angle
+  const TILT_C    = 6;     // tilt damping: how fast the wobble dies
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const badgeW = idBadge.offsetWidth;
+
+  let anchorX = 170;       // the hang point (wrap-local), set in layout()
+  let ropeLen = 220;       // natural strap length, set in layout()
+
+  // card state — (x, y) is the CLIP point at the card's top-center
+  let x = 170, y = 220;
+  let vx = 60, vy = 0;     // tiny push so it swings on page load
+  let tilt = 0, tiltVel = 0;
+  let holding = false;
+  let downX = 0, downY = 0;
+  let grabDX = 0, grabDY = 0;
+  let lastTime = null;
+
+  function layout() {
+    anchorX = lanyardWrap.clientWidth / 2;
+    ropeLen = Math.max(120,
+      Math.min(240, lanyardWrap.clientHeight - idBadge.offsetHeight - 30));
+  }
+
+  // draw the current state: stretch+rotate the strap so it always
+  // connects the anchor to the card's clip, then place the card
+  function render() {
+    const dx = x - anchorX;
+    const dist = Math.max(30, Math.hypot(dx, y));
+    const ropeDeg = -Math.atan2(dx, y) * 180 / Math.PI;
+    lanyardStrap.style.height = dist + "px";
+    lanyardStrap.style.transform = `translateX(-50%) rotate(${ropeDeg}deg)`;
+    idBadge.style.transform =
+      `translate(${x - badgeW / 2}px, ${y}px) rotate(${tilt}deg)`;
+  }
+
+  // the flip, plus a physical jolt: the card hops, drifts sideways,
+  // and wobbles — then gravity and the strap sort it out
+  function flipBadge() {
+    badgeInner.classList.toggle("flipped");
+    if (reduceMotion) return;
+    vy -= 380;
+    vx += (Math.random() < 0.5 ? -1 : 1) * 120;
+    tiltVel += (Math.random() < 0.5 ? -1 : 1) * 160;
+  }
+
+  function frame(t) {
+    if (lastTime === null) lastTime = t;
+    const dt = Math.min((t - lastTime) / 1000, 0.033);  // seconds, capped
+    lastTime = t;
+
+    if (!holding) {
+      // gravity + a whisper of breeze so it never looks frozen
+      vy += GRAVITY * dt;
+      vx += Math.sin(t / 1500) * 14 * dt;
+
+      // air drag
+      const drag = Math.max(0, 1 - AIR_DRAG * dt);
+      vx *= drag;
+      vy *= drag;
+
+      x += vx * dt;
+      y += vy * dt;
+
+      // the strap only pulls when TAUT — slack rope = free fall
+      const ddx = x - anchorX;
+      const dist = Math.hypot(ddx, y);
+      if (dist > ropeLen) {
+        const nx = ddx / dist, ny = y / dist;
+        // reel the card back toward the rope's end (elastic, not rigid)
+        const give = Math.min(1, ROPE_GIVE * dt);
+        x -= nx * (dist - ropeLen) * give;
+        y -= ny * (dist - ropeLen) * give;
+        // bleed off outward speed so it swings instead of yo-yoing
+        const radial = vx * nx + vy * ny;
+        if (radial > 0) {
+          const k = Math.min(1, 10 * dt);
+          vx -= nx * radial * k;
+          vy -= ny * radial * k;
+        }
+      }
+    }
+
+    // tilt chases the strap's direction (+ a lean when moving fast),
+    // which is what makes it dangle instead of staying stiff
+    const ropeDeg = -Math.atan2(x - anchorX, y) * 180 / Math.PI;
+    const lean = Math.max(-24, Math.min(24, vx * 0.04));
+    tiltVel += ((ropeDeg + lean) - tilt) * TILT_K * dt - tiltVel * TILT_C * dt;
+    tilt += tiltVel * dt;
+
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  idBadge.addEventListener("pointerdown", (e) => {
+    holding = true;
+    downX = e.clientX;
+    downY = e.clientY;
+    // remember where ON the card it was grabbed, so it doesn't jump
+    const rect = lanyardWrap.getBoundingClientRect();
+    grabDX = (e.clientX - rect.left) - x;
+    grabDY = (e.clientY - rect.top) - y;
+    idBadge.classList.add("grabbing");
+    idBadge.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+
+  idBadge.addEventListener("pointermove", (e) => {
+    if (!holding) return;
+    const rect = lanyardWrap.getBoundingClientRect();
+    const nx = Math.max(-140, Math.min(lanyardWrap.clientWidth + 140,
+                 (e.clientX - rect.left) - grabDX));
+    const ny = Math.max(-40, Math.min(lanyardWrap.clientHeight + 60,
+                 (e.clientY - rect.top) - grabDY));
+    // velocity from the movement → a release keeps the throw's momentum
+    vx = (nx - x) * 18;
+    vy = (ny - y) * 18;
+    x = nx;
+    y = ny;
+    if (reduceMotion) render();   // no loop running — draw directly
+  });
+
+  idBadge.addEventListener("pointerup", (e) => {
+    if (!holding) return;
+    holding = false;
+    idBadge.classList.remove("grabbing");
+    const dragDistance = Math.hypot(e.clientX - downX, e.clientY - downY);
+    if (dragDistance < 8) flipBadge();       // a tap, not a throw
+    if (reduceMotion) {                      // no physics — snap home
+      x = anchorX; y = ropeLen; tilt = 0;
+      render();
+    }
+  });
+
+  idBadge.addEventListener("pointercancel", () => {
+    holding = false;
+    idBadge.classList.remove("grabbing");
+  });
+
+  // keyboard users: Enter or Space flips the badge
+  idBadge.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      flipBadge();
+    }
+  });
+
+  window.addEventListener("resize", layout);
+
+  layout();
+  x = anchorX;
+  y = ropeLen;
+  render();
+  if (!reduceMotion) requestAnimationFrame(frame);
+}
+
+/* ---------- 9. SKILLS KEYBOARD ----------
+   EDIT-ME: each keycap's readout lives here. The button's data-skill
+   in index.html must match a key in this object. */
+const skillDefs = {
+  python:  { name: "Python",            cat: "LANGUAGE",      text: "My main language — automation scripts and the brains of SUZENTINEL." },
+  cpp:     { name: "C++ (Arduino)",     cat: "LANGUAGE",      text: "What MazeBot thinks in — navigation logic on the microcontroller." },
+  js:      { name: "JavaScript",        cat: "LANGUAGE",      text: "Every animation on this site is hand-written JS — zero libraries." },
+  sql:     { name: "SQL",               cat: "LANGUAGE",      text: "Keeps the Amari booking platform's data honest — no double bookings." },
+  html:    { name: "HTML",              cat: "FRONTEND",      text: "The skeleton of every page I build, this one included." },
+  css:     { name: "CSS",               cat: "FRONTEND",      text: "This site's whole look: 3 colors, 2 fonts, lots of borders." },
+  flask:   { name: "Flask",             cat: "FRAMEWORK",     text: "Python micro-framework behind SUZENTINEL's dashboard." },
+  maestro: { name: "Maestro",           cat: "QA / AUTOMATION", text: "Mobile UI test automation — my daily tool at Pick.A.Roo." },
+  android: { name: "Android Studio",    cat: "QA / AUTOMATION", text: "Where I run and debug the Merchant App test builds." },
+  gas:     { name: "Google Apps Script", cat: "QA / AUTOMATION", text: "Automates the boring spreadsheet work." },
+  git:     { name: "Git / GitHub",      cat: "TOOL",          text: "Version control — how this site is tracked and shipped." },
+  vscode:  { name: "VS Code",           cat: "TOOL",          text: "My editor. This site was written in it." },
+  arduino: { name: "Arduino IDE",       cat: "TOOL",          text: "Where robot code gets compiled and flashed to the board." },
+  linux:   { name: "Linux Mint",        cat: "TOOL",          text: "My Linux sandbox, running inside Oracle VM VirtualBox." },
+  lm:      { name: "LM Studio",         cat: "TOOL",          text: "Running AI models locally on my own machine." },
+  ai:      { name: "AI Tools",          cat: "TOOL",          text: "ChatGPT & Claude — pair programmers for debugging and learning faster." },
+  cad:     { name: "AutoCAD / Fusion 360", cat: "TOOL",       text: "CAD for engineering drawings and 3D-printable parts." },
+  sim:     { name: "Tinkercad / Multisim", cat: "TOOL",       text: "Simulating circuits before touching real wires." },
+  pm:      { name: "Trello / Notion",   cat: "TOOL",          text: "Where my projects and school work stay organized." },
+  office:  { name: "MS Office / Google Workspace", cat: "TOOL", text: "Docs, sheets, and decks — the universal toolkit." },
+  ccna:    { name: "CCNA 1 & 2",        cat: "CERTIFICATION", text: "Cisco Certified Network Associate — networking fundamentals, routing & switching." }
+};
+
+const screenTextEl = document.getElementById("screenText");
+const screenTagEl  = document.getElementById("screenTag");
+
+if (screenTextEl) {
+  document.querySelectorAll(".keycap").forEach(cap => {
+    cap.addEventListener("click", () => {
+      const def = skillDefs[cap.dataset.skill];
+      if (!def) return;
+      screenTagEl.textContent  = def.cat;
+      screenTextEl.textContent = `${def.name} — ${def.text}`;
+      // brief press animation (matters for keyboard/Enter users)
+      cap.classList.add("pressed");
+      setTimeout(() => cap.classList.remove("pressed"), 140);
+    });
+  });
+}
+
+/* ---------- 10. INTERACTIVE DOT-GRID BACKGROUND ----------
+   A fixed <canvas> behind everything draws a faint grid of dots;
+   dots near the cursor grow and turn yellow. It only redraws when
+   the pointer actually moves (requestAnimationFrame-throttled). */
+const bgCanvas = document.getElementById("bgGrid");
+
+if (bgCanvas) {
+  const ctx  = bgCanvas.getContext("2d");
+  const GAP  = 26;     // px between dots
+  const GLOW = 130;    // how far the cursor's influence reaches
+  let mouseX = -9999, mouseY = -9999;   // start far away = no glow
+  let redrawQueued = false;
+  const sparks = [];   // click-spark particles (see below)
+
+  function drawGrid() {
+    redrawQueued = false;
+    ctx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+    for (let x = GAP; x < bgCanvas.width; x += GAP) {
+      for (let y = GAP; y < bgCanvas.height; y += GAP) {
+        const dist = Math.hypot(x - mouseX, y - mouseY);
+
+        if (dist < GLOW) {
+          // near the cursor: yellow dot, bigger the closer it is
+          const pull = 1 - dist / GLOW;              // 1 at cursor → 0 at edge
+          ctx.fillStyle   = `rgba(232, 242, 76, ${0.35 + pull * 0.65})`;
+          ctx.strokeStyle = `rgba(17, 17, 17, ${0.15 + pull * 0.45})`;
+          ctx.beginPath();
+          ctx.arc(x, y, 1.5 + pull * 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          // everywhere else: a faint dark speck
+          ctx.fillStyle = "rgba(17, 17, 17, 0.10)";
+          ctx.fillRect(x - 1, y - 1, 2, 2);
+        }
+      }
+    }
+
+    // any live click-sparks draw on top of the grid
+    for (const s of sparks) {
+      ctx.globalAlpha = Math.max(0, s.life / 0.7);   // fade out over life
+      ctx.fillStyle = "#E8F24C";
+      ctx.strokeStyle = "#111111";
+      ctx.fillRect(s.x - 3, s.y - 3, 6, 6);
+      ctx.strokeRect(s.x - 3, s.y - 3, 6, 6);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function queueRedraw() {
+    if (!redrawQueued) {
+      redrawQueued = true;
+      requestAnimationFrame(drawGrid);
+    }
+  }
+
+  function sizeCanvas() {
+    bgCanvas.width  = window.innerWidth;
+    bgCanvas.height = window.innerHeight;
+    drawGrid();
+  }
+
+  // --- click sparks: clicking empty space bursts little yellow
+  //     squares that fly out and fall with gravity, then fade ---
+  let sparkTicking = false;
+  let sparkLast = null;
+
+  function sparkTick(t) {
+    if (sparkLast === null) sparkLast = t;
+    const dt = Math.min((t - sparkLast) / 1000, 0.033);
+    sparkLast = t;
+
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i];
+      s.vy += 900 * dt;            // sparks feel gravity too
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      s.life -= dt;
+      if (s.life <= 0) sparks.splice(i, 1);
+    }
+
+    drawGrid();
+    if (sparks.length) {
+      requestAnimationFrame(sparkTick);
+    } else {
+      sparkTicking = false;
+      sparkLast = null;
+    }
+  }
+
+  // reduced-motion users get the static grid — no glow, no sparks
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    window.addEventListener("pointermove", (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      queueRedraw();
+    });
+
+    window.addEventListener("pointerdown", (e) => {
+      // only on "empty" space — never steal a real interaction
+      if (!e.target || !e.target.closest || e.target.closest(
+        "a, button, .keycap, .id-badge, .ring-scene, .terminal, .modal-box, .project, input, textarea")) return;
+      for (let i = 0; i < 8; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const sp  = 120 + Math.random() * 220;
+        sparks.push({
+          x: e.clientX, y: e.clientY,
+          vx: Math.cos(ang) * sp,
+          vy: Math.sin(ang) * sp - 80,   // slight upward bias
+          life: 0.7
+        });
+      }
+      if (!sparkTicking) {
+        sparkTicking = true;
+        requestAnimationFrame(sparkTick);
+      }
+    });
+  }
+
+  window.addEventListener("resize", sizeCanvas);
+  sizeCanvas();
+}
+
+/* ---------- 11. SCROLL PROGRESS LINE ----------
+   The yellow line at the very top of the page. Its width is simply
+   "how far down am I?" as a percentage of the total scrollable height. */
+const progressLine = document.getElementById("scrollProgress");
+
+if (progressLine) {
+  function updateProgress() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+    progressLine.style.width = pct + "%";
+  }
+
+  window.addEventListener("scroll", updateProgress, { passive: true });
+  window.addEventListener("resize", updateProgress);
+  updateProgress();
+}
+
+/* ---------- 12. CURSOR TRAIL ----------
+   A little yellow diamond that chases the mouse using "lerp"
+   (linear interpolation): every frame it moves 14% of the remaining
+   distance toward the pointer, which gives that smooth lag. It grows
+   over anything clickable. Mouse-only: the (pointer: fine) check
+   keeps it off phones and tablets, where it would make no sense. */
+const cursorTrail = document.getElementById("cursorTrail");
+
+if (cursorTrail
+    && window.matchMedia("(pointer: fine)").matches
+    && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+
+  cursorTrail.style.display = "block";
+
+  let aimX = -100, aimY = -100;      // where the mouse actually is
+  let trailX = -100, trailY = -100;  // where the diamond is right now
+  let grow = 1;
+
+  window.addEventListener("pointermove", (e) => {
+    aimX = e.clientX;
+    aimY = e.clientY;
+    // grow over anything interactive
+    const hot = e.target.closest &&
+      e.target.closest("a, button, .keycap, .ring-scene, .id-badge, .project");
+    grow = hot ? 2 : 1;
+  });
+
+  (function chase() {
+    trailX += (aimX - trailX) * 0.14;
+    trailY += (aimY - trailY) * 0.14;
+    cursorTrail.style.transform =
+      `translate(${trailX - 6}px, ${trailY - 6}px) rotate(45deg) scale(${grow})`;
+    requestAnimationFrame(chase);
+  })();
+}

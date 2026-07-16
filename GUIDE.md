@@ -24,8 +24,9 @@ Your project is 3 small files — the standard beginner-friendly structure:
 - **Layout:** CSS Flexbox (nav, hero, timeline, photo strip) + CSS Grid (project cards, skills)
 - **Theming:** CSS custom properties (variables) — a 3-color palette (`#FFFFFF` / `#111111` / `#E8F24C`) defined once in `:root`
 - **Animations:** pure CSS transitions & keyframes; JavaScript only toggles classes
-- **Scroll effects:** `IntersectionObserver` API for both the scrollspy (active nav pill) and the scroll-reveal (fade/slide-in)
-- **Interactive parts (all vanilla JS):** gallery tabs + expanding photo strip, project detail modal built from a data object, card mini-carousels, terminal tabs, typewriter
+- **Scroll effects:** `IntersectionObserver` API for both the scrollspy (active nav pill) and the scroll-reveal (fade/slide-in), a scroll progress line, and spring-physics anchor scrolling (the page "has weight")
+- **Interactive parts (all vanilla JS):** ID badge on a lanyard with two-spring physics (swing + strap stretch, drag / flip-with-jolt), 3D rotating photo ring with category tabs and count-aware spacing, pressable skills keyboard with definitions, cursor-reactive dot-grid background (`<canvas>`), cursor-chasing diamond, project detail modal built from a data object, card mini-carousels, terminal tabs, typewriter
+- **Ambience (pure CSS):** falling code glyphs on a fixed layer, unified "lifted sheet" section seams, self-pressing SCROLL keycap, custom SVG crosshair cursor
 - **Responsive:** mobile-first friendly breakpoints at 880px / 680px / 500px
 - **Accessibility:** semantic HTML5 tags, alt text, `aria-label`s, keyboard focus rings, `prefers-reduced-motion` support
 - **Tools used:** VS Code + Live Server (development), Git & GitHub (version control), GitHub Pages (deployment)
@@ -48,7 +49,7 @@ Ctrl+F in `index.html` or `script.js` and search **`EDIT-ME`** — the editable 
 2. In `index.html` (gallery) or `script.js` (projects), change the `src` / paths.
 3. The `.svg` files currently there are just placeholders — delete them once your real photos are in.
 
-**Add a gallery photo:** copy one whole `<figure class="strip-item">...</figure>` block, paste it in, then change the image, the `data-category` (which tab it belongs to: `events`, `arduino`, or `certs`), the `data-num` (the little number chip), the `data-label` (the vertical spine text), and the caption. The strip adjusts automatically — no JS editing needed. Portrait photos look best here.
+**Add a gallery photo:** copy one whole `<figure class="ring-item">...</figure>` block, paste it in, then change the image, the `data-category` (which tab it belongs to: `events`, `arduino`, or `certs`), the `data-num` (the little number chip), and the caption. The ring re-spaces itself automatically — no JS editing needed. Portrait photos look best here.
 
 **Add a gallery tab:** add a `<button class="gallery-tab" data-filter="yourname" aria-pressed="false">Your Name</button>` next to the others, then give some photos `data-category="yourname"`. The filtering picks it up automatically.
 
@@ -60,7 +61,9 @@ Ctrl+F in `index.html` or `script.js` and search **`EDIT-ME`** — the editable 
 3. The key like `mazebot:` must match the card's `onclick="openProject('mazebot')"` in `index.html`. When adding a new project, add both: a new entry in `projectPhotos` and a new card with the matching `onclick`.
 4. Popup closes with the ✕ button, the Esc key, or clicking the dark background.
 
-**Add a skill:** find the right category in the Skills section and add `<span class="pill">Name</span>` (use `class="pill hl"` to highlight, like the CCNA one).
+**Add a skill (keyboard key):** two steps — (1) in `index.html`, add `<button class="keycap" data-skill="yourskill">LABEL</button>` to a `kb-row` (use `class="keycap cap-lang"` for a yellow language key or `cap-tool` for a black tool key); (2) in `script.js`, add a matching `yourskill: { name, cat, text }` entry to the `skillDefs` object (marked EDIT-ME). The screen readout picks it up automatically.
+
+**Edit the ID badge:** everything on the card is plain HTML in the hero section — the photo, name, role chip, and the facts on the back. The swing feel is tuned by `SPRING` and `DAMPING` in `script.js` §8.
 
 **Add an experience:** copy a whole `<div class="t-item reveal">...</div>` block. Put the newest at the top. Add `current` to the classes (`t-item current reveal`) to give it the filled yellow dot.
 
@@ -79,7 +82,9 @@ Semantic HTML: `<nav>`, `<header>`, `<section>`, `<article>`, `<footer>` describ
 - **CSS variables** (`:root`) — the 3 colors and 2 fonts are defined once; `var(--yellow)` reuses them. Change one line to re-theme the whole site.
 - **Flexbox** — navbar, hero, buttons, pills, timeline (things in a row or column).
 - **CSS Grid** — project cards and skills: `repeat(auto-fill, minmax(290px, 1fr))` means "fit as many 290px-wide cards per row as possible" — responsive with zero media queries.
-- **The gallery strip trick** — all photos share one flex row; the expanded one has `flex: 3.5`, the rest `flex: 1`, and `transition: flex` animates the change. The vertical labels are just `writing-mode: vertical-rl` on a pseudo-element.
+- **The 3D ring trick** — photo *i* gets `transform: rotateY(i × step) translateZ(radius)`, which stands the photos on an invisible circle. The parent has `transform-style: preserve-3d` (children keep 3D positions) and the scene has `perspective` (adds depth). JS then rotates ONE element — the ring — and every photo moves with it.
+- **The ID flip trick** — front and back faces stacked with `backface-visibility: hidden`; the back starts at `rotateY(180deg)`. Rotating the wrapper 180° swaps which face you see.
+- **The keycap trick** — the key's "depth" is `box-shadow: 0 6px 0` (a hard shadow straight down). Pressing moves the cap down 5px and shrinks the shadow to 1px, so it looks like it sinks into the board.
 - **The mini-carousel trick** (project cards) — all photos sit in one long row (`display:flex`), the box has `overflow:hidden` so only one shows, and JS slides the row with `transform: translateX(-100%)` per step.
 - **`object-fit: cover`** — crops photos to fill their box without stretching.
 - **Media queries** — ≤880px collapses the nav into the ••• menu; ≤680px and ≤500px shrink photos, flatten the education zig-zag, and tune spacing.
@@ -88,11 +93,15 @@ Semantic HTML: `<nav>`, `<header>`, `<section>`, `<article>`, `<footer>` describ
 ### script.js (8 numbered sections, fully commented)
 - **`projectPhotos`** — one object holds every project's photos *and* write-up. The modal renders itself from this data (`buildWriteUp`), so adding a project never means writing new HTML.
 - **Scrollspy** — an `IntersectionObserver` watches each section; when one crosses mid-screen, its nav link gets the yellow `.active` pill.
-- **Scroll reveal** — a second `IntersectionObserver` adds `.visible` to `.reveal` elements the first time they appear; CSS does the actual fade/slide.
-- **Gallery strip** — JS only moves the `.active` class between photos (hover / tap / focus / auto-cycle every 4.5s); the expanding animation is 100% CSS (`transition: flex`).
+- **Scroll reveal** — a second `IntersectionObserver` adds `.visible` to `.reveal` elements the first time they appear; CSS does the actual fade/slide (the About portrait uses `clip-path` instead, for the wipe).
+- **Gallery ring (§3)** — JS tracks one number, `ringAngle`. Arrows change it by one step, dragging changes it by pixels × 0.25, releasing snaps it to the nearest step with `Math.round`. `pointerdown/move/up` events cover mouse AND touch in one API.
+- **ID lanyard (§8)** — a tiny physics simulation run by `requestAnimationFrame` (~60 calls per second). Each frame: `acceleration = -SPRING × angle - DAMPING × speed`, then speed and angle update. That one line is why the badge swings back and settles like a real hanging card. Dragging aims the badge at your pointer with `Math.atan2`; a click with < 8px of movement counts as a flip instead of a drag.
+- **Skills keyboard (§9)** — one `skillDefs` object holds every definition; clicking a keycap looks up its `data-skill` and writes the text into the screen. Zero HTML changes needed to reword a definition.
+- **Dot-grid background (§10)** — a full-screen `<canvas>`; a double loop stamps a dot every 26px, and dots within 130px of the cursor are drawn bigger and yellow (`Math.hypot` for distance). It only redraws when the mouse moves, throttled to once per frame.
+- **Scroll progress line (§11)** — `width % = scrollY ÷ (page height − window height) × 100`. One formula, one style write.
 - **Mini-carousels** — one variable `index` tracks the visible photo; the `%` remainder makes it loop; `setInterval` auto-plays every 4s.
 
-**Key line to explain:** `miniTrack.style.transform = "translateX(-" + index * 100 + "%)"` — photo 0 = 0%, photo 1 = −100%, photo 2 = −200%. That's the whole carousel.
+**Key line to explain:** `item.style.transform = "rotateY(" + (i * ringStep) + "deg) translateZ(" + radius + "px)"` — rotate each photo around the circle's axis, then push it outward. That's the entire 3D gallery.
 
 ## 4. Likely questions
 
@@ -113,9 +122,18 @@ Semantic HTML: `<nav>`, `<header>`, `<section>`, `<article>`, `<footer>` describ
 ## 6. Quick tweak recipes
 
 - **Change accent color:** edit `--yellow: #E8F24C;` at the top of `style.css`.
-- **Gallery cycle speed:** in `script.js`, change `4500` (milliseconds) in the photo strip `setInterval`. Delete those lines to turn off auto-cycling.
-- **Taller gallery:** in `style.css`, `.photo-strip { height: 560px; }`.
-- **Wider expanded photo:** in `style.css`, `.strip-item.active { flex: 3.5; }` — bigger number = wider.
+- **Ring spin speed:** in `script.js` §3, change `5000` (milliseconds) in the auto-spin `setInterval`. Delete those lines to turn off auto-spin.
+- **Ring size:** in `style.css`, `.ring-item { width / height }`; the circle's radius adapts automatically (`ringRadius()` in `script.js`).
+- **Badge swing feel:** in `script.js` §8 — raise `SPRING` for a snappier pull-back, raise `DAMPING` to calm the swing faster.
+- **Background dot spacing / glow size:** in `script.js` §10, `GAP` and `GLOW`.
+- **Gallery photo gaps:** in `script.js`, the `+ 24` inside `ringRadius()` is the air between photos — raise it for more space. It auto-adapts when you add photos.
+- **Falling glyphs:** edit the `<span>`s inside `#floatLayer` in `index.html`; speed/lanes live in the `#floatLayer span:nth-child(...)` rules in `style.css`.
+- **Section seam look:** the `section, footer` rule in `style.css` section 2 — the first box-shadow is the yellow under-edge, the second is the soft lift blur.
+- **Page scroll weight:** in `script.js` §2d, `42` is the spring pull and `11` the damping — lower damping = more overshoot bounce.
+- **Badge physics feel:** in `script.js` §8 — `GRAVITY` (how hard it falls), `ROPE_GIVE` (strap elasticity: lower = stretchier), `AIR_DRAG` (how fast throws die out), `TILT_K`/`TILT_C` (dangle wobble).
+- **Section slide distance/speed:** `style.css` section 11 — `translateY(56px)` and `0.85s` in the `section > .wrap` rule.
+- **Click sparks:** count (`8`), speed, and gravity (`900`) live in the sparks block of `script.js` §10.
+- **Cursor diamond:** size/colors in the `#cursorTrail` CSS rule; chase speed is the `0.14` lerp factor in `script.js` §12.
 - **Reveal animation speed:** in `style.css` section 11, change `0.6s` in the `.reveal` rule.
 - **Stronger card tilt:** `.project:hover` → change `-1deg` to `-2deg`.
 - **Reorder sections:** cut/paste an entire `<section>` block in `index.html`, and reorder the nav links (both the desktop `.nav-links` list and the mobile dropdown) to match.

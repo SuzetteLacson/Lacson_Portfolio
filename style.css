@@ -68,15 +68,146 @@ img {
 
 section {
   padding: 90px 0;
-  background: var(--white);
+  /* transparent so the interactive dot-grid canvas shows through */
+  background: transparent;
   width: 100%;
 }
 
-/* yellow background section for emphasis */
+/* yellow background section for emphasis (stays opaque on purpose) */
 .yellow-bg {
   background: var(--yellow);
-  border-top: 1px solid var(--black);
-  border-bottom: 1px solid var(--black);
+}
+
+/* ---- unified section seam: the "lifted sheet" transition ----
+   Every section (and the footer) starts with the same edge:
+     1. a solid black top line (the sheet's edge),
+     2. a yellow under-edge peeking out ABOVE it (box-shadow #1),
+     3. a soft dark blur fading upward (box-shadow #2) — this is what
+        makes the new section look like it's lifting over the last one.
+   WHY box-shadow instead of border: shadows can sit OUTSIDE the box,
+   overlapping the section above — a border can't do that.
+   This matches the hard-offset shadows used on cards & buttons. */
+section,
+footer {
+  border-top: 2px solid var(--black);
+  box-shadow:
+    0 -8px 0 -3px var(--yellow),
+    0 -22px 26px -18px rgba(17, 17, 17, 0.28);
+}
+
+/* every section title gets the same yellow accent bar underneath —
+   one consistent "signature" across the whole site */
+section .wrap > h2::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 8px;
+  background: var(--yellow);
+  border: 2px solid var(--black);
+  margin-top: 12px;
+}
+
+/* ---- interactive dot-grid background (drawn by script.js §10) ----
+   Fixed full-screen canvas behind all content; dots near the cursor
+   glow yellow. z-index -1 keeps it under everything. */
+#bgGrid {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;            /* never blocks clicks */
+}
+
+/* ---- scroll progress line (width driven by script.js §11) ---- */
+#scrollProgress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 5px;
+  width: 0%;
+  background: var(--yellow);
+  border-bottom: 2px solid var(--black);
+  z-index: 10001;                  /* above the nav dock */
+}
+
+/* ---- floating code glyphs (pure CSS — zero JavaScript) ----
+   A fixed layer of faint mono symbols drifting down the page.
+   Because the layer is position:fixed, the glyphs stay with you
+   through every section. Negative animation-delays start each glyph
+   mid-fall so the screen is never empty on load.
+   PERFORMANCE: only `transform` animates → GPU-composited, no layout. */
+#floatLayer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;                     /* behind content, above the dot grid */
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#floatLayer span {
+  position: absolute;
+  top: -10vh;                      /* starts just above the screen */
+  font-family: var(--mono);
+  font-weight: 700;
+  color: rgba(17, 17, 17, 0.12);   /* faint — never fights the text */
+  animation: floatFall linear infinite;
+  will-change: transform;
+}
+
+/* the two ✦ get the brand yellow with a soft dark outline */
+#floatLayer span.accent {
+  color: rgba(232, 242, 76, 0.9);
+  -webkit-text-stroke: 1px rgba(17, 17, 17, 0.35);
+}
+
+/* every glyph gets its own lane, size, speed, and head start */
+#floatLayer span:nth-child(1)  { left: 6%;  font-size: 1.6rem;  animation-duration: 34s; animation-delay: -5s; }
+#floatLayer span:nth-child(2)  { left: 16%; font-size: 1.2rem;  animation-duration: 46s; animation-delay: -20s; }
+#floatLayer span:nth-child(3)  { left: 27%; font-size: 1.9rem;  animation-duration: 38s; animation-delay: -12s; }
+#floatLayer span:nth-child(4)  { left: 38%; font-size: 1rem;    animation-duration: 50s; animation-delay: -33s; }
+#floatLayer span:nth-child(5)  { left: 49%; font-size: 1.4rem;  animation-duration: 42s; animation-delay: -8s; }
+#floatLayer span:nth-child(6)  { left: 58%; font-size: 1.2rem;  animation-duration: 36s; animation-delay: -26s; }
+#floatLayer span:nth-child(7)  { left: 67%; font-size: 1rem;    animation-duration: 52s; animation-delay: -40s; }
+#floatLayer span:nth-child(8)  { left: 76%; font-size: 1.05rem; animation-duration: 44s; animation-delay: -16s; }
+#floatLayer span:nth-child(9)  { left: 86%; font-size: 1.7rem;  animation-duration: 40s; animation-delay: -2s; }
+#floatLayer span:nth-child(10) { left: 93%; font-size: 1rem;    animation-duration: 48s; animation-delay: -30s; }
+#floatLayer span:nth-child(11) { left: 11%; font-size: 1.15rem; animation-duration: 43s; animation-delay: -37s; }
+#floatLayer span:nth-child(12) { left: 22%; font-size: 1.5rem;  animation-duration: 39s; animation-delay: -18s; }
+#floatLayer span:nth-child(13) { left: 44%; font-size: 1rem;    animation-duration: 54s; animation-delay: -45s; }
+#floatLayer span:nth-child(14) { left: 62%; font-size: 1.3rem;  animation-duration: 37s; animation-delay: -10s; }
+#floatLayer span:nth-child(15) { left: 72%; font-size: 1.1rem;  animation-duration: 49s; animation-delay: -28s; }
+#floatLayer span:nth-child(16) { left: 97%; font-size: 1.4rem;  animation-duration: 41s; animation-delay: -22s; }
+
+@keyframes floatFall {
+  from { transform: translateY(0) rotate(0deg); }
+  to   { transform: translateY(125vh) rotate(20deg); }
+}
+
+/* ---- custom cursor ----
+   The body gets a blueprint-style crosshair drawn as an inline SVG
+   (a data: URI — no image file needed). Links and buttons keep the
+   normal pointer so usability never suffers. The yellow diamond
+   (#cursorTrail) chases the pointer from script.js §12 and grows
+   over clickable things; it's mouse-only (script checks pointer:fine). */
+body {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22'><line x1='11' y1='0' x2='11' y2='7' stroke='%23111111' stroke-width='2'/><line x1='11' y1='15' x2='11' y2='22' stroke='%23111111' stroke-width='2'/><line x1='0' y1='11' x2='7' y2='11' stroke='%23111111' stroke-width='2'/><line x1='15' y1='11' x2='22' y2='11' stroke='%23111111' stroke-width='2'/><rect x='9' y='9' width='4' height='4' fill='%23E8F24C' stroke='%23111111'/></svg>") 11 11, crosshair;
+}
+
+a, button, .keycap, [role="button"] {
+  cursor: pointer;
+}
+
+#cursorTrail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  background: var(--yellow);
+  border: 2px solid var(--black);  /* rotated 45° by JS = the ✦ diamond */
+  pointer-events: none;
+  z-index: 10002;
+  will-change: transform;
+  display: none;                   /* script.js §12 enables it for mouse users */
 }
 
 .section-sub {
@@ -267,23 +398,26 @@ button:focus-visible {
   transform: translateX(4px);
 }
 
-/* ---------- 4. HERO ---------- */
+/* ---------- 4. HERO (name left, ID lanyard right) ---------- */
 .hero {
-  background: var(--white);
   min-height: 100vh;
   display: flex;
   align-items: center;
   position: relative;
-  padding: 120px 0 60px;
+  padding: 100px 0 40px;
+  overflow: hidden;                /* the swinging badge stays inside */
 }
 
-.hero-centerpiece {
-  display: flex;
-  flex-direction: column;
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
   align-items: center;
-  justify-content: center;
+  gap: 24px;
   width: 100%;
-  text-align: center;
+}
+
+.hero-copy {
+  text-align: left;
 }
 
 /* small mono line above the name, like the inspiration template */
@@ -292,85 +426,245 @@ button:focus-visible {
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 3px;
-  margin: 0 0 26px;
-}
-
-.massive-name-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
+  margin: 0 0 22px;
 }
 
 .massive-text-line {
-  font-size: clamp(4.5rem, 17vw, 13rem);
-  line-height: 0.85;
+  font-size: clamp(3.2rem, 9.5vw, 7.8rem);
+  line-height: 0.9;
   font-weight: 900;
   color: var(--yellow);
   letter-spacing: -2px;
   text-transform: uppercase;
-  margin: 0;
+  margin: 0 0 20px;
   user-select: none;
   /* pure yellow on white is nearly invisible — the thin black
      outline keeps the yellow look but makes the name readable */
   -webkit-text-stroke: 2px var(--black);
 }
 
-/* Capsule photo frame overlapping the name */
-.oval-photo-frame {
-  width: clamp(100px, 15vw, 160px);
-  height: clamp(140px, 21vw, 220px);
-  border-radius: 120px;
-  border: 1px solid var(--black);
-  overflow: hidden;
+/* ····· THE ID LANYARD ·····
+   The card is a free-moving body on an elastic strap: script.js §8
+   simulates gravity + a rope constraint, then positions the strap
+   and the card here every frame. Grab it, throw it, drop it. */
+.lanyard-wrap {
+  position: relative;
+  height: 640px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* the arm is now just a positioning canvas — script.js §8 places the
+   strap and the badge independently, so the card can travel ANYWHERE
+   (thrown, lifted, dropped) while the strap stretches to follow it */
+.lanyard-arm {
   position: absolute;
-  top: 50%;
+  inset: 0;
+}
+
+/* fabric strap with repeating branding, like a real lanyard.
+   JS sets its height (anchor→card distance) and rotation every frame;
+   transform-origin 50% 0 pins it to the hang point at the top. */
+.lanyard-strap {
+  position: absolute;
+  top: 0;
   left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  background: var(--white);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-  perspective: 1000px;             /* gives the flip its 3D depth */
+  width: 34px;
+  height: 210px;
+  transform: translateX(-50%);
+  transform-origin: 50% 0;
+  will-change: transform, height;
+  background: var(--black);
+  color: var(--yellow);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  writing-mode: vertical-rl;       /* text runs down the strap */
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  border-radius: 0 0 4px 4px;
 }
 
-.hero-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+/* the "metal" clip rides on top of the card */
+.badge-clip {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 46px;
+  height: 18px;
+  background: #EAEAEA;
+  border: 2px solid var(--black);
+  border-radius: 4px;
+  z-index: 3;
 }
 
-/* hero flip card (front/back photo) */
-.flip-card-inner {
+/* the ID card itself — positioned every frame by script.js §8.
+   transform-origin 50% 0 = it pivots around its clip, like a real card. */
+.id-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 350px;
+  transform-origin: 50% 0;
+  will-change: transform;
+  perspective: 1200px;             /* 3D depth for the flip */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;              /* touch-drags move the badge, not the page */
+  user-select: none;
+  cursor: grab;
+}
+
+.id-badge.grabbing {
+  cursor: grabbing;
+}
+
+.id-badge:focus-visible {
+  outline: 3px solid var(--black);
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+
+.badge-inner {
   position: relative;
   width: 100%;
   height: 100%;
-  transition: transform 0.7s ease;
-  transform-style: preserve-3d;
+  transform-style: preserve-3d;    /* lets front/back live in 3D */
+  transition: transform 0.65s cubic-bezier(0.3, 1.4, 0.4, 1);
 }
 
-.oval-photo-frame:hover .flip-card-inner,
-.oval-photo-frame:focus-visible .flip-card-inner {
+.badge-inner.flipped {
   transform: rotateY(180deg);
 }
 
-.flip-card-front,
-.flip-card-back {
+.badge-face {
   position: absolute;
   inset: 0;
-  backface-visibility: hidden;     /* hides the reversed side */
+  backface-visibility: hidden;     /* hide whichever side faces away */
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 14px;
+  box-shadow: 10px 12px 0 rgba(17, 17, 17, 0.16);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
 }
 
-.flip-card-back {
+.badge-back {
   transform: rotateY(180deg);
 }
 
-.diamond-divider {
-  font-size: 2rem;
-  color: var(--yellow);
-  margin: 40px 0 20px;
-  -webkit-text-stroke: 1px var(--black);
+/* punched slot at the top of the card */
+.badge-slot {
+  width: 52px;
+  height: 9px;
+  background: var(--yellow);
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.badge-photo {
+  width: 118px;
+  height: 118px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--black);
+  margin-bottom: 12px;
+  pointer-events: none;            /* drags grab the card, not the img */
+}
+
+.badge-name {
+  font-family: var(--mono);
+  font-weight: 900;
+  font-size: 1.35rem;
+  line-height: 1.05;
+  text-align: center;
+  margin: 0 0 8px;
+}
+
+.badge-role {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: var(--yellow);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 3px 8px;
+  margin: 0;
+}
+
+/* fake barcode — just stripes from a repeating gradient */
+.badge-barcode {
+  width: 150px;
+  height: 32px;
+  margin-top: auto;                /* pushes it to the card bottom */
+  background: repeating-linear-gradient(
+    90deg,
+    var(--black) 0 2px, transparent 2px 5px,
+    var(--black) 5px 9px, transparent 9px 11px
+  );
+}
+
+.badge-id {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  margin: 8px 0 0;
+}
+
+/* --- back face content --- */
+.badge-back-title {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin: 6px 0 14px;
+}
+
+.badge-facts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.badge-facts li {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 6px 8px;
+}
+
+/* fake QR block — two crossing striped gradients make the pattern */
+.badge-qr {
+  width: 70px;
+  height: 70px;
+  margin-top: auto;
+  border: 2px solid var(--black);
+  background:
+    repeating-linear-gradient(0deg,  var(--black) 0 6px, transparent 6px 12px),
+    repeating-linear-gradient(90deg, var(--black) 0 6px, var(--white) 6px 12px);
+}
+
+.badge-flip-hint {
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  font-weight: 700;
+  opacity: 0.55;
+  margin: 8px 0 0;
 }
 
 /* hero typewriter line */
@@ -396,37 +690,62 @@ button:focus-visible {
   font-family: var(--sans);
   font-size: clamp(1rem, 2vw, 1.2rem);
   color: var(--black);
-  max-width: 620px;
+  max-width: 560px;
   line-height: 1.6;
   font-weight: 500;
-  margin: 0 auto;
+  margin: 0;
 }
 
+/* ---- scroll indicator: a keycap that presses itself ----
+   WHY a keycap: it echoes the Skills keyboard, so the hero and the
+   skills section share one visual language. It's also a real link —
+   pressing it springs the page down to About (script.js §2d).
+   HOW the press works: same trick as the skill keys — the "depth" is
+   a hard box-shadow, and the keyframes move the cap down into it. */
 .scroll-indicator {
-  margin-top: 50px;
+  margin-top: 44px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 12px;
 }
 
-.scroll-line {
-  width: 2px;
-  height: 35px;
-  background: var(--black);
-  animation: scrollPulse 2s ease-in-out infinite;
-}
-
-@keyframes scrollPulse {
-  0%, 100% { transform: scaleY(1);   opacity: 1; }
-  50%      { transform: scaleY(0.5); opacity: 0.4; }
-}
-
-.scroll-text {
+.scroll-key {
+  display: inline-block;
   font-family: var(--mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 2px;
+  color: var(--black);
+  text-decoration: none;
+  background: var(--yellow);
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  padding: 10px 16px;
+  box-shadow: 0 6px 0 var(--black);
+  animation: keyPress 2.6s ease-in-out infinite;
+}
+
+/* the cap taps itself every couple of seconds */
+@keyframes keyPress {
+  0%, 74%, 100% { transform: translateY(0);   box-shadow: 0 6px 0 var(--black); }
+  80%, 88%      { transform: translateY(5px); box-shadow: 0 1px 0 var(--black); }
+}
+
+/* hovering holds it pressed (and pauses the self-tap) */
+.scroll-key:hover {
+  animation-play-state: paused;
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 var(--black);
+}
+
+/* small caption under the key — EDIT-ME: text lives in index.html */
+.scroll-hint {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  opacity: 0.55;
 }
 
 /* ---------- 5. ABOUT + EDUCATION ---------- */
@@ -443,6 +762,57 @@ button:focus-visible {
 
 .about-chapter:first-of-type {
   margin-top: 0;
+}
+
+/* --- intro: portrait + terminal side by side --- */
+.about-intro-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 28px;
+  align-items: stretch;
+}
+
+/* the ME2 portrait "wipes" open left→right when scrolled into view:
+   it starts fully clipped (clip-path hides 100% from the right) and
+   the .visible class — added by the scroll observer — un-clips it */
+.about-photo {
+  position: relative;
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--white);
+  min-height: 340px;
+  box-shadow: 8px 8px 0 var(--yellow), 8px 8px 0 2px var(--black);
+}
+
+.about-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-photo.reveal {
+  opacity: 1;                      /* override the generic fade... */
+  transform: none;
+  clip-path: inset(0 100% 0 0);    /* ...this hides it instead */
+  transition: clip-path 0.9s cubic-bezier(0.65, 0, 0.35, 1) 0.15s;
+}
+
+.about-photo.reveal.visible {
+  clip-path: inset(0 0 0 0);       /* wipe complete — fully shown */
+}
+
+.about-photo-chip {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--yellow);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 3px 10px;
 }
 
 /* --- developer terminal --- */
@@ -540,20 +910,42 @@ button:focus-visible {
 
 .tab-content p + p { margin-top: 10px; }
 
-/* --- education cards: the "second scroll" story --- */
+/* --- education cards: a connected mini-timeline --- */
 .edu-track {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 22px;
   max-width: 720px;
+  padding-left: 34px;
 }
 
-/* zig-zag: even cards shift right on desktop for a storytelling flow */
-.edu-card:nth-child(even) {
-  margin-left: 56px;
+/* the spine line connecting the schools */
+.edu-track::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: var(--black);
+}
+
+/* a dot on the spine for each school */
+.edu-card::before {
+  content: "";
+  position: absolute;
+  left: -34px;                     /* centers the dot on the spine */
+  top: 24px;
+  width: 12px;
+  height: 12px;
+  background: var(--yellow);
+  border: 2.5px solid var(--black);
+  border-radius: 50%;
 }
 
 .edu-card {
+  position: relative;
   background: var(--white);
   border: 2px solid var(--black);
   border-radius: 8px;
@@ -634,61 +1026,77 @@ button:focus-visible {
   color: var(--yellow);
 }
 
-.photo-strip {
+/* --- the 3D ring ---
+   Photos stand on an invisible circular carousel (3D cover-flow).
+   Each item gets rotateY(angle) translateZ(radius) from script.js;
+   spinning the whole .ring brings a different photo to the front.
+   The front photo is full color and shows its caption. */
+.ring-stage {
   display: flex;
-  gap: 12px;
-  height: 560px;                   /* tall = portrait photos fit naturally */
+  align-items: center;
+  gap: 10px;
 }
 
-/* photos outside the chosen tab are simply not rendered */
-.strip-item.hidden {
-  display: none;
-}
-
-.strip-item {
-  position: relative;
+.ring-scene {
   flex: 1;
-  margin: 0;
-  overflow: hidden;
+  height: 470px;
+  perspective: 1300px;             /* how "deep" the 3D looks */
+  touch-action: pan-y;             /* sideways drag spins, vertical still scrolls */
+  cursor: grab;
+}
+
+.ring-scene.dragging {
+  cursor: grabbing;
+}
+
+.ring {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;    /* children keep their 3D positions */
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* while dragging, the ring must follow the pointer instantly */
+.ring.dragging {
+  transition: none;
+}
+
+.ring-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 260px;
+  height: 380px;
+  margin: -190px 0 0 -130px;       /* centers the card in the scene */
   border: 2px solid var(--black);
-  border-radius: 8px;
+  border-radius: 10px;
+  overflow: hidden;
   background: var(--white);
-  cursor: pointer;
-  transition: flex 0.55s cubic-bezier(0.25, 0.8, 0.25, 1),
-              box-shadow 0.3s ease;
+  filter: grayscale(70%) brightness(0.85);  /* side photos are muted */
+  transition: filter 0.4s ease;
 }
 
-.strip-item.active {
-  flex: 3.5;                       /* the expanded photo */
-  box-shadow: 8px 8px 0 var(--black);
+.ring-item.hidden {
+  display: none;                   /* photos outside the chosen tab */
 }
 
-.strip-item:focus-visible {
-  outline: 3px solid var(--black);
-  outline-offset: 2px;
+.ring-item.front {
+  filter: none;                    /* the photo facing you: full color */
 }
 
-.strip-item img {
+.ring-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(65%);          /* slivers are muted... */
-  transform: scale(1.12);          /* ...and slightly cropped-in */
-  transition: filter 0.45s ease, transform 0.6s ease;
-}
-
-.strip-item.active img,
-.strip-item:hover img {
-  filter: none;                    /* expanding reveals full color */
-  transform: scale(1);
 }
 
 /* number chip, top-left of every photo */
-.strip-item::before {
+.ring-item::before {
   content: attr(data-num);
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 10px;
+  left: 10px;
   z-index: 2;
   font-family: var(--mono);
   font-size: 0.68rem;
@@ -699,33 +1107,8 @@ button:focus-visible {
   padding: 2px 7px;
 }
 
-/* vertical "book spine" label on collapsed slivers */
-.strip-item::after {
-  content: attr(data-label);
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%) rotate(180deg);
-  writing-mode: vertical-rl;       /* text runs bottom-to-top */
-  z-index: 2;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  background: var(--yellow);
-  border: 1.5px solid var(--black);
-  border-radius: 4px;
-  padding: 10px 4px;
-  white-space: nowrap;
-  transition: opacity 0.25s ease;
-}
-
-.strip-item.active::after {
-  opacity: 0;                      /* spine label hides when expanded */
-}
-
-/* full caption bar slides up once the photo is expanded */
-.strip-item figcaption {
+/* caption bar — only visible on the front photo */
+.ring-item figcaption {
   position: absolute;
   left: 0;
   right: 0;
@@ -733,18 +1116,37 @@ button:focus-visible {
   background: var(--white);
   border-top: 2px solid var(--black);
   font-family: var(--mono);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  padding: 12px 16px;
+  padding: 10px 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transform: translateY(105%);
-  transition: transform 0.4s ease 0.18s;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.strip-item.active figcaption {
-  transform: translateY(0);
+.ring-item.front figcaption {
+  opacity: 1;
+}
+
+/* the ‹ › buttons beside the ring */
+.ring-btn {
+  font-size: 1.5rem;
+  font-weight: 700;
+  width: 44px;
+  height: 44px;
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.ring-btn:hover {
+  background: var(--black);
+  color: var(--yellow);
 }
 
 /* arrow buttons — shared by the project modal photo viewer */
@@ -1063,52 +1465,138 @@ button:focus-visible {
   margin: 0;
 }
 
-/* ---------- 8. SKILLS ---------- */
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 12px 40px;
+/* ---------- 8. SKILLS KEYBOARD ----------
+   Every skill is a 3D keycap. The "depth" is a hard box-shadow under
+   the cap; pressing (click / tap / Enter) sinks the cap into it.
+   The black screen above prints the pressed skill's definition. */
+.skill-screen {
+  background: var(--black);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  min-height: 64px;
+  box-shadow: 6px 6px 0 rgba(17, 17, 17, 0.25);
 }
 
-/* Tools list is the longest — let it span the full row */
-.skill-group:nth-child(5) {
-  grid-column: 1 / -1;
+.screen-tag {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--black);
+  background: var(--yellow);
+  border-radius: 3px;
+  padding: 2px 7px;
+  flex-shrink: 0;
 }
 
-.skill-title {
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin: 26px 0 12px;
+.screen-text {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--yellow);
+  margin: 0;
 }
 
-.pills {
+/* blinking terminal cursor at the end of the readout */
+.screen-text::after {
+  content: "▌";
+  animation: blink 1s steps(1) infinite;
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kb-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* stagger the rows sideways like a real keyboard */
+.kb-row:nth-child(2) { margin-left: 22px; }
+.kb-row:nth-child(3) { margin-left: 44px; }
+.kb-row:nth-child(4) { margin-left: 66px; }
+
+.keycap {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-width: 66px;
+  height: 58px;
+  padding: 0 14px;
+  background: var(--white);
+  color: var(--black);
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 var(--black);          /* the key's "depth" */
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+/* pressed: the cap sinks into its own shadow */
+.keycap:active,
+.keycap.pressed {
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 var(--black);
+}
+
+/* category colors — still the same 3-color palette */
+.cap-lang {
+  background: var(--yellow);
+}
+
+.cap-tool {
+  background: var(--black);
+  color: var(--white);
+  box-shadow: 0 6px 0 var(--white);          /* white depth reads on yellow bg */
+}
+
+.cap-tool:active,
+.cap-tool.pressed {
+  box-shadow: 0 1px 0 var(--white);
+}
+
+.cap-cert {
+  background: var(--black);
+  color: var(--yellow);
+  min-width: 120px;
+  box-shadow: 0 6px 0 var(--white);
+}
+
+.cap-cert:active,
+.cap-cert.pressed {
+  box-shadow: 0 1px 0 var(--white);
+}
+
+/* the color legend under the keyboard */
+.kb-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin: 28px 0 0;
 }
 
-.pill {
+.legend-chip {
   font-family: var(--mono);
-  font-size: 0.82rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  background: var(--white);
-  border: 2px solid var(--black);
-  border-radius: 6px;
-  padding: 7px 14px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  letter-spacing: 1px;
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 3px 9px;
 }
 
-.pill:hover {
-  transform: translateY(-2px);
-  box-shadow: 3px 3px 0 var(--black);
-}
-
-/* highlighted pill — inverted on the yellow section so it stands out */
-.yellow-bg .pill.hl {
-  background: var(--black);
-  color: var(--yellow);
-}
+.chip-lang { background: var(--yellow); }
+.chip-qa   { background: var(--white); }
+.chip-tool { background: var(--black); color: var(--white); }
+.chip-cert { background: var(--black); color: var(--yellow); }
 
 /* ---------- 9. EXPERIENCE TIMELINE ----------
    Connected vertical line with round dots; most recent on top.
@@ -1246,7 +1734,15 @@ footer p {
   transform: translate(2px, 2px);
 }
 
-.btn svg { flex-shrink: 0; }
+.btn svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+/* micro-interaction: the little icon tilts when its button is hovered */
+.btn:hover svg {
+  transform: rotate(-10deg) scale(1.1);
+}
 
 .btn-resume {
   background: var(--yellow);
@@ -1286,6 +1782,26 @@ footer a:focus-visible {
 /* ---------- 11. SCROLL-REVEAL ANIMATIONS ----------
    script.js adds .visible when an element scrolls into view.
    Elements start slightly lower + transparent, then ease up. */
+
+/* --- section slide transitions ---
+   Each section's whole content block starts lower + transparent;
+   when the section enters the viewport, script.js adds .section-in
+   and the content SLIDES up into place — so crossing a seam feels
+   like arriving on a new page, not just more scrolling.
+   (Inner .reveal elements then stagger in on top of this.) */
+section > .wrap,
+footer > .wrap {
+  transform: translateY(56px);
+  opacity: 0;
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.7s ease;
+}
+
+section.section-in > .wrap,
+footer.section-in > .wrap {
+  transform: translateY(0);
+  opacity: 1;
+}
 .reveal {
   opacity: 0;
   transform: translateY(26px);
@@ -1313,60 +1829,90 @@ footer a:focus-visible {
     transition: none;
   }
 
-  .flip-card-inner,
-  .mini-track,
-  .strip-item,
-  .strip-item img,
-  .strip-item figcaption {
+  /* sections appear instantly instead of sliding */
+  section > .wrap,
+  footer > .wrap {
+    transform: none;
+    opacity: 1;
     transition: none;
   }
 
-  .scroll-line,
-  .type-cursor {
+  .mini-track,
+  .ring,
+  .ring-item,
+  .badge-inner {
+    transition: none;
+  }
+
+  /* the About portrait just appears instead of wiping in */
+  .about-photo.reveal {
+    clip-path: none;
+    transition: none;
+  }
+
+  .scroll-key,
+  .type-cursor,
+  .screen-text::after,
+  #floatLayer span {
     animation: none;
+  }
+
+  #floatLayer,
+  #cursorTrail {
+    display: none;
   }
 }
 
 /* ---------- 12. MOBILE TUNING ---------- */
 
 /* below 880px the inline nav links no longer fit the capsule —
-   switch to the ••• dropdown menu */
+   switch to the ••• dropdown menu; the hero also stacks vertically */
 @media (max-width: 880px) {
   .nav-links { display: none; }
   .nav-toggle-btn { display: flex; }
   .nav-dock { min-width: 250px; }
   .nav-dock-inner { justify-content: space-between; }
+
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .lanyard-wrap {
+    height: 500px;
+    margin-top: 10px;
+  }
+
+  .lanyard-strap { height: 110px; }
 }
 
 @media (max-width: 680px) {
-  /* gallery strip turns vertical: collapsed photos are short bars,
-     tapping one expands it downward like an accordion */
-  .photo-strip {
-    flex-direction: column;
-    height: auto;
+  /* the 3D ring shrinks to fit small screens */
+  .ring-scene { height: 360px; }
+
+  .ring-item {
+    width: 200px;
+    height: 300px;
+    margin: -150px 0 0 -100px;
   }
 
-  .strip-item {
-    flex: none;
-    height: 64px;
-    transition: height 0.5s ease, box-shadow 0.3s ease;
+  /* the About intro stacks: photo on top, terminal below */
+  .about-intro-grid {
+    grid-template-columns: 1fr;
   }
 
-  .strip-item.active {
-    flex: none;
-    height: 400px;
-    box-shadow: 6px 6px 0 var(--black);
-  }
+  .about-photo { min-height: 300px; }
 
-  /* spine labels lie flat again on mobile */
-  .strip-item::after {
-    writing-mode: horizontal-tb;
-    transform: none;
-    left: auto;
-    right: 12px;
-    bottom: auto;
-    top: 12px;
-    padding: 3px 8px;
+  /* keyboard rows lose their sideways stagger and just wrap */
+  .kb-row:nth-child(2),
+  .kb-row:nth-child(3),
+  .kb-row:nth-child(4) { margin-left: 0; }
+
+  .keycap {
+    min-width: 56px;
+    height: 52px;
+    font-size: 0.72rem;
+    padding: 0 10px;
   }
 
   #modal-img   { height: 240px; }
@@ -1380,11 +1926,6 @@ footer a:focus-visible {
     width: 36px;
     height: 36px;
   }
-
-  /* education zig-zag flattens on small screens */
-  .edu-card:nth-child(even) { margin-left: 0; }
-
-  .skills-grid { grid-template-columns: 1fr; }
 
   .modal-meta {
     grid-template-columns: 1fr;

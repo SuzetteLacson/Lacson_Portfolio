@@ -31,6 +31,38 @@
 </head>
 <body>
 
+  <!-- Scroll progress line — fills left→right as you scroll (script.js §11) -->
+  <div id="scrollProgress" aria-hidden="true"></div>
+
+  <!-- Interactive dot-grid background — dots glow yellow near the cursor
+       (drawn on a <canvas> by script.js §10; sits behind everything) -->
+  <canvas id="bgGrid" aria-hidden="true"></canvas>
+
+  <!-- Floating code glyphs — drift down the page forever (pure CSS
+       animation). Fixed layer, so they follow you through every section.
+       EDIT-ME: change the symbols freely; add/remove <span>s at will. -->
+  <div id="floatLayer" aria-hidden="true">
+    <span>&lt;/&gt;</span>
+    <span class="accent">✦</span>
+    <span>{ }</span>
+    <span>01</span>
+    <span>//</span>
+    <span>;</span>
+    <span class="accent">✦</span>
+    <span>#include</span>
+    <span>+</span>
+    <span>0101</span>
+    <span>if( )</span>
+    <span class="accent">✦</span>
+    <span>&lt;/&gt;</span>
+    <span>::</span>
+    <span>[ ]</span>
+    <span>=&gt;</span>
+  </div>
+
+  <!-- The yellow diamond that chases the mouse (script.js §12) -->
+  <div id="cursorTrail" aria-hidden="true"></div>
+
 <!-- ==================== FLOATING CAPSULE NAV ====================
      Desktop: brand + inline links inside the black capsule,
               with a yellow pill that follows the section you're in
@@ -74,50 +106,81 @@
     </div>
   </nav>
 
-  <!-- ==================== HIGH-IMPACT HERO ==================== -->
+  <!-- ==================== HIGH-IMPACT HERO ====================
+       Left: giant name + typewriter.
+       Right: interactive ID badge on a lanyard — grab it to swing it,
+       click/tap it to flip it over (physics lives in script.js §8). -->
   <header class="hero" id="top">
-    <div class="wrap hero-centerpiece">
+    <div class="wrap hero-grid">
 
-      <!-- Small mono kicker line (like the inspiration template) -->
-      <p class="hero-kicker">CRAFTING CODE, TESTS &amp; ROBOTS — LIPA CITY, PH</p>
+      <div class="hero-copy">
+        <!-- Small mono kicker line (like the inspiration template) -->
+        <p class="hero-kicker">CRAFTING CODE, TESTS &amp; ROBOTS — LIPA CITY, PH</p>
 
-      <!-- Giant typographic name stack -->
-      <div class="massive-name-container">
-        <h1 class="massive-text-line">SUZETTE</h1>
+        <!-- Giant typographic name stack -->
+        <h1 class="massive-text-line">SUZETTE<br>LACSON</h1>
 
-        <!-- Interactive 3D flip capsule (links to About) -->
-        <a href="#about" class="oval-photo-frame" aria-label="Go to About section">
-          <div class="flip-card-inner">
-            <!-- FRONT SIDE: main photo -->
-            <div class="flip-card-front">
-              <img class="hero-photo" src="images/Me.jpg" alt="Portrait of Suzette Lacson">
-            </div>
-            <!-- BACK SIDE: second photo (file is ME2.png, not .jpg) -->
-            <div class="flip-card-back">
-              <img class="hero-photo" src="images/ME2.png" alt="Suzette Lacson, alternate photo">
-            </div>
-          </div>
-        </a>
+        <!-- Animated role typewriter (logic lives in script.js) -->
+        <p class="typewriter-line"><span id="typewriter"></span><span class="type-cursor">▌</span></p>
 
-        <h1 class="massive-text-line">LACSON</h1>
+        <!-- Professional subtitle bio -->
+        <p class="hero-tagline">
+          I'm Suzette Lacson — an aspiring developer passionately creating
+          automated solutions, QA systems, and hardware builds.
+        </p>
+
+        <!-- Dynamic scroll asset -->
+        <div class="scroll-indicator">
+          <!-- a self-pressing keycap (echoes the Skills keyboard);
+               clicking it springs the page down to About -->
+          <a class="scroll-key" href="#about">SCROLL ↓</a>
+          <!-- EDIT-ME: change this caption, or delete it -->
+          <span class="scroll-hint">press to see my story ✦</span>
+        </div>
       </div>
 
-      <!-- Minimalist deco divider -->
-      <div class="diamond-divider">✦</div>
+      <!-- ····· THE ID LANYARD ·····
+           The card moves FREELY: gravity + an elastic strap, simulated
+           in script.js §8. Grab and throw it; tap to flip it. -->
+      <div class="lanyard-wrap" id="lanyardWrap">
+        <div class="lanyard-arm" id="lanyardArm">
 
-      <!-- Animated role typewriter (logic lives in script.js) -->
-      <p class="typewriter-line"><span id="typewriter"></span><span class="type-cursor">▌</span></p>
+          <div class="lanyard-strap" id="lanyardStrap" aria-hidden="true">SUZETTE.DEV&nbsp;&nbsp;✦&nbsp;&nbsp;SUZETTE.DEV&nbsp;&nbsp;✦&nbsp;&nbsp;SUZETTE.DEV&nbsp;&nbsp;✦&nbsp;&nbsp;SUZETTE.DEV</div>
 
-      <!-- Professional subtitle bio -->
-      <p class="hero-tagline">
-        I'm Suzette Lacson — an aspiring developer passionately creating
-        automated solutions, QA systems, and hardware builds.
-      </p>
+          <div class="id-badge" id="idBadge" role="button" tabindex="0"
+               aria-label="Suzette's ID badge — grab and throw it, click or press Enter to flip it">
+            <!-- the metal clip rides on the card so it follows it anywhere -->
+            <div class="badge-clip" aria-hidden="true"></div>
+            <div class="badge-inner" id="badgeInner">
 
-      <!-- Dynamic scroll asset -->
-      <div class="scroll-indicator">
-        <span class="scroll-line"></span>
-        <span class="scroll-text">SCROLL</span>
+              <!-- FRONT of the ID -->
+              <div class="badge-face badge-front">
+                <span class="badge-slot" aria-hidden="true"></span>
+                <img class="badge-photo" src="images/Me.jpg" alt="" draggable="false">
+                <p class="badge-name">SUZETTE<br>LACSON</p>
+                <p class="badge-role">QA AUTOMATION · CpE STUDENT</p>
+                <div class="badge-barcode" aria-hidden="true"></div>
+                <p class="badge-id">ID NO. 2026-QA-001</p>
+              </div>
+
+              <!-- BACK of the ID (shows after a click/tap) -->
+              <div class="badge-face badge-back">
+                <span class="badge-slot" aria-hidden="true"></span>
+                <p class="badge-back-title">// PROPERTY OF SUZETTE.DEV</p>
+                <ul class="badge-facts">
+                  <li>BASED IN — LIPA CITY, PH</li>
+                  <li>FOCUS — QA · HARDWARE · APPS</li>
+                  <li>STATUS — OPEN TO INTERNSHIPS</li>
+                  <li>FUEL — COFFEE + BREADBOARDS</li>
+                </ul>
+                <div class="badge-qr" aria-hidden="true"></div>
+                <p class="badge-flip-hint">click to flip back ↻</p>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
       </div>
 
     </div>
@@ -134,8 +197,16 @@
       <!-- ····· scroll 1: the intro ····· -->
       <p class="about-chapter reveal">// first, a quick intro</p>
 
-      <!-- Developer Terminal UI -->
-      <div class="terminal reveal">
+      <div class="about-intro-grid">
+
+        <!-- Portrait wipes into view when scrolled to (CSS clip-path) -->
+        <div class="about-photo reveal">
+          <img src="images/ME2.png" alt="Suzette Lacson" draggable="false">
+          <span class="about-photo-chip">hello, it's me ✦</span>
+        </div>
+
+        <!-- Developer Terminal UI -->
+        <div class="terminal reveal">
         <div class="terminal-header">
           <div class="terminal-buttons">
             <span class="dot red"></span>
@@ -171,6 +242,8 @@
           </div>
         </div>
       </div>
+
+      </div><!-- /about-intro-grid -->
 
       <!-- ····· scroll 2: the education arc ····· -->
       <p class="about-chapter reveal">// then, where I studied — it wasn't a straight line</p>
@@ -215,7 +288,7 @@
   <section id="gallery" class="yellow-bg">
     <div class="wrap">
       <h2>02 / Gallery</h2>
-      <p class="section-sub">Pick a tab, then hover or tap a photo to expand it.</p>
+      <p class="section-sub">Pick a tab, then drag the ring — or use the arrows.</p>
 
       <!-- Category tabs: each button shows only the photos whose
            data-category matches its data-filter value.
@@ -227,69 +300,80 @@
         <button class="gallery-tab"        data-filter="certs"   aria-pressed="false">Certs</button>
       </div>
 
-      <div class="photo-strip reveal" id="photoStrip">
+      <!-- 3D rotating ring: photos stand on an invisible carousel ring.
+           Drag it sideways, use the arrows, or let it auto-spin.
+           The front photo shows in full color with its caption. -->
+      <div class="ring-stage reveal">
+        <button class="ring-btn" id="ringPrev" aria-label="Rotate to previous photo">‹</button>
 
-        <!-- ····· EVENTS ····· -->
-        <figure class="strip-item" data-category="events" data-num="001" data-label="PICK-A-ROO" tabindex="0">
-          <img src="images/interns.jpg" alt="Pick-A-Roo internship team">
-          <figcaption>Pick-A-Roo Internship</figcaption>
-        </figure>
+        <div class="ring-scene" id="ringScene">
+          <div class="ring" id="photoRing">
 
-        <figure class="strip-item" data-category="events" data-num="002" data-label="DAY ONE" tabindex="0">
-          <img src="images/internshipw_id.jpg" alt="First day of internship with company ID" loading="lazy">
-          <figcaption>Internship onboarding at AGILE Digital Ventures</figcaption>
-        </figure>
+            <!-- ····· EVENTS ····· -->
+            <figure class="ring-item" data-category="events" data-num="001">
+              <img src="images/interns.jpg" alt="Pick-A-Roo internship team" draggable="false">
+              <figcaption>Pick-A-Roo Internship</figcaption>
+            </figure>
 
-        <figure class="strip-item" data-category="events" data-num="003" data-label="PIC 2025" tabindex="0">
-          <img src="images/PIC_EVENT.jpg" alt="Philippine Innovation Conference 2025" loading="lazy">
-          <figcaption>Philippine Innovation Conference 2025 — Tatak Future</figcaption>
-        </figure>
+            <figure class="ring-item" data-category="events" data-num="002">
+              <img src="images/internshipw_id.jpg" alt="First day of internship with company ID" loading="lazy" draggable="false">
+              <figcaption>Internship onboarding at AGILE Digital Ventures</figcaption>
+            </figure>
 
-        <figure class="strip-item" data-category="events" data-num="004" data-label="TEAM EVENT" tabindex="0">
-          <img src="images/event_pickaroo.jpg" alt="Pick-A-Roo company event" loading="lazy">
-          <figcaption>Pick-A-Roo team event</figcaption>
-        </figure>
+            <figure class="ring-item" data-category="events" data-num="003">
+              <img src="images/PIC_EVENT.jpg" alt="Philippine Innovation Conference 2025" loading="lazy" draggable="false">
+              <figcaption>Philippine Innovation Conference 2025 — Tatak Future</figcaption>
+            </figure>
 
-        <!-- ····· ARDUINO PROJECTS ····· -->
-        <figure class="strip-item" data-category="arduino" data-num="001" data-label="ARDUINO DAYS" tabindex="0">
-          <img src="images/withArduino.jpg" alt="Working with Arduino" loading="lazy">
-          <figcaption>Working with Arduino activities</figcaption>
-        </figure>
+            <figure class="ring-item" data-category="events" data-num="004">
+              <img src="images/event_pickaroo.jpg" alt="Pick-A-Roo company event" loading="lazy" draggable="false">
+              <figcaption>Pick-A-Roo team event</figcaption>
+            </figure>
 
-        <figure class="strip-item" data-category="arduino" data-num="002" data-label="MAZEBOT" tabindex="0">
-          <img src="images/mzebot_bot.jpg" alt="MazeBot robot up close" loading="lazy">
-          <figcaption>MazeBot — the robot up close</figcaption>
-        </figure>
+            <!-- ····· ARDUINO PROJECTS ····· -->
+            <figure class="ring-item" data-category="arduino" data-num="001">
+              <img src="images/withArduino.jpg" alt="Working with Arduino" loading="lazy" draggable="false">
+              <figcaption>Working with Arduino activities</figcaption>
+            </figure>
 
-        <figure class="strip-item" data-category="arduino" data-num="003" data-label="THE MAZE" tabindex="0">
-          <img src="images/mzebot_maze.jpg" alt="MazeBot navigating the maze" loading="lazy">
-          <figcaption>MazeBot navigating the maze</figcaption>
-        </figure>
+            <figure class="ring-item" data-category="arduino" data-num="002">
+              <img src="images/mzebot_bot.jpg" alt="MazeBot robot up close" loading="lazy" draggable="false">
+              <figcaption>MazeBot — the robot up close</figcaption>
+            </figure>
 
-        <figure class="strip-item" data-category="arduino" data-num="004" data-label="ME + BOT" tabindex="0">
-          <img src="images/me_w_bot.jpg" alt="Suzette with the MazeBot" loading="lazy">
-          <figcaption>Me with our MazeBot</figcaption>
-        </figure>
+            <figure class="ring-item" data-category="arduino" data-num="003">
+              <img src="images/mzebot_maze.jpg" alt="MazeBot navigating the maze" loading="lazy" draggable="false">
+              <figcaption>MazeBot navigating the maze</figcaption>
+            </figure>
 
-        <figure class="strip-item" data-category="arduino" data-num="005" data-label="BOT SQUAD" tabindex="0">
-          <img src="images/mzebotgrouppic.jpg" alt="MazeBot team group picture" loading="lazy">
-          <figcaption>The MazeBot team</figcaption>
-        </figure>
+            <figure class="ring-item" data-category="arduino" data-num="004">
+              <img src="images/me_w_bot.jpg" alt="Suzette with the MazeBot" loading="lazy" draggable="false">
+              <figcaption>Me with our MazeBot</figcaption>
+            </figure>
 
-        <!-- ····· CERTS ·····
-             EDIT-ME: these two are placeholders — take photos/scans of
-             your CCNA certificates, drop them into images/, and replace
-             the .svg paths below. -->
-        <figure class="strip-item" data-category="certs" data-num="001" data-label="CCNA 1" tabindex="0">
-          <img src="images/activity1.svg" alt="Cisco CCNA 1 certificate" loading="lazy">
-          <figcaption>Cisco CCNA 1 — certificate photo coming soon</figcaption>
-        </figure>
+            <figure class="ring-item" data-category="arduino" data-num="005">
+              <img src="images/mzebotgrouppic.jpg" alt="MazeBot team group picture" loading="lazy" draggable="false">
+              <figcaption>The MazeBot team</figcaption>
+            </figure>
 
-        <figure class="strip-item" data-category="certs" data-num="002" data-label="CCNA 2" tabindex="0">
-          <img src="images/activity2.svg" alt="Cisco CCNA 2 certificate" loading="lazy">
-          <figcaption>Cisco CCNA 2 — certificate photo coming soon</figcaption>
-        </figure>
+            <!-- ····· CERTS ·····
+                 EDIT-ME: these two are placeholders — take photos/scans of
+                 your CCNA certificates, drop them into images/, and replace
+                 the .svg paths below. -->
+            <figure class="ring-item" data-category="certs" data-num="001">
+              <img src="images/activity1.svg" alt="Cisco CCNA 1 certificate" loading="lazy" draggable="false">
+              <figcaption>Cisco CCNA 1 — certificate photo coming soon</figcaption>
+            </figure>
 
+            <figure class="ring-item" data-category="certs" data-num="002">
+              <img src="images/activity2.svg" alt="Cisco CCNA 2 certificate" loading="lazy" draggable="false">
+              <figcaption>Cisco CCNA 2 — certificate photo coming soon</figcaption>
+            </figure>
+
+          </div>
+        </div>
+
+        <button class="ring-btn" id="ringNext" aria-label="Rotate to next photo">›</button>
       </div>
     </div>
   </section>
@@ -358,74 +442,71 @@
     </div>
   </div>
 
-  <!-- ==================== 04 / SKILLS ====================
-       Organized by category. Everything listed here is genuinely
-       in the CV or used in one of the projects above. -->
+  <!-- ==================== 04 / SKILLS (INTERACTIVE KEYBOARD) ====================
+       Every skill is a keycap — press one (click, tap, or Tab+Enter)
+       and the screen above reads out what it is. Keycap colors group
+       the categories (see the legend). Definitions live in script.js §9.
+       Everything here is genuinely in the CV or used in a project. -->
   <section id="skills" class="yellow-bg">
     <div class="wrap">
       <h2>04 / Skills</h2>
+      <p class="section-sub">(hint: press a key)</p>
 
-      <div class="skills-grid">
+      <!-- The "LCD screen" that reads out the pressed skill -->
+      <div class="skill-screen reveal">
+        <span class="screen-tag" id="screenTag">SKILLS.SYS</span>
+        <p class="screen-text" id="screenText">TAP A KEY TO READ ABOUT IT_</p>
+      </div>
 
-        <div class="skill-group reveal">
-          <h3 class="skill-title">Programming Languages</h3>
-          <div class="pills">
-            <span class="pill">Python</span>
-            <span class="pill">C++</span>
-            <span class="pill">JavaScript</span>
-            <span class="pill">SQL</span>
-          </div>
+      <!-- The keyboard: data-skill matches an entry in script.js §9 -->
+      <div class="keyboard reveal" id="skillKeyboard">
+
+        <!-- row 1 — languages (yellow caps) -->
+        <div class="kb-row">
+          <button class="keycap cap-lang" data-skill="python">PY</button>
+          <button class="keycap cap-lang" data-skill="cpp">C++</button>
+          <button class="keycap cap-lang" data-skill="js">JS</button>
+          <button class="keycap cap-lang" data-skill="sql">SQL</button>
+          <button class="keycap cap-lang" data-skill="html">HTML</button>
+          <button class="keycap cap-lang" data-skill="css">CSS</button>
         </div>
 
-        <div class="skill-group reveal">
-          <h3 class="skill-title">Frontend</h3>
-          <div class="pills">
-            <span class="pill">HTML</span>
-            <span class="pill">CSS</span>
-            <span class="pill">JavaScript</span>
-          </div>
+        <!-- row 2 — QA / automation / frameworks (white caps) -->
+        <div class="kb-row">
+          <button class="keycap" data-skill="maestro">MAES</button>
+          <button class="keycap" data-skill="android">DROID</button>
+          <button class="keycap" data-skill="gas">GAS</button>
+          <button class="keycap" data-skill="flask">FLASK</button>
         </div>
 
-        <div class="skill-group reveal">
-          <h3 class="skill-title">Frameworks &amp; Libraries</h3>
-          <div class="pills">
-            <span class="pill">Flask</span>
-          </div>
+        <!-- row 3 — tools (black caps) -->
+        <div class="kb-row">
+          <button class="keycap cap-tool" data-skill="git">GIT</button>
+          <button class="keycap cap-tool" data-skill="vscode">VSC</button>
+          <button class="keycap cap-tool" data-skill="arduino">ARD</button>
+          <button class="keycap cap-tool" data-skill="linux">LNX</button>
+          <button class="keycap cap-tool" data-skill="lm">LM</button>
+          <button class="keycap cap-tool" data-skill="ai">AI</button>
         </div>
 
-        <div class="skill-group reveal">
-          <h3 class="skill-title">QA &amp; Automation</h3>
-          <div class="pills">
-            <span class="pill">Maestro</span>
-            <span class="pill">Android Studio</span>
-            <span class="pill">Google Apps Script</span>
-          </div>
-        </div>
-
-        <div class="skill-group reveal">
-          <h3 class="skill-title">Tools &amp; Platforms</h3>
-          <div class="pills">
-            <span class="pill">Git / GitHub</span>
-            <span class="pill">VS Code</span>
-            <span class="pill">Arduino IDE</span>
-            <span class="pill">Oracle VM VirtualBox (Linux Mint)</span>
-            <span class="pill">LM Studio</span>
-            <span class="pill">AI tools (ChatGPT, Claude)</span>
-            <span class="pill">AutoCAD / Fusion 360</span>
-            <span class="pill">Tinkercad / Multisim</span>
-            <span class="pill">Trello / Notion</span>
-            <span class="pill">Microsoft Office / Google Workspace</span>
-          </div>
-        </div>
-
-        <div class="skill-group reveal">
-          <h3 class="skill-title">Certifications</h3>
-          <div class="pills">
-            <span class="pill hl">Cisco Certified Network Associate (CCNA) 1 &amp; 2</span>
-          </div>
+        <!-- row 4 — more tools + the cert (wide key) -->
+        <div class="kb-row">
+          <button class="keycap cap-tool" data-skill="cad">CAD</button>
+          <button class="keycap cap-tool" data-skill="sim">SIM</button>
+          <button class="keycap cap-tool" data-skill="pm">PLAN</button>
+          <button class="keycap cap-tool" data-skill="office">DOCS</button>
+          <button class="keycap cap-cert" data-skill="ccna">CCNA 1&amp;2</button>
         </div>
 
       </div>
+
+      <!-- color legend -->
+      <p class="kb-legend reveal">
+        <span class="legend-chip chip-lang">languages</span>
+        <span class="legend-chip chip-qa">qa · automation · frameworks</span>
+        <span class="legend-chip chip-tool">tools</span>
+        <span class="legend-chip chip-cert">certification</span>
+      </p>
     </div>
   </section>
 
