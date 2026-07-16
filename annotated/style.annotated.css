@@ -1,0 +1,1927 @@
+/* ============================================================================
+   style.annotated.css — STUDY COPY of style.css (fully commented)
+
+   THIS IS A DUPLICATE FOR LEARNING. The real site runs on ../style.css.
+   Every rule below is identical to the original — only comments were added.
+
+   ------------------------------------------------------------------------
+   WHAT CSS IS DOING HERE
+   HTML gives the page structure. CSS decides how all of it LOOKS: colours,
+   fonts, spacing, layout, and (importantly in this project) all animation.
+   JavaScript in this site almost never touches styles directly — it toggles a
+   class and lets CSS do the visuals. Remember that pattern; it's everywhere.
+
+   ------------------------------------------------------------------------
+   HOW TO READ ANY CSS RULE
+       .selector {          <- WHO to style (which elements)
+         property: value;   <- WHAT to change
+       }
+   Some selectors you'll meet below:
+       .thing            an element with class="thing"
+       #thing            the element with id="thing"       (ids beat classes)
+       .a.b              has BOTH classes a AND b          (no space!)
+       .a .b             a .b INSIDE an .a                 (space = descendant)
+       .a:hover          while the mouse is over it
+       .a::before        a fake element CSS invents and draws inside .a
+       .a:nth-child(2)   the 2nd child
+
+   ------------------------------------------------------------------------
+   THE 3-COLOUR PALETTE: white (dominant), black, one yellow accent.
+   Constraint is a design choice — few colours, used consistently, looks
+   intentional. That's a real answer if someone asks about the design.
+
+   SECTIONS:
+     1. Design tokens        7. Projects + modal
+     2. Global defaults      8. Skills
+     3. Capsule navbar       9. Experience timeline
+     4. Hero                10. Footer / contact
+     5. About + education   11. Scroll-reveal animations
+     6. Gallery carousel    12. Mobile tuning
+============================================================================ */
+
+
+/* ============================================================================
+   1. DESIGN TOKENS
+   "Tokens" = the design decisions stored once as named variables, so the rest
+   of the file refers to the NAME instead of repeating the value.
+============================================================================ */
+:root {
+  /* :root = the <html> element — the top of the document. Variables declared
+     here are visible to EVERY rule in the file (they inherit downward).
+     A variable must start with two dashes. You read it back with var(--name).
+
+     THE PAYOFF: --yellow is used ~30 times below. Change this ONE line and the
+     entire site re-themes. That is the single best thing to demo if someone
+     asks what CSS variables are for. */
+  --yellow: #E8F24C;      /* the accent. #E8F24C is hex: RR=E8 GG=F2 BB=4C */
+  --black:  #111111;      /* not pure #000 — slightly soft black is easier on the eyes */
+  --white:  #FFFFFF;      /* the dominant background */
+  --mono:   'JetBrains Mono', monospace;  /* headings/code. "monospace" is the fallback */
+  --sans:   'Inter', sans-serif;          /* body text. Fallback if Inter fails to load */
+  /* Font stacks are read left to right: try Inter, and if it isn't available,
+     use whatever the system's default sans-serif is. Always end with a generic. */
+}
+
+
+/* ============================================================================
+   2. GLOBAL DEFAULTS — baseline rules that apply site-wide
+============================================================================ */
+
+*, *::before, *::after {
+  /* "*" = the universal selector: EVERY element. Plus their pseudo-elements. */
+  box-sizing: border-box;
+  /* THE MOST IMPORTANT LINE IN ANY STYLESHEET. It changes what "width" means.
+       content-box (the browser default): width = content ONLY. Padding and
+         border get ADDED on top. So width:100px + padding:20px = 140px wide.
+         This is where beginner layouts break.
+       border-box (this): width = the FINAL outside size, padding and border
+         included. width:100px really means 100px.
+     Setting it on * makes every element behave sanely. Standard practice. */
+}
+
+html, body {
+  margin: 0;              /* browsers add ~8px of default body margin — remove it */
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;     /* kill horizontal scrolling. The giant hero name and the
+                             off-centre shadows can poke past the screen edge; this
+                             clips them instead of letting the page scroll sideways.
+                             (Use with care — it can also hide a real layout bug.) */
+  background-color: var(--white);   /* var() reads the token from :root above */
+  color: var(--black);              /* default TEXT colour, inherited by everything */
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Makes every #anchor jump glide instead of teleport. ONE LINE — no JS scroll
+     library. It's switched off for reduced-motion users in section 11. */
+}
+
+body {
+  font-family: var(--sans);   /* Inter everywhere by default... */
+  line-height: 1.6;
+  /* Vertical space between lines. Unitless 1.6 = "1.6x this element's own font
+     size". Always prefer unitless here: it recalculates per element, whereas
+     line-height: 25px would be inherited literally and cramp big text. */
+}
+
+h1, h2, h3 {
+  font-family: var(--mono);   /* ...except headings, which use the mono font. That
+                                 mono-heading + sans-body pairing is the whole
+                                 "developer" look of the site. */
+  font-weight: 900;           /* 900 = the heaviest weight. Remember the Google Fonts
+                                 URL in the HTML only downloaded 500/700/800/900 — if
+                                 you ask for a weight you didn't download, the browser
+                                 fakes it and it looks worse. */
+  margin: 0;                  /* browsers give headings big default margins; reset and
+                                 control spacing deliberately below */
+}
+
+h2 {
+  font-size: 2rem;
+  /* rem = "root em" = a multiple of the browser's base font size (normally 16px),
+     so 2rem = 32px. Why rem and not px: if a visitor increases their browser's
+     font size for readability, rem scales and px does not. Better accessibility. */
+  margin-bottom: 24px;
+}
+
+img {
+  max-width: 100%;   /* RESPONSIVE IMAGE SAFETY NET: an image can never be wider than
+                        its container, so a huge photo shrinks instead of breaking
+                        the layout. Worth applying in every project. */
+  display: block;    /* images are inline by default, which leaves a mysterious ~4px
+                        gap underneath (space reserved for the "text baseline").
+                        display:block removes it. Classic beginner gotcha. */
+}
+
+.wrap {
+  max-width: 1100px;   /* the reading-width limiter. Text lines never get so long
+                          they're painful to read on a big monitor. */
+  margin: 0 auto;      /* 0 top/bottom, auto left/right. "auto" splits the leftover
+                          space equally on both sides = HORIZONTAL CENTRING. */
+  padding: 0 24px;     /* breathing room so text never touches a phone's edge */
+  /* Reused on every section — one class, consistent width everywhere. */
+}
+
+section {
+  padding: 90px 0;          /* 90px top and bottom, 0 left and right. Shorthand:
+                               2 values = "vertical horizontal". This one line is
+                               what gives every section its generous spacing. */
+  background: var(--white);
+  width: 100%;
+}
+
+.yellow-bg {
+  /* A reusable modifier: put it on a <section> to make it yellow. Used on Gallery
+     and Skills so the page alternates white/yellow instead of one long white wall. */
+  background: var(--yellow);
+  border-top: 1px solid var(--black);
+  border-bottom: 1px solid var(--black);   /* crisp black rules top and bottom */
+}
+
+.section-sub {
+  margin: -12px 0 28px;   /* NEGATIVE margin pulls this subtitle UP, closer to the h2
+                             above it, tightening the pair. Negative margins are a
+                             legitimate tool for exactly this. */
+  font-size: 0.95rem;
+}
+
+a:focus-visible,
+button:focus-visible {
+  /* :focus-visible = focused via KEYBOARD (Tab), not via mouse click. This is the
+     modern fix to an old accessibility problem: developers used to delete focus
+     outlines because they looked ugly on mouse clicks, which stranded keyboard
+     users with no way to see where they were. :focus-visible shows the ring only
+     when it's actually needed. Never write `outline: none` without a replacement. */
+  outline: 3px solid var(--black);
+  outline-offset: 2px;   /* pushes the ring 2px away so it doesn't hug the element */
+}
+
+
+/* ============================================================================
+   3. FLOATING CAPSULE NAVBAR
+   Desktop: brand + inline links; the active link wears a yellow pill.
+   Mobile (<=880px): links hide, the ••• button opens the dropdown card.
+============================================================================ */
+.nav-dock {
+  position: fixed;   /* FIXED = pinned to the SCREEN, not the page. It stays put while
+                        you scroll and it no longer takes up space in the layout flow
+                        (which is why the hero has big top padding — to sit clear of it). */
+  top: 24px;
+  left: 50%;         /* moves the LEFT EDGE to the middle of the screen — not centred yet! */
+  transform: translateX(-50%);
+  /* THE CENTRING TRICK, and it's worth understanding properly:
+     left:50% puts the element's left edge at the halfway mark, so it sits too far
+     right by half its own width. translateX(-50%) then shifts it back by 50% OF
+     ITSELF. Percentages in transform refer to the element's own size, while
+     percentages in `left` refer to the parent's — that difference is what makes
+     the pair work. This centres an element of UNKNOWN width, which margin:auto
+     can't do for a fixed/absolute element. */
+  width: max-content;              /* be exactly as wide as the content needs */
+  max-width: calc(100% - 32px);    /* ...but never wider than the screen minus 32px.
+                                      calc() does live maths and can mix units
+                                      (% and px), which is its real superpower. */
+  background: var(--black);
+  border-radius: 50px;             /* a number far bigger than half the height, which
+                                      just means "fully rounded ends" = capsule */
+  padding: 8px 10px;
+  z-index: 9999;                   /* STACKING ORDER: higher = drawn on top. This keeps
+                                      the nav above all page content. (The modal uses
+                                      10000 so it can cover even the nav.) */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  /* box-shadow: x-offset y-offset blur colour.
+     0 across, 10px down, 30px of blur = a soft shadow below, so the capsule looks
+     like it floats. rgba() = red,green,blue,ALPHA — 0.18 = 18% opaque. */
+}
+
+.nav-dock-inner {
+  display: flex;         /* FLEXBOX: lay the children out in a row. */
+  align-items: center;   /* centre them vertically against each other */
+  gap: 20px;             /* 20px between children. `gap` beats putting margins on
+                            children — no leftover margin on the last one. */
+}
+
+.nav-brand {
+  color: var(--white);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;   /* removes the default link underline */
+  padding-left: 14px;
+  white-space: nowrap;     /* never break "suzette.dev" onto two lines */
+}
+
+.nav-links {
+  list-style: none;   /* remove the <ul> bullet points */
+  display: flex;      /* lay the <li> items in a row instead of stacking them */
+  align-items: center;
+  gap: 2px;
+  margin: 0;          /* <ul> has default margin AND padding — both must be reset,
+                         and forgetting the padding is why lists often look indented */
+  padding: 0;
+}
+
+.nav-link {
+  display: block;     /* <a> is inline by default, so padding wouldn't push other
+                         things away properly. block makes the whole pill clickable. */
+  color: var(--white);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 50px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  /* TRANSITION = "any time these properties change, animate over 0.2s instead of
+     snapping". Read it as: property, duration, easing curve.
+     KEY IDEA: the transition lives on the NORMAL state, not inside :hover. Putting
+     it here means it animates BOTH ways — in on hover and back out on un-hover.
+     Note it lists specific properties rather than `all`: cheaper, and it avoids
+     accidentally animating something you didn't mean to. */
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.14);   /* a faint white wash */
+}
+
+.nav-link.active {
+  /* TWO classes with NO SPACE = the same element has BOTH .nav-link AND .active.
+     script.js's scrollspy adds .active to whichever link matches the section on
+     screen — and this rule is the entire visual result. JS moves a class; CSS
+     draws the pill. */
+  background: var(--yellow);
+  color: var(--black);
+}
+
+.nav-toggle-btn {
+  display: none;       /* HIDDEN ON DESKTOP. Section 12's media query flips it to
+                          `display: flex` under 880px. Note the pair: this button
+                          appears exactly when .nav-links disappears. */
+  background: #EAEAEA; /* a raw hex, not a token — a one-off grey */
+  border: none;        /* buttons come with an ugly default border; remove it */
+  border-radius: 50px;
+  cursor: pointer;     /* show the hand cursor. <button> doesn't do this by default,
+                          unlike <a> — an easy detail to forget. */
+  align-items: center;
+  gap: 3px;
+  padding: 10px 18px;
+  transition: background-color 0.2s ease;
+}
+
+.nav-toggle-btn:hover {
+  background: var(--white);
+}
+
+.nav-toggle-btn span {
+  /* ".nav-toggle-btn span" with a SPACE = any span INSIDE the button (the 3 dots). */
+  font-size: 1.1rem;
+  color: var(--black);
+  line-height: 1;   /* strips the extra leading around the dots so they sit tight */
+}
+
+/* --- Expanded dropdown card (the mobile menu) --- */
+.nav-dropdown {
+  display: none;          /* THE DEFAULT: not rendered at all. */
+  position: absolute;     /* ABSOLUTE = positioned against the nearest ancestor that
+                             is itself positioned — here .nav-dock (position: fixed
+                             counts). So this card pins to the capsule, not the page. */
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-width: 250px;
+  background: var(--black);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  animation: cardSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  /* ANIMATION vs TRANSITION — the difference is worth knowing:
+       transition = animate a change between two states (needs a trigger like :hover)
+       animation  = play a defined @keyframes sequence, can run on its own
+     Reading this line: run the keyframes named cardSlideIn, over 0.25s, with a
+     custom easing curve, and `forwards` = hold the final frame when it ends
+     (without `forwards` it would snap back to the start values). */
+}
+
+.nav-dropdown.show {
+  display: block;
+  /* script.js adds .show, and this single line reveals the menu.
+     Same JS-toggles-a-class pattern as everywhere else in this project. */
+}
+
+@keyframes cardSlideIn {
+  /* @keyframes = a named, reusable animation recipe. from/to are shorthand for
+     0% and 100%; you could also list 0%, 50%, 100% for multi-step animations. */
+  from { opacity: 0; transform: scale(0.96); }   /* start: invisible, 4% too small */
+  to   { opacity: 1; transform: scale(1); }      /* end: visible, full size */
+  /* The result is a subtle "pop" rather than an abrupt appearance. */
+}
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* space-between = first child hard left, last child hard right, gap in the middle.
+     The classic way to build a header row. No margins or floats needed. */
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+
+.dropdown-brand {
+  color: var(--white);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.dropdown-close-btn {
+  background: var(--white);
+  border: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;    /* equal width + height + 50% radius = a perfect circle */
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;            /* flex + these two centring lines is the most reliable */
+  align-items: center;      /* way to centre one thing inside another, both axes.    */
+  justify-content: center;  /* Worth memorising — you'll use it constantly.          */
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-close-btn:hover {
+  background: var(--yellow);
+}
+
+.dropdown-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;   /* flex defaults to a ROW; this stacks them vertically */
+  gap: 12px;
+}
+
+.dropdown-pill {
+  display: block;
+  background: var(--white);
+  color: var(--black);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 180px;
+  transition: background-color 0.2s, transform 0.15s;
+  /* Two properties, two different durations — the slide is slightly quicker than
+     the colour fade. Small touches like that are what make motion feel considered. */
+}
+
+.dropdown-pill:hover,
+.dropdown-pill.active {
+  /* A COMMA = "or". This applies to hovered pills AND active ones — one rule
+     serving two states instead of duplicating the declarations. */
+  background: var(--yellow);
+  transform: translateX(4px);   /* nudge 4px right — a tiny "you're here" motion */
+}
+
+
+/* ============================================================================
+   4. HERO — the full-screen opening
+============================================================================ */
+.hero {
+  background: var(--white);
+  min-height: 100vh;
+  /* vh = "viewport height", so 100vh = exactly the height of the browser window.
+     MIN-height, not height: it fills the screen but is still allowed to grow if
+     the content needs more room. Using height:100vh here would clip the content
+     on short screens — a common bug. */
+  display: flex;
+  align-items: center;    /* vertically centre the content in that full screen */
+  position: relative;
+  padding: 120px 0 60px;  /* 3 values = top / horizontal / bottom. The big 120px top
+                             keeps content clear of the fixed nav floating above. */
+}
+
+.hero-centerpiece {
+  display: flex;
+  flex-direction: column;    /* stack: kicker, name, divider, typewriter, tagline */
+  align-items: center;       /* in a COLUMN, align-items controls the HORIZONTAL axis */
+  justify-content: center;   /* ...and justify-content controls the VERTICAL one.
+                                They swap meaning with flex-direction — the single
+                                most confusing thing about flexbox. Rule of thumb:
+                                justify-content follows the direction, align-items
+                                works across it. */
+  width: 100%;
+  text-align: center;
+}
+
+.hero-kicker {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 3px;   /* spreads the letters apart. Small + bold + wide tracking
+                            is the standard "label" typographic treatment. */
+  margin: 0 0 26px;
+}
+
+.massive-name-container {
+  position: relative;
+  /* THE ANCHOR. `position: relative` barely changes this element itself, but it
+     makes it the reference point for any absolutely-positioned child. The photo
+     capsule below is `position: absolute`, so it centres on THIS box rather than
+     on the page. Remove this one word and the photo flies off. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.massive-text-line {
+  font-size: clamp(4.5rem, 17vw, 13rem);
+  /* clamp(MINIMUM, PREFERRED, MAXIMUM) — fluid typography, and one of the most
+     useful modern CSS functions:
+       4.5rem = never smaller than this (readable on a phone)
+       17vw   = normally 17% of the screen width, so it scales continuously
+       13rem  = never bigger than this (doesn't get absurd on a 4K monitor)
+     This replaces what used to need three or four media queries. */
+  line-height: 0.85;   /* BELOW 1 — deliberately tighter than the text is tall, so
+                          SUZETTE and LACSON stack tightly. Only do this on huge
+                          display text; it would make body text unreadable. */
+  font-weight: 900;
+  color: var(--yellow);
+  letter-spacing: -2px;   /* NEGATIVE tracking pulls the letters together. Big type
+                             looks loose by default, so tightening is standard. */
+  text-transform: uppercase;
+  margin: 0;
+  user-select: none;      /* can't be selected/highlighted — it's art, not content */
+  -webkit-text-stroke: 2px var(--black);
+  /* Draws a 2px black outline around each letter. THE REASON IT'S HERE: yellow
+     text on a white background is nearly invisible (terrible contrast). The
+     outline keeps the yellow look while making the name readable — a genuine
+     accessibility fix, not decoration.
+     The -webkit- prefix means it started as a Chrome/Safari-only feature; it now
+     works in all modern browsers but the prefixed name is still the way to write it. */
+}
+
+.oval-photo-frame {
+  width: clamp(100px, 15vw, 160px);    /* clamp again, this time for SIZE not text — */
+  height: clamp(140px, 21vw, 220px);   /* so the photo scales with the name it overlaps */
+  border-radius: 120px;
+  border: 1px solid var(--black);
+  overflow: hidden;   /* CRITICAL: clips the square photo to the capsule shape.
+                         Without it the image ignores border-radius and pokes out
+                         at the corners. border-radius alone never clips children. */
+  position: absolute;   /* lifted out of the flow and positioned against the
+                           .massive-name-container (which is `relative`) */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* The same centring trick as the navbar, but now on BOTH axes: top/left 50%
+     put the top-left CORNER at the centre, then translate pulls it back by half
+     its own width and height. This is the standard "perfectly centre anything"
+     recipe — very much worth memorising. */
+  z-index: 10;        /* sit on top of the giant name text */
+  background: var(--white);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  perspective: 1000px;
+  /* THE 3D SETUP. perspective = how far away the "camera" is. Without it, the
+     rotateY flip below would look like a flat squish; with it, the near edge
+     grows and the far edge shrinks and it reads as real depth. A smaller number
+     = a more extreme, fish-eye effect. It must sit on the PARENT of the thing
+     that rotates — which is why it's here and not on .flip-card-inner. */
+}
+
+.hero-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* object-fit: cover = fill the box completely, cropping the overflow, WITHOUT
+     squashing the image. Same idea as background-size: cover, but for a real
+     <img>. The alternative, `contain`, fits the whole image and leaves gaps.
+     This one property is why photos of different shapes all look tidy here. */
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s ease;   /* the flip takes 0.7s, and because the
+                                        transition is on the base state it plays
+                                        in reverse when you un-hover */
+  transform-style: preserve-3d;
+  /* Tells the browser to keep this element's children in real 3D space instead of
+     flattening them. Without it, the back face would never hide correctly and the
+     whole flip collapses. perspective (on the parent) + preserve-3d (here) +
+     backface-visibility (below) are a three-part set — all needed. */
+}
+
+.oval-photo-frame:hover .flip-card-inner,
+.oval-photo-frame:focus-visible .flip-card-inner {
+  /* NOTE THE SPACE: "when the FRAME is hovered, style the INNER element inside it."
+     Hovering a parent to animate a child is the standard CSS way to do this.
+     The :focus-visible half means the flip also happens for KEYBOARD users who
+     tab onto the photo — accessibility parity with the mouse, one extra selector. */
+  transform: rotateY(180deg);   /* spin half a turn around the vertical axis */
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  inset: 0;   /* modern shorthand for top:0; right:0; bottom:0; left:0 — i.e.
+                 "stretch to fill the parent completely". This is what stacks the
+                 two photos exactly on top of each other. */
+  backface-visibility: hidden;
+  /* "When this face is turned away from the camera, don't draw it." Without this
+     you'd see the mirror-image of the front photo showing through the back. */
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+  /* The back starts PRE-ROTATED 180deg (facing away, hidden). When the parent then
+     rotates 180deg, this face's total becomes 360deg = facing you, while the front
+     lands at 180deg = facing away and hidden. That's the whole flip mechanism. */
+}
+
+.diamond-divider {
+  font-size: 2rem;
+  color: var(--yellow);
+  margin: 40px 0 20px;
+  -webkit-text-stroke: 1px var(--black);   /* same readability outline as the name */
+}
+
+.typewriter-line {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  margin: 0 0 14px;
+  min-height: 1.6em;
+  /* SUBTLE BUT IMPORTANT. The typewriter empties this line between phrases. With
+     no min-height it would briefly collapse to zero height and everything below
+     would JUMP up and back on every cycle. Reserving one line's worth of height
+     keeps the layout still. em = "relative to THIS element's font size", which is
+     why it's used here instead of rem — it tracks the clamp() above automatically. */
+}
+
+.type-cursor {
+  color: var(--yellow);
+  -webkit-text-stroke: 1px var(--black);
+  animation: blink 1s steps(1) infinite;
+  /* THE CURSOR IS BLINKED BY CSS, NOT JAVASCRIPT — the JS only types letters.
+       1s        = one blink per second
+       steps(1)  = jump instantly between states instead of easing. That's what
+                   makes it BLINK rather than fade — an eased cursor would pulse.
+       infinite  = never stop */
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+  /* Only ONE keyframe is listed. The browser fills in the missing 0% and 100%
+     from the element's current values (opacity: 1). So: visible -> invisible at
+     halfway -> visible. Half a second on, half a second off. */
+}
+
+.hero-tagline {
+  font-family: var(--sans);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: var(--black);
+  max-width: 620px;   /* caps the line length. ~60-75 characters per line is the
+                         readability sweet spot; unlimited-width text is tiring. */
+  line-height: 1.6;
+  font-weight: 500;
+  margin: 0 auto;     /* auto side margins centre the block itself */
+}
+
+.scroll-indicator {
+  margin-top: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.scroll-line {
+  width: 2px;
+  height: 35px;
+  background: var(--black);
+  /* Recall this is an EMPTY <span> in the HTML. These three lines are what make it
+     a visible line at all — width, height and a background colour. */
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { transform: scaleY(1);   opacity: 1; }    /* start AND end: full */
+  50%      { transform: scaleY(0.5); opacity: 0.4; }  /* midpoint: half-height, faded */
+  /* Listing 0% and 100% identically is what makes it loop SEAMLESSLY — the end
+     state matches the start, so `infinite` has no visible jump. scaleY squashes
+     vertically, so the line breathes. */
+}
+
+.scroll-text {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+
+/* ============================================================================
+   5. ABOUT + EDUCATION
+============================================================================ */
+
+.about-chapter {
+  /* The "// first, a quick intro" lines — styled to look like code comments,
+     which ties the section to the terminal below it. */
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--black);
+  opacity: 0.55;   /* 55% opaque = grey WITHOUT choosing a new grey. Since real code
+                      comments are dimmed, this reinforces the joke. */
+  margin: 48px 0 18px;
+}
+
+.about-chapter:first-of-type {
+  margin-top: 0;
+  /* :first-of-type = only the FIRST .about-chapter. It kills the 48px top margin on
+     the first one (which doesn't need separating from anything) while keeping it on
+     the second. Otherwise you'd need an extra class on one of them. */
+}
+
+/* --- the fake developer terminal --- */
+.terminal {
+  background: #1a1a1a;              /* one-off dark grey, deliberately not --black */
+  border: 3px solid var(--black);
+  border-radius: 12px;
+  overflow: hidden;   /* clips the header's square corners to the rounded outline */
+  box-shadow: 8px 8px 0 var(--yellow);
+  /* A HARD OFFSET SHADOW: 8px right, 8px down, ZERO blur. Zero blur is what makes
+     it a flat graphic slab rather than a soft glow — the neo-brutalist look used
+     consistently across this site (cards, pills, modal all do the same). */
+}
+
+.terminal-header {
+  background: #2d2d2d;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+}
+
+.terminal-buttons {
+  display: flex;
+  gap: 8px;
+  margin-right: 16px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;   /* square + 50% = circle */
+  display: block;       /* spans are inline; width/height are IGNORED on inline
+                           elements, so without this the dots would not exist */
+}
+
+/* Three tiny rules, one per traffic light. The colours are hard-coded because
+   they're imitating macOS exactly — they're not part of this site's palette. */
+.dot.red    { background: #ff5f56; }
+.dot.yellow { background: #ffbd2e; }
+.dot.green  { background: #27c93f; }
+/* Careful: `.dot.yellow` (a class named yellow) has nothing to do with the
+   `--yellow` token. Same word, unrelated things. */
+
+.terminal-title {
+  color: #999;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+.terminal-tabs {
+  display: flex;
+  gap: 4px;
+  background: #2d2d2d;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--black);
+}
+
+.tab-btn {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  padding: 9px 14px;
+  background: transparent;
+  color: #aaa;                          /* inactive tabs are dim grey */
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  /* A TRANSPARENT border, not "no border". Why: the border still occupies 2px, so
+     when .active colours it in, nothing SHIFTS. If you added the border only on
+     .active, every tab would jiggle 2px when clicked. Reserving invisible space is
+     a standard fix for that class of bug. */
+}
+
+.tab-btn.active {
+  color: var(--yellow);
+  border-bottom-color: var(--yellow);   /* the transparent border becomes visible */
+}
+
+.tab-content { display: none; }          /* every tab panel is hidden... */
+.tab-content.active { display: block; }  /* ...except the one JS marked active.
+                                            switchTab() in script.js does nothing but
+                                            move that class between panels. */
+
+.terminal-body {
+  padding: 20px;
+  color: #f8f8f2;         /* off-white, the standard "code editor" text colour */
+  font-family: var(--mono);
+}
+
+.terminal-body pre {
+  margin: 0;
+  white-space: pre-wrap;
+  /* <pre> normally refuses to wrap, so a long line would force a horizontal
+     scrollbar on a phone. `pre-wrap` = keep my line breaks and spacing, but DO
+     wrap if you run out of room. The best of both. */
+  font-size: 0.88rem;
+}
+
+.key    { color: var(--yellow); }   /* the fake "syntax highlighting" — just two */
+.string { color: #8be98b; }         /* colours applied to hand-written spans.
+                                       No highlighting library anywhere. */
+
+.tab-content h3 {
+  color: var(--yellow);
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.tab-content p {
+  color: #ddd;
+  font-family: var(--sans);   /* body text switches back to Inter INSIDE the mono
+                                 terminal — real prose is easier to read in a sans */
+  font-size: 0.95rem;
+}
+
+.tab-content p + p { margin-top: 10px; }
+/* The "+" is the ADJACENT SIBLING combinator: a <p> that comes IMMEDIATELY AFTER
+   another <p>. So the first paragraph gets no top margin and every following one
+   does — spacing BETWEEN paragraphs without a stray gap above the first. */
+
+/* --- education cards --- */
+.edu-track {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 720px;
+}
+
+.edu-card:nth-child(even) {
+  margin-left: 56px;
+  /* THE ZIG-ZAG. :nth-child(even) selects the 2nd, 4th, 6th... card automatically,
+     so CSS does the counting and you never touch the HTML. Also accepts
+     :nth-child(odd) or formulas like :nth-child(3n) for every third.
+     (Section 12 sets this back to 0 on small screens so the zig-zag flattens.) */
+}
+
+.edu-card {
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  padding: 22px 24px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;   /* animates the hover
+                                                                below, both ways */
+}
+
+.edu-card:hover {
+  transform: translateY(-4px);   /* lift 4px (negative Y = up) */
+  box-shadow: 6px 6px 0 var(--yellow), 6px 6px 0 2px var(--black);
+  /* TWO shadows in one property, comma-separated — they stack, first one on top.
+     The 4th number on the second shadow (2px) is SPREAD: grow the shadow 2px in
+     every direction. So you get a yellow slab with a black outline around it,
+     built from nothing but shadows. Layering shadows like this is a neat trick. */
+}
+
+.edu-years {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: var(--yellow);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 2px 8px;
+  display: inline-block;
+  /* inline-block = the golden middle: sits inline with text (doesn't force a line
+     break like block), but DOES accept width/height/padding (unlike inline). It's
+     what makes the chip hug its text instead of stretching the full row. */
+  margin-bottom: 10px;
+}
+
+.edu-card h3 {
+  font-size: 1.05rem;   /* overrides the global h2/h3 sizing for this context.
+                           Later + more specific rules win — that's the cascade. */
+}
+
+.edu-degree {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: block;    /* force onto its own line */
+  margin: 4px 0 10px;
+  opacity: 0.7;      /* de-emphasise without picking a new colour */
+}
+
+.edu-card p {
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+
+/* ============================================================================
+   6. GALLERY PHOTO STRIP — the flex:1 vs flex:3.5 expanding trick
+
+   THE WHOLE MECHANISM IN THREE LINES:
+     .strip-item        { flex: 1;   }   every photo takes an equal share
+     .strip-item.active { flex: 3.5; }   the active one takes 3.5 shares
+     .strip-item        { transition: flex ...; }   animate between the two
+   JavaScript's ONLY job is moving the .active class. If someone asks "what's
+   the hardest thing on your site?", this is the one to explain.
+============================================================================ */
+.gallery-tabs {
+  display: flex;
+  flex-wrap: wrap;   /* if the tabs don't fit on one line, let them WRAP to the next
+                        instead of squashing. Flex items refuse to wrap by default —
+                        forgetting this is a very common mobile bug. */
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.gallery-tab {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 50px;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+              background-color 0.15s ease, color 0.15s ease;
+  /* Four properties listed explicitly. It's longer than `transition: all` but it's
+     faster and more predictable — `all` animates things you never intended. */
+}
+
+.gallery-tab:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 3px 0 var(--black);   /* the same flat offset-slab language again */
+}
+
+.gallery-tab.active {
+  background: var(--black);
+  color: var(--yellow);   /* inverted = unmistakably "this tab is selected" */
+}
+
+.photo-strip {
+  display: flex;    /* ALL photos in ONE row — the foundation of the whole effect */
+  gap: 12px;
+  height: 560px;    /* a FIXED tall row, so portrait photos fit naturally. Because
+                       the height is fixed, only the WIDTHS change when expanding —
+                       which is what makes the animation smooth. */
+}
+
+.strip-item.hidden {
+  display: none;
+  /* Photos outside the chosen tab. `display: none` removes them from the layout
+     entirely, so the remaining flex items automatically redistribute the row —
+     the strip re-balances itself with zero extra code. script.js just toggles
+     this class based on data-category. */
+}
+
+.strip-item {
+  position: relative;   /* the anchor for the ::before chip, ::after label and the
+                           absolutely-positioned figcaption */
+  flex: 1;
+  /* flex: 1 = "take an equal share of the leftover space". Every photo gets 1,
+     so 5 photos each get 1/5 of the row. This is the collapsed sliver state. */
+  margin: 0;            /* <figure> ships with a big default margin — reset it */
+  overflow: hidden;     /* clip the scaled-up image inside the rounded box */
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  background: var(--white);
+  cursor: pointer;
+  transition: flex 0.55s cubic-bezier(0.25, 0.8, 0.25, 1),
+              box-shadow 0.3s ease;
+  /* TRANSITIONING `flex` IS THE ENTIRE ANIMATION. Without this line the photo
+     would still expand — instantly, with no glide.
+     cubic-bezier(...) = a custom easing curve. The 4 numbers are two control
+     points; this one starts fast and settles gently, which feels natural. Named
+     easings (ease, linear, ease-in-out) are just common curves like this one. */
+}
+
+.strip-item.active {
+  flex: 3.5;   /* 3.5 shares vs everyone else's 1 = the expanded photo. Raise the
+                  number for a wider expansion. This is THE line. */
+  box-shadow: 8px 8px 0 var(--black);
+}
+
+.strip-item:focus-visible {
+  outline: 3px solid var(--black);   /* keyboard focus ring — this is what makes the
+                                        tabindex="0" in the HTML actually useful */
+  outline-offset: 2px;
+}
+
+.strip-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;         /* crop to fill, never squash */
+  filter: grayscale(65%);    /* collapsed slivers are 65% desaturated... */
+  transform: scale(1.12);    /* ...and zoomed in 12% (overflow:hidden crops the rest) */
+  transition: filter 0.45s ease, transform 0.6s ease;
+}
+
+.strip-item.active img,
+.strip-item:hover img {
+  filter: none;          /* expanding restores FULL COLOUR — the colour returning is */
+  transform: scale(1);   /* what makes the active photo feel genuinely "switched on", */
+                         /* and the zoom-out adds a subtle settling motion.           */
+}
+
+.strip-item::before {
+  /* ::before = a PSEUDO-ELEMENT: a fake element CSS invents and draws inside this
+     one. It doesn't exist in the HTML at all. This is the little number chip. */
+  content: attr(data-num);
+  /* THE CLEVER PART: attr() pulls the value of the HTML attribute data-num="001"
+     and prints it as text. So the chip's text comes straight from the HTML with
+     no extra markup and no JS. Add a photo, set data-num, the chip appears.
+     NOTE: `content` is REQUIRED on every pseudo-element — even if it's empty
+     (content: "") — or nothing renders at all. #1 pseudo-element gotcha. */
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;   /* above the photo */
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--white);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
+.strip-item::after {
+  /* The second pseudo-element — the vertical "book spine" label. Each element gets
+     exactly one ::before and one ::after, and this file uses both here. */
+  content: attr(data-label);   /* again read straight from the HTML attribute */
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+  /* Two transforms in one value, applied RIGHT TO LEFT: rotate first, then shift.
+     Order matters — swapping them gives a different result, because each transform
+     also moves the element's coordinate system. */
+  writing-mode: vertical-rl;
+  /* Rotates the TEXT FLOW itself so it reads top-to-bottom. Combined with the
+     rotate(180deg) above it ends up running bottom-to-top, like a book spine.
+     (writing-mode exists for Japanese/Chinese vertical text; this is a creative
+     reuse of it.) */
+  z-index: 2;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  background: var(--yellow);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 10px 4px;
+  white-space: nowrap;
+  transition: opacity 0.25s ease;
+}
+
+.strip-item.active::after {
+  opacity: 0;   /* the spine label fades out once the photo is expanded — the full
+                   caption below takes over. Note: opacity:0 not display:none,
+                   because display can't be animated but opacity can. */
+}
+
+.strip-item figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;    /* left:0 + right:0 = stretch full width */
+  background: var(--white);
+  border-top: 2px solid var(--black);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 12px 16px;
+  white-space: nowrap;      /* one line only... */
+  overflow: hidden;         /* ...clip what doesn't fit... */
+  text-overflow: ellipsis;  /* ...and end it with "..." — these THREE always go
+                               together; none of them works alone. */
+  transform: translateY(105%);
+  /* PARKED OFF-SCREEN: pushed 105% of its own height BELOW the photo, hidden by the
+     parent's overflow:hidden. It's always there, just out of sight. */
+  transition: transform 0.4s ease 0.18s;
+  /* The 4th value (0.18s) is a DELAY: wait 0.18s before sliding up, so the caption
+     arrives just after the photo finishes widening. Sequencing two animations with
+     a delay instead of JS timers — cheap and effective. */
+}
+
+.strip-item.active figcaption {
+  transform: translateY(0);   /* slide into place */
+}
+
+.carousel-btn {
+  /* Shared by the project modal's photo viewer — defined here because it's the
+     same visual language as the gallery. */
+  font-size: 1.5rem;
+  font-weight: 700;
+  width: 44px;
+  height: 44px;
+  /* 44x44 is not arbitrary — it's the accessibility guideline minimum for a touch
+     target (roughly a fingertip). Smaller buttons are hard to tap accurately. */
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;   /* IMPORTANT in a flex row: by default flex items are allowed to
+                       SHRINK below their set size when space is tight, which would
+                       squash these buttons into slivers. 0 = "never shrink me". */
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.carousel-btn:hover {
+  background: var(--black);
+  color: var(--yellow);   /* the same invert-on-hover used site-wide */
+}
+
+
+/* ============================================================================
+   7. PROJECTS + MODAL
+============================================================================ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  /* THE RESPONSIVE GRID ONE-LINER — worth being able to explain:
+       repeat(auto-fill, ...)  = "make as many columns as fit; I won't say how many"
+       minmax(290px, 1fr)      = each column is AT LEAST 290px, and at most 1fr
+       fr = "fraction of the leftover space" (a grid-only unit)
+     Result: 3 columns on a laptop, 2 on a tablet, 1 on a phone — reflowing
+     automatically with ZERO media queries. This is the single most useful thing
+     CSS Grid does, and it's the answer to "is it responsive?".
+     (auto-fill leaves empty columns; auto-fit collapses them. Minor difference.) */
+  gap: 24px;   /* gutters between BOTH rows and columns, in one property */
+}
+
+.card {
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  /* A base class — the shared card shell. .project below adds the behaviour. */
+}
+
+.project {
+  padding: 0;         /* deliberately 0 so the photo sits FLUSH against the card
+                         edge; the padding is applied to the inner text instead */
+  overflow: hidden;   /* clips the carousel to the rounded corners */
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;    /* signals the whole card is clickable — it has an onclick
+                         but it's an <article>, so it gets no hand cursor by default */
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.project:hover {
+  transform: rotate(-1deg) translateY(-4px);
+  /* Rotate a single degree anticlockwise AND lift. The tiny tilt is what gives the
+     hover personality — barely noticeable, but the card feels physical. Two
+     transforms must be combined in ONE property; writing a second `transform:`
+     line would simply overwrite the first. */
+  box-shadow: 6px 6px 0 var(--black);
+}
+
+.project h3 {
+  font-size: 1.05rem;
+  padding: 16px 20px 8px;   /* the text padding the card itself gave up */
+}
+
+.project .tags {
+  /* SPACE = "a .tags inside a .project". The same .tags class is reused in the
+     experience timeline, where it gets no padding — context-specific styling
+     without inventing a second class. */
+  display: flex;
+  flex-wrap: wrap;   /* tags wrap to a second line rather than overflowing */
+  gap: 6px;
+  padding: 0 20px;
+}
+
+.tag {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--yellow);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.project p {
+  font-size: 0.92rem;
+  padding: 10px 20px;
+  flex-grow: 1;
+  /* "Absorb all the leftover vertical space." Since the card is a flex COLUMN, this
+     stretches the paragraph so that EVERY card in a row ends up the same height and
+     all the "view details" links line up at the bottom — no matter how long each
+     blurb is. Equalising card heights used to require JavaScript. */
+}
+
+.view-more {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0 20px 14px;
+}
+
+.project:hover .view-more {
+  text-decoration: underline;
+  /* Hovering the CARD underlines the link inside it — reinforcing that the whole
+     card is one click target, not just the text. */
+}
+
+/* --- the mini-carousel inside each project card --- */
+.mini-carousel {
+  position: relative;   /* anchor for the arrows and dots */
+  overflow: hidden;
+  /* THE WINDOW. The track inside is many photos wide, but only the width of this
+     box is ever visible — everything else is clipped. This is what makes it a
+     carousel rather than a long row of photos. */
+  border-bottom: 2px solid var(--black);
+  height: 175px;
+}
+
+.mini-track {
+  display: flex;   /* ALL the photos in one very long horizontal row */
+  height: 100%;
+  transition: transform 0.4s ease;   /* animates the slide when JS moves it */
+}
+
+.mini-track img {
+  min-width: 100%;
+  /* min-width, NOT width. Flex items are allowed to shrink to fit, so `width:100%`
+     would let 4 photos squeeze into one box, side by side. min-width forces each
+     photo to stay full-box-width, making the track overflow — which is exactly
+     what we want, because overflow is what we then slide. */
+  height: 100%;
+  object-fit: cover;
+}
+
+.mini-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);   /* the vertical-centring trick again */
+  width: 28px;
+  height: 28px;
+  font-size: 1rem;
+  font-weight: 700;
+  background: var(--yellow);
+  border: 2px solid var(--black);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;   /* INVISIBLE until the card is hovered (see the rule below) */
+  transition: opacity 0.15s;
+}
+
+.project:hover .mini-btn { opacity: 1; }   /* arrows fade in on card hover, so the
+                                              card stays clean until you interact.
+                                              (opacity:0 keeps them clickable and
+                                              in the layout — unlike display:none.) */
+.mini-btn.prev { left: 8px; }              /* one class for the shared look, plus a */
+.mini-btn.next { right: 8px; }             /* tiny modifier for position each side  */
+
+.mini-btn:hover {
+  background: var(--black);
+  color: var(--yellow);
+}
+
+.mini-dots {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;                  /* full width... */
+  display: flex;
+  justify-content: center;   /* ...so the dots can centre themselves in it */
+  gap: 5px;
+}
+
+.mini-dots span {
+  width: 8px;
+  height: 8px;
+  background: var(--white);
+  border: 1.5px solid var(--black);
+  border-radius: 2px;   /* only 2px = rounded SQUARES, not circles — matching the
+                           site's boxy look rather than the usual round dots */
+}
+
+.mini-dots span.active {
+  background: var(--black);   /* the filled dot = the photo you're on. JS sets this
+                                 class as it slides. */
+}
+
+/* --- the project detail popup (modal) --- */
+.modal-overlay {
+  display: none;   /* the closed state */
+  position: fixed; /* fixed to the SCREEN, so it covers everything even mid-scroll */
+  inset: 0;        /* top/right/bottom/left = 0 -> cover the entire viewport */
+  background: rgba(17, 17, 17, 0.75);
+  /* 75%-opaque near-black. Semi-transparency is the point: you can still see the
+     page behind, so it reads as "on top of" rather than "a new page". */
+  z-index: 10000;  /* one higher than the nav's 9999 — so the popup covers the nav
+                      too. Those two numbers were chosen relative to each other. */
+  padding: 20px;   /* keeps the white box off the screen edges on a phone */
+}
+
+.modal-overlay.show {
+  display: flex;             /* JS adds .show; the popup appears...              */
+  align-items: center;       /* ...and these two lines centre the box on screen. */
+  justify-content: center;   /* Note the switch from `none` to `flex` does BOTH   */
+                             /* jobs at once — reveal and centre.                 */
+}
+
+.modal-box {
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  box-shadow: 8px 8px 0 var(--yellow);
+  max-width: 760px;   /* never wider than 760px on a big screen... */
+  width: 100%;        /* ...but shrink freely on a small one. max-width + width:100%
+                         is THE standard responsive box recipe. */
+  max-height: 92vh;   /* never taller than 92% of the window... */
+  overflow-y: auto;   /* ...and if the write-up is longer, scroll INSIDE the box.
+                         Without this, long content would overflow off-screen with
+                         no way to reach the bottom. */
+  padding: 20px;
+}
+
+.modal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;   /* title left, ✕ right */
+  margin-bottom: 12px;
+}
+
+.modal-top h3 { font-size: 1.05rem; }
+
+.modal-close {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 1rem;
+  width: 36px;
+  height: 36px;
+  background: var(--yellow);
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;   /* don't let a long project title squash the close button */
+}
+
+.modal-close:hover {
+  background: var(--black);
+  color: var(--yellow);
+}
+
+.modal-view {
+  display: flex;         /* ‹  [ photo ]  › in a row */
+  align-items: center;
+  gap: 12px;
+}
+
+#modal-img {
+  /* An ID SELECTOR (#) rather than a class. Ids are more SPECIFIC than classes, so
+     they override them. Fine for a genuinely one-off element like this, but
+     styling by class is generally preferred — heavy id use makes CSS hard to
+     override later. Worth knowing the trade-off. */
+  flex: 1;   /* the photo takes ALL the space the two arrows don't need */
+  width: 100%;
+  height: 380px;   /* fixed height, so swapping photos never resizes the popup and
+                      makes the page jump */
+  object-fit: cover;
+  border: 2px solid var(--black);
+  border-radius: 6px;
+}
+
+.modal-thumbs {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.modal-thumbs img {
+  width: 90px;
+  height: 60px;
+  object-fit: cover;
+  border: 2px solid var(--black);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.5;   /* unselected thumbnails are faded... */
+  transition: opacity 0.15s ease;
+}
+
+.modal-thumbs img.active {
+  opacity: 1;                            /* ...the current one is full strength */
+  box-shadow: 3px 3px 0 var(--black);
+}
+
+/* --- the write-up inside the modal (this HTML is built by script.js) --- */
+.modal-body {
+  margin-top: 18px;
+  font-size: 0.92rem;
+  line-height: 1.65;   /* slightly looser than the site default — this is the
+                          longest prose on the page, so give it room to breathe */
+}
+
+.modal-body .modal-story {
+  border-left: 4px solid var(--yellow);   /* a yellow quote bar down the left */
+  padding: 4px 0 4px 14px;
+  margin: 0 0 16px;
+}
+
+.modal-body .modal-story + .modal-story {
+  margin-top: -6px;
+  /* The "+" sibling selector again: pull consecutive story paragraphs closer so the
+     yellow bars read as one continuous block rather than separate quotes. */
+}
+
+.modal-meta {
+  /* The Technologies / Framework / Languages table. It's a <dl> (description list)
+     in the HTML — the correct semantic tag for term/definition pairs. */
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  /* TWO explicitly-defined columns:
+       max-content = exactly as wide as the longest label needs, no more
+       1fr         = the value column takes ALL the rest
+     A clean label/value table without an actual <table>. */
+  gap: 8px 16px;   /* two values = row-gap 8px, column-gap 16px */
+  background: #f7f7f7;
+  border: 1.5px solid var(--black);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.modal-meta dt {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;   /* types it in lowercase, DISPLAYS it uppercase —
+                                  presentation stays in CSS where it belongs */
+  letter-spacing: 1px;
+  align-self: center;   /* centre the short label against a possibly taller value */
+}
+
+.modal-meta dd {
+  margin: 0;   /* <dd> has a default left indent — reset it */
+  font-size: 0.88rem;
+}
+
+.modal-body h4 {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 18px 0 8px;
+}
+
+.modal-body h4::before {
+  content: "// ";
+  /* A pseudo-element with LITERAL text instead of attr(). Every heading in the
+     popup automatically gets a "// " prefix, so they look like code comments — the
+     same joke as the About chapters. Written once here; the JS never adds it. */
+  color: var(--black);
+  opacity: 0.4;
+}
+
+.modal-body ul {
+  margin: 0;
+  padding-left: 20px;   /* keep enough left padding for the bullets to be visible —
+                           padding:0 would push the bullets outside the box */
+}
+
+.modal-body li {
+  margin-bottom: 4px;
+}
+
+.modal-body p {
+  margin: 0;
+}
+
+
+/* ============================================================================
+   8. SKILLS
+============================================================================ */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  /* Same self-organising grid as the projects, but auto-FIT instead of auto-FILL.
+     The difference: auto-fill keeps empty columns reserved, auto-fit collapses
+     them so the real content stretches to fill the row. With enough items you
+     can't tell them apart. */
+  gap: 12px 40px;   /* 12px between rows, 40px between columns */
+}
+
+.skill-group:nth-child(5) {
+  grid-column: 1 / -1;
+  /* "Start at grid line 1, end at line -1" — and -1 means THE LAST LINE, whatever
+     the current column count happens to be. So this element spans the full row on
+     any screen size. Negative line numbers count from the end; very handy.
+     WHY: the Tools list is much longer than the others and looks cramped in one
+     column. CAVEAT: this targets the 5th group BY POSITION, so reordering the
+     HTML would make the wrong group go full-width. A class would be sturdier. */
+}
+
+.skill-title {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;   /* em, so the tracking scales WITH the font size —
+                              better than px for letter-spacing */
+  margin: 26px 0 12px;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;   /* essential here — these lists are long and must wrap */
+  gap: 10px;
+}
+
+.pill {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  padding: 7px 14px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 3px 0 var(--black);   /* the same lift-and-slab hover as the tabs,
+                                           cards and buttons — one consistent
+                                           motion language across the whole site */
+}
+
+.yellow-bg .pill.hl {
+  /* Read this selector right to left: an element with BOTH .pill and .hl, that is
+     inside something with .yellow-bg. Three conditions in one line.
+     WHY scoped to .yellow-bg: a white highlight pill on a yellow background would
+     barely show. Only invert it where the background needs it. */
+  background: var(--black);
+  color: var(--yellow);
+}
+
+
+/* ============================================================================
+   9. EXPERIENCE TIMELINE
+   The connecting line and every dot are PSEUDO-ELEMENTS — no images, no extra
+   divs. Nice thing to point out: the timeline graphic is 100% CSS.
+============================================================================ */
+.timeline {
+  position: relative;   /* anchor for the ::before line and the item dots */
+  margin-left: 8px;
+  max-width: 720px;
+  padding-left: 32px;   /* the empty gutter the line and dots live in */
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.timeline::before {
+  /* THE VERTICAL CONNECTING LINE. */
+  content: "";
+  /* EMPTY content — but still required, or the pseudo-element doesn't render at
+     all. Here it's a pure shape, so there's no text to put in it. */
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  /* top + bottom instead of a height: the line automatically stretches to whatever
+     the timeline's height happens to be. Add a 5th job and the line grows itself.
+     The 6px insets stop it poking past the first and last dots. */
+  width: 2px;
+  background: var(--black);
+}
+
+.t-item {
+  position: relative;   /* anchor for this item's own dot */
+}
+
+.t-item::before {
+  /* ONE DOT PER ITEM, drawn automatically. Add a new .t-item to the HTML and its
+     dot appears with no extra markup — that's the payoff of pseudo-elements. */
+  content: "";
+  position: absolute;
+  left: -39px;
+  /* Negative = OUTSIDE this element, to the left, out into the gutter, landing
+     exactly on the line. The number is the result of tuning against the parent's
+     32px padding plus the dot's own width and border. (A "magic number" — it
+     works, but it would break if the padding changed. Worth knowing.) */
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  background: var(--white);   /* white fill = a hollow dot for past roles */
+  border: 2.5px solid var(--black);
+  border-radius: 50%;
+}
+
+.t-item.current::before {
+  background: var(--yellow);   /* filled = the current role */
+  box-shadow: 0 0 0 4px rgba(232, 242, 76, 0.55);
+  /* 0 offset, 0 blur, 4px SPREAD = a solid ring sitting evenly around the dot, in
+     translucent yellow. Using spread with no offset/blur to draw a halo is a neat
+     alternative to a second border. */
+}
+
+.t-item .when {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: var(--yellow);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 2px 8px;
+  display: inline-block;   /* hug the text, don't stretch the row */
+  margin-bottom: 6px;
+  /* Note this is visually identical to .edu-years in section 5 — the same chip
+     defined twice under two names. A genuine small duplication: one shared .chip
+     class would be tidier. Good honest "what would you improve?" answer. */
+}
+
+.t-item h3 { font-size: 1rem; }
+
+.t-company {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: block;
+  margin: 3px 0 8px;
+  opacity: 0.65;
+}
+
+.t-item p {
+  font-size: 0.92rem;
+  margin: 0 0 8px;
+}
+
+.t-highlights {
+  margin: 0 0 10px;
+  padding-left: 20px;   /* room for the bullets */
+  font-size: 0.9rem;
+}
+
+.t-highlights li {
+  margin-bottom: 3px;
+}
+
+.t-item .tags {
+  /* .tags reused from the projects, but WITHOUT the padding it gets there —
+     because the selector there was `.project .tags`, scoped to that context.
+     Same class, two contexts, no conflict. That's the cascade working for you. */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+
+/* ============================================================================
+   10. FOOTER / CONTACT
+============================================================================ */
+footer {
+  background: var(--black);
+  color: var(--white);   /* inherited by all the text inside — set the colour once
+                            on the parent rather than on every child */
+  padding: 72px 0 32px;
+}
+
+footer h2 { color: var(--yellow); }   /* overrides the global h2 colour, but only
+                                         inside the footer */
+
+footer p {
+  max-width: 520px;   /* short lines are even more important on a dark background */
+  margin: 0 0 26px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;   /* the 4 buttons stack onto multiple lines on a phone */
+  margin-bottom: 34px;
+}
+
+.btn {
+  display: inline-flex;
+  /* inline-flex, not flex: it flexes its CHILDREN (icon + label onto one line,
+     vertically centred) while the button ITSELF stays inline so several sit in a
+     row. That distinction is exactly why it's used here. */
+  align-items: center;
+  gap: 8px;             /* the space between the SVG icon and its label */
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  padding: 12px 20px;
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+              background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);   /* the lift */
+}
+
+.btn:active {
+  transform: translate(2px, 2px);
+  /* :active = WHILE the mouse button is held down. Moving down-right makes the
+     button feel physically pressed. A tiny detail most sites skip, and it's the
+     kind of thing worth pointing at when talking about craft. */
+}
+
+.btn svg { flex-shrink: 0; }   /* never let a long label squash the icon */
+
+.btn-resume {
+  /* MODIFIER: .btn is the shape, .btn-resume is the paint. The HTML uses both:
+     class="btn btn-resume". This is the base + modifier pattern (formalised as
+     "BEM" in bigger projects) and it's why there's no repeated padding here. */
+  background: var(--yellow);
+  color: var(--black);
+  border-color: var(--yellow);
+}
+
+.btn-resume:hover {
+  background: var(--white);
+  border-color: var(--white);
+}
+
+.btn-ghost {
+  /* "Ghost button" = the standard name for an outline-only, transparent button.
+     Used for the secondary actions, so the yellow resume button stays the
+     obvious primary one. Visual hierarchy through styling. */
+  background: transparent;
+  color: var(--white);
+  border-color: var(--white);
+}
+
+.btn-ghost:hover {
+  background: var(--white);
+  color: var(--black);
+}
+
+footer a:focus-visible {
+  outline-color: var(--yellow);
+  /* Overrides the global BLACK focus ring from section 2 — a black ring on a black
+     footer would be invisible. Only the colour is overridden; the 3px width and
+     offset are inherited from the earlier rule. A real, easily-missed
+     accessibility detail. */
+}
+
+.copyright {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  border-top: 1px solid #444;   /* a hairline divider, using border rather than an
+                                   extra <hr> element */
+  padding-top: 16px;
+  margin: 0;
+}
+
+
+/* ============================================================================
+   11. SCROLL-REVEAL ANIMATIONS
+   The full picture, one more time:
+     1. CSS here     -> .reveal starts invisible and 26px low
+     2. script.js    -> IntersectionObserver watches every .reveal
+     3. on entry     -> JS adds the class .visible
+     4. CSS here     -> .reveal.visible is opaque and back in place; `transition`
+                        animates between the two
+   No animation library. JS decides WHEN; CSS decides WHAT.
+============================================================================ */
+.reveal {
+  opacity: 0;                    /* invisible... */
+  transform: translateY(26px);   /* ...and sitting 26px below its real position */
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  /* Animating opacity and transform SPECIFICALLY is a performance choice: these
+     two are the only properties the GPU can animate without re-laying-out the
+     page, so they stay smooth at 60fps. Animating `top` or `height` instead
+     forces layout recalculation every frame and can visibly stutter. */
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);   /* ...eases up into place */
+}
+
+/* A gentle STAGGER so stacked cards cascade in one after another instead of all
+   popping at once. transition-delay just holds each one back a beat. */
+.edu-card.reveal:nth-child(2)  { transition-delay: 0.1s; }
+.edu-card.reveal:nth-child(3)  { transition-delay: 0.2s; }
+.grid .project.reveal:nth-child(2) { transition-delay: 0.1s; }
+.grid .project.reveal:nth-child(3) { transition-delay: 0.2s; }
+/* Card 1: no delay. Card 2: 0.1s late. Card 3: 0.2s late. That's the whole
+   cascade — three lines, no JS timers. (It's hard-coded to 3 items though; a 4th
+   card would appear with no delay unless a line is added.) */
+
+@media (prefers-reduced-motion: reduce) {
+  /* THE ACCESSIBILITY ONE — this is the answer if you're asked about accessible
+     animation. Some people get motion sickness, vertigo or migraines from moving
+     interfaces, so operating systems have a "reduce motion" setting. This media
+     query READS that setting and switches the animations off for those visitors.
+     It costs ~20 lines and it's the difference between a site being usable or
+     physically unpleasant for someone. */
+  html { scroll-behavior: auto; }   /* instant jumps instead of smooth scrolling */
+
+  .reveal {
+    opacity: 1;        /* show everything immediately, already in place... */
+    transform: none;
+    transition: none;  /* ...and never animate it */
+  }
+
+  .flip-card-inner,
+  .mini-track,
+  .strip-item,
+  .strip-item img,
+  .strip-item figcaption {
+    transition: none;   /* the gallery and carousels snap instead of gliding —
+                           still fully FUNCTIONAL, just not animated */
+  }
+
+  .scroll-line,
+  .type-cursor {
+    animation: none;   /* stop the pulsing line and the blinking cursor */
+  }
+  /* script.js ALSO checks this setting in JavaScript, with
+     window.matchMedia("(prefers-reduced-motion: reduce)"), to stop the gallery
+     auto-cycling. CSS can't stop a JS timer, so both halves are needed. */
+}
+
+
+/* ============================================================================
+   12. MOBILE TUNING — the media queries
+
+   HOW MEDIA QUERIES WORK: everything above applies at ALL sizes. These blocks
+   then OVERRIDE specific bits at specific widths. Because they're at the BOTTOM
+   of the file, they win — with equal specificity, the LAST rule wins. Move them
+   to the top and they'd stop working. That's the cascade.
+
+   This site uses max-width queries ("desktop first": design big, then patch for
+   small). The alternative is min-width ("mobile first"), which is generally
+   preferred nowadays — a fair thing to mention if you're asked.
+
+   THE THREE BREAKPOINTS, each chosen because something actually breaks there:
+     880px -> the nav links stop fitting in the capsule
+     680px -> the horizontal photo strip gets too cramped
+     500px -> small phones need finer tuning
+   Note they're not device sizes ("iPhone width") — they're CONTENT breakpoints,
+   which is the right way to choose them.
+============================================================================ */
+
+@media (max-width: 880px) {
+  /* Read as: "when the viewport is 880px wide or LESS, apply these." */
+  .nav-links { display: none; }        /* hide the inline links...          */
+  .nav-toggle-btn { display: flex; }   /* ...and reveal the ••• button.     */
+                                       /* One swap = the whole mobile nav.  */
+  .nav-dock { min-width: 250px; }      /* keep the capsule a sensible width
+                                          once its links are gone */
+  .nav-dock-inner { justify-content: space-between; }   /* brand left, ••• right */
+}
+
+@media (max-width: 680px) {
+  .photo-strip {
+    flex-direction: column;   /* THE BIG ONE: the strip rotates from a horizontal
+                                 row of book spines into a VERTICAL accordion.
+                                 One property changes the entire interaction. */
+    height: auto;             /* drop the fixed 560px — let it size to content */
+  }
+
+  .strip-item {
+    flex: none;     /* switch OFF the flex sizing... */
+    height: 64px;   /* ...and use plain heights instead, since the axis flipped */
+    transition: height 0.5s ease, box-shadow 0.3s ease;
+    /* AND the transition changes too: on desktop it animates `flex`, here it
+       animates `height`. Same visual idea, different property, because the
+       expansion direction is now vertical. Genuinely thoughtful responsive work. */
+  }
+
+  .strip-item.active {
+    flex: none;
+    height: 400px;   /* the expanded height, replacing desktop's flex: 3.5 */
+    box-shadow: 6px 6px 0 var(--black);
+  }
+
+  .strip-item::after {
+    /* the "book spine" labels lie flat again — vertical text makes no sense on a
+       horizontal bar */
+    writing-mode: horizontal-tb;   /* back to normal left-to-right text */
+    transform: none;               /* cancel the rotate + translate */
+    left: auto;                    /* `auto` UNSETS the desktop left:50%. You have
+                                      to actively undo a property, not just set a
+                                      new one — a common media-query trap. */
+    right: 12px;
+    bottom: auto;
+    top: 12px;                     /* moved to the top-right corner */
+    padding: 3px 8px;
+  }
+
+  #modal-img   { height: 240px; }   /* 380px is too tall for a phone screen */
+
+  .modal-thumbs img {
+    width: 64px;    /* smaller thumbnails so they still fit in a row */
+    height: 44px;
+  }
+
+  .modal-view .carousel-btn {
+    width: 36px;    /* slightly smaller arrows to leave more room for the photo */
+    height: 36px;
+  }
+
+  .edu-card:nth-child(even) { margin-left: 0; }
+  /* Flatten the zig-zag. A 56px indent is elegant on a laptop and just wastes a
+     quarter of the screen on a phone. */
+
+  .skills-grid { grid-template-columns: 1fr; }   /* force a single column */
+
+  .modal-meta {
+    grid-template-columns: 1fr;   /* the label/value table stacks: label ABOVE
+                                     value, instead of side by side */
+    gap: 2px;
+  }
+
+  .modal-meta dd { margin-bottom: 8px; }   /* re-add separation now that they stack */
+}
+
+@media (max-width: 500px) {
+  /* The finest tuning, for small phones. */
+  .nav-dock { top: 16px; }   /* tuck the capsule closer to the top edge */
+
+  .hero { padding-top: 100px; }
+
+  .massive-text-line {
+    -webkit-text-stroke: 1px var(--black);
+    /* Thin the outline from 2px to 1px. At small sizes a 2px stroke is
+       proportionally huge and starts swallowing the letterforms. Scaling a detail
+       to the text size — a real typographic decision, not a guess. */
+  }
+
+  .hero-kicker {
+    font-size: 0.62rem;
+    letter-spacing: 2px;   /* less tracking so it fits on one line */
+    padding: 0 16px;
+  }
+
+  section { padding: 64px 0; }   /* 90px of vertical air is generous on a laptop and
+                                    just endless scrolling on a phone */
+
+  .timeline { padding-left: 26px; }   /* narrow the gutter... */
+  .t-item::before { left: -33px; }    /* ...and move the dots to match. THESE TWO
+                                         MUST CHANGE TOGETHER — the dot position is
+                                         measured against the gutter, so changing
+                                         one without the other knocks the dots off
+                                         the line. That's the downside of the magic
+                                         number back in section 9. */
+}
+
+/* ============================================================================
+   END OF FILE — the quick recap:
+     - :root variables      = change one line, re-theme everything
+     - Flexbox              = things in a row or column (nav, hero, strip, timeline)
+     - CSS Grid             = the self-organising card layouts (projects, skills)
+     - transition           = animate a change between two states
+     - @keyframes/animation = play a sequence on a loop
+     - ::before / ::after   = draw things without adding HTML (dots, chips, the
+                              timeline line, spine labels)
+     - @media               = override rules at specific screen sizes
+     - JS toggles a class; CSS does the visuals. Every time.
+============================================================================ */

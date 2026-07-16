@@ -1,9 +1,17 @@
 /* ==========================================================
    style.css — Portfolio Master Design Sheet
    3-Color Palette: Dominant White, Deep Black, Accent Yellow.
+
+   SECTIONS:
+     1. Design tokens        7. Projects + modal
+     2. Global defaults      8. Skills
+     3. Capsule navbar       9. Experience timeline
+     4. Hero                10. Footer / contact
+     5. About + education   11. Scroll-reveal animations
+     6. Gallery carousel    12. Mobile tuning
 ========================================================== */
 
-/* ---------- 1. DESIGN ENGINE INITIALIZATION ---------- */
+/* ---------- 1. DESIGN TOKENS ---------- */
 :root {
   --yellow: #E8F24C;
   --black:  #111111;
@@ -12,18 +20,18 @@
   --sans:   'Inter', sans-serif;
 }
 
-/* ---------- 2. UNIVERSAL DEFAULTS & GLOBAL FIXES ---------- */
+/* ---------- 2. GLOBAL DEFAULTS ---------- */
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
 html, body {
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: hidden !important;
-  background-color: var(--white) !important;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: var(--white);
   color: var(--black);
 }
 
@@ -64,53 +72,97 @@ section {
   width: 100%;
 }
 
-/*yellow background section for emphasis*/
+/* yellow background section for emphasis */
 .yellow-bg {
   background: var(--yellow);
   border-top: 1px solid var(--black);
   border-bottom: 1px solid var(--black);
 }
 
-/* ---------- 3. FLOATING MODULAR DOCK NAVBAR ---------- */
+.section-sub {
+  margin: -12px 0 28px;
+  font-size: 0.95rem;
+}
+
+/* keyboard focus — visible on white or yellow backgrounds */
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--black);
+  outline-offset: 2px;
+}
+
+/* ---------- 3. FLOATING CAPSULE NAVBAR ----------
+   Desktop: brand + inline links, active link gets a yellow pill.
+   Mobile (≤880px): links hide, ••• button opens the dropdown card. */
 .nav-dock {
   position: fixed;
   top: 24px;
   left: 50%;
   transform: translateX(-50%);
-  /* FIX: 17% was ~65px on phones — brand + button overflowed the capsule */
-  width: auto;
-  min-width: 250px;
-  max-width: 500px;
+  width: max-content;
+  max-width: calc(100% - 32px);
   background: var(--black);
-  border-radius: 50px; /* Perfect sleek capsule architecture */
-  padding: 10px 14px;
+  border-radius: 50px;             /* sleek capsule */
+  padding: 8px 10px;
   z-index: 9999;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
 }
 
 .nav-dock-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  width: 100%;
+  gap: 20px;
 }
 
 .nav-brand {
   color: var(--white);
   font-family: var(--sans);
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   text-decoration: none;
-  padding-left: 12px;
+  padding-left: 14px;
+  white-space: nowrap;
 }
 
+.nav-links {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  display: block;
+  color: var(--white);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 50px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* scrollspy highlight — the yellow pill follows the visible section */
+.nav-link.active {
+  background: var(--yellow);
+  color: var(--black);
+}
+
+/* mobile menu button — hidden on desktop */
 .nav-toggle-btn {
-  background: #EAEAEA; /* Off-white comfortable interactive surface */
+  display: none;
+  background: #EAEAEA;
   border: none;
   border-radius: 50px;
   cursor: pointer;
-  display: flex;
   align-items: center;
   gap: 3px;
   padding: 10px 18px;
@@ -127,17 +179,18 @@ section {
   line-height: 1;
 }
 
-/* --- Expanded Navigation Card Menu --- */
+/* --- Expanded dropdown card (mobile menu) --- */
 .nav-dropdown {
-  display: none; /* Safely locked invisible until interaction toggles it */
+  display: none;                   /* hidden until toggled */
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
+  min-width: 250px;
   background: var(--black);
   border-radius: 28px;
   padding: 24px;
-  box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
   animation: cardSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -147,7 +200,7 @@ section {
 
 @keyframes cardSlideIn {
   from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 .dropdown-header {
@@ -185,17 +238,12 @@ section {
 }
 
 .dropdown-links {
-  list-style: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.dropdown-links li {
-  margin: 0 !important;
-  padding: 0 !important;
 }
 
 .dropdown-pill {
@@ -209,16 +257,17 @@ section {
   padding: 12px 20px;
   border-radius: 14px;
   width: 100%;
-  max-width: 160px; /* Aligns smoothly leftward matching design reference */
+  max-width: 180px;
   transition: background-color 0.2s, transform 0.15s;
 }
 
-.dropdown-pill:hover {
+.dropdown-pill:hover,
+.dropdown-pill.active {
   background: var(--yellow);
   transform: translateX(4px);
 }
 
-/* ---------- 4. HERO STRUCTURAL SYSTEM ---------- */
+/* ---------- 4. HERO ---------- */
 .hero {
   background: var(--white);
   min-height: 100vh;
@@ -235,6 +284,15 @@ section {
   justify-content: center;
   width: 100%;
   text-align: center;
+}
+
+/* small mono line above the name, like the inspiration template */
+.hero-kicker {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  margin: 0 0 26px;
 }
 
 .massive-name-container {
@@ -255,17 +313,17 @@ section {
   text-transform: uppercase;
   margin: 0;
   user-select: none;
-  /* FIX: pure yellow on white was nearly invisible — a thin black
+  /* pure yellow on white is nearly invisible — the thin black
      outline keeps the yellow look but makes the name readable */
   -webkit-text-stroke: 2px var(--black);
 }
 
-/* Capsule Photo Frame Overlap Geometry */
+/* Capsule photo frame overlapping the name */
 .oval-photo-frame {
   width: clamp(100px, 15vw, 160px);
   height: clamp(140px, 21vw, 220px);
   border-radius: 120px;
-  border: 1px solid var(--black); /*  capsule border */
+  border: 1px solid var(--black);
   overflow: hidden;
   position: absolute;
   top: 50%;
@@ -273,7 +331,8 @@ section {
   transform: translate(-50%, -50%);
   z-index: 10;
   background: var(--white);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  perspective: 1000px;             /* gives the flip its 3D depth */
 }
 
 .hero-photo {
@@ -282,10 +341,55 @@ section {
   object-fit: cover;
 }
 
+/* hero flip card (front/back photo) */
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s ease;
+  transform-style: preserve-3d;
+}
+
+.oval-photo-frame:hover .flip-card-inner,
+.oval-photo-frame:focus-visible .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;     /* hides the reversed side */
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
 .diamond-divider {
   font-size: 2rem;
   color: var(--yellow);
   margin: 40px 0 20px;
+  -webkit-text-stroke: 1px var(--black);
+}
+
+/* hero typewriter line */
+.typewriter-line {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  margin: 0 0 14px;
+  min-height: 1.6em;               /* stops layout jumping while typing */
+}
+
+.type-cursor {
+  color: var(--yellow);
+  -webkit-text-stroke: 1px var(--black);
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
 }
 
 .hero-tagline {
@@ -309,7 +413,13 @@ section {
 .scroll-line {
   width: 2px;
   height: 35px;
-  background: var(--yellow);
+  background: var(--black);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { transform: scaleY(1);   opacity: 1; }
+  50%      { transform: scaleY(0.5); opacity: 0.4; }
 }
 
 .scroll-text {
@@ -319,141 +429,38 @@ section {
   letter-spacing: 2px;
 }
 
-/* ---------- 5. GLOBAL PORTFOLIO INTERFACE FIXES ---------- */
-.card {
-  background: var(--white);
-  border: 2px solid var(--black);
-  border-radius: 8px;
-  padding: 24px;
-}
+/* ---------- 5. ABOUT + EDUCATION ---------- */
 
-.btn {
-  display: inline-block;
+/* mono "code comment" chapter labels inside About */
+.about-chapter {
   font-family: var(--mono);
+  font-size: 0.85rem;
   font-weight: 700;
-  font-size: 0.9rem;
-  text-decoration: none;
-  padding: 12px 20px;
-  border: 2px solid var(--black);
-  border-radius: 6px;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-.btn-dark { background: var(--black); color: var(--white); }
-.btn-dark:hover { background: var(--yellow); color: var(--black); }
-.btn-light { background: var(--white); color: var(--black); }
-.btn-light:hover { background: var(--black); color: var(--white); }
-.btn:active { transform: translate(2px, 2px); }
-
-/* Grid Protection System */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  gap: 24px;
+  color: var(--black);
+  opacity: 0.55;
+  margin: 48px 0 18px;
 }
 
-.project {
-  background: var(--white);
-  border: 2px solid var(--black);
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+.about-chapter:first-of-type {
+  margin-top: 0;
 }
 
-/* Dynamic Interactive Terminal Fixes */
+/* --- developer terminal --- */
 .terminal {
   background: #1a1a1a;
   border: 3px solid var(--black);
   border-radius: 12px;
   overflow: hidden;
+  box-shadow: 8px 8px 0 var(--yellow);
 }
+
 .terminal-header {
   background: #2d2d2d;
   padding: 12px 20px;
   display: flex;
   align-items: center;
 }
-.terminal-body {
-  padding: 20px;
-  color: #f8f8f2;
-  font-family: var(--mono);
-}
 
-/* Timeline Components */
-.timeline {
-  border-left: 2px solid var(--black);
-  padding-left: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-/* ==========================================================
-   7. RESTORED COMPONENT STYLES
-   ROOT CAUSE OF THE "not clickable / not sliding" BUG:
-   when this stylesheet was rewritten, the styles for the
-   carousel, mini-carousels, modal, tags, pills, timeline and
-   footer were dropped. The JavaScript still worked — but with
-   no overflow:hidden / display:flex / positioning, the sliders
-   rendered as stacked images and the modal never appeared.
-   Everything below restores those components in the same
-   3-color style.
-========================================================== */
-
-/* ---- small helpers ---- */
-.section-sub {
-  margin: -12px 0 28px;
-  font-size: 0.95rem;
-}
-
-/* ---- hero typewriter line ---- */
-.typewriter-line {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: clamp(1rem, 2.2vw, 1.3rem);
-  margin: 0 0 14px;
-  min-height: 1.6em;         /* stops layout jumping while typing */
-}
-
-.type-cursor {
-  color: var(--yellow);
-  -webkit-text-stroke: 1px var(--black);
-  animation: blink 1s steps(1) infinite;
-}
-
-@keyframes blink {
-  50% { opacity: 0; }
-}
-
-/* ---- hero flip card (front/back photo) ---- */
-.oval-photo-frame {
-  perspective: 1000px;       /* gives the flip its 3D depth */
-}
-
-.flip-card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.7s ease;
-  transform-style: preserve-3d;
-}
-
-.oval-photo-frame:hover .flip-card-inner {
-  transform: rotateY(180deg);
-}
-
-.flip-card-front,
-.flip-card-back {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;    /* hides the reversed side */
-}
-
-.flip-card-back {
-  transform: rotateY(180deg);
-}
-
-/* ---- terminal chrome (dots, tabs, code colors) ---- */
 .terminal-buttons {
   display: flex;
   gap: 8px;
@@ -504,6 +511,12 @@ section {
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
+.terminal-body {
+  padding: 20px;
+  color: #f8f8f2;
+  font-family: var(--mono);
+}
+
 .terminal-body pre {
   margin: 0;
   white-space: pre-wrap;
@@ -527,46 +540,214 @@ section {
 
 .tab-content p + p { margin-top: 10px; }
 
-/* ---- gallery carousel ---- */
-.carousel {
+/* --- education cards: the "second scroll" story --- */
+.edu-track {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 720px;
 }
 
-.carousel-window {
-  overflow: hidden;          /* hides the off-screen slides */
+/* zig-zag: even cards shift right on desktop for a storytelling flow */
+.edu-card:nth-child(even) {
+  margin-left: 56px;
+}
+
+.edu-card {
+  background: var(--white);
   border: 2px solid var(--black);
   border-radius: 8px;
-  background: var(--white);
-  flex: 1;
+  padding: 22px 24px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-.carousel-track {
-  display: flex;             /* all slides in one row */
-  transition: transform 0.4s ease;
+.edu-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 6px 6px 0 var(--yellow), 6px 6px 0 2px var(--black);
 }
 
-.slide {
-  min-width: 100%;
+.edu-years {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: var(--yellow);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 2px 8px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.edu-card h3 {
+  font-size: 1.05rem;
+}
+
+.edu-degree {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: block;
+  margin: 4px 0 10px;
+  opacity: 0.7;
+}
+
+.edu-card p {
+  font-size: 0.92rem;
   margin: 0;
 }
 
-.slide img {
-  width: 100%;
-  height: 400px;
-  object-fit: cover;         /* crops any photo size to fit */
+/* ---------- 6. GALLERY PHOTO STRIP ----------
+   Portrait-friendly "expanding strip": all photos stand in one row.
+   The active one grows wide (flex: 3.5) and shows in full color;
+   the rest collapse into grayscale slivers (flex: 1) with a number
+   chip on top and a vertical label at the bottom — like book spines.
+   Hover, tap, or keyboard-focus a sliver to expand it.
+   The tabs above the strip filter photos by data-category. */
+.gallery-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
 }
 
-.slide figcaption {
+.gallery-tab {
   font-family: var(--mono);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 50px;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+              background-color 0.15s ease, color 0.15s ease;
+}
+
+.gallery-tab:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 3px 0 var(--black);
+}
+
+.gallery-tab.active {
+  background: var(--black);
+  color: var(--yellow);
+}
+
+.photo-strip {
+  display: flex;
+  gap: 12px;
+  height: 560px;                   /* tall = portrait photos fit naturally */
+}
+
+/* photos outside the chosen tab are simply not rendered */
+.strip-item.hidden {
+  display: none;
+}
+
+.strip-item {
+  position: relative;
+  flex: 1;
+  margin: 0;
+  overflow: hidden;
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  background: var(--white);
+  cursor: pointer;
+  transition: flex 0.55s cubic-bezier(0.25, 0.8, 0.25, 1),
+              box-shadow 0.3s ease;
+}
+
+.strip-item.active {
+  flex: 3.5;                       /* the expanded photo */
+  box-shadow: 8px 8px 0 var(--black);
+}
+
+.strip-item:focus-visible {
+  outline: 3px solid var(--black);
+  outline-offset: 2px;
+}
+
+.strip-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(65%);          /* slivers are muted... */
+  transform: scale(1.12);          /* ...and slightly cropped-in */
+  transition: filter 0.45s ease, transform 0.6s ease;
+}
+
+.strip-item.active img,
+.strip-item:hover img {
+  filter: none;                    /* expanding reveals full color */
+  transform: scale(1);
+}
+
+/* number chip, top-left of every photo */
+.strip-item::before {
+  content: attr(data-num);
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--white);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
+/* vertical "book spine" label on collapsed slivers */
+.strip-item::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+  writing-mode: vertical-rl;       /* text runs bottom-to-top */
+  z-index: 2;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  background: var(--yellow);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 10px 4px;
+  white-space: nowrap;
+  transition: opacity 0.25s ease;
+}
+
+.strip-item.active::after {
+  opacity: 0;                      /* spine label hides when expanded */
+}
+
+/* full caption bar slides up once the photo is expanded */
+.strip-item figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--white);
+  border-top: 2px solid var(--black);
+  font-family: var(--mono);
+  font-size: 0.82rem;
   font-weight: 700;
   padding: 12px 16px;
-  border-top: 2px solid var(--black);
-  background: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transform: translateY(105%);
+  transition: transform 0.4s ease 0.18s;
 }
 
+.strip-item.active figcaption {
+  transform: translateY(0);
+}
+
+/* arrow buttons — shared by the project modal photo viewer */
 .carousel-btn {
   font-size: 1.5rem;
   font-weight: 700;
@@ -577,6 +758,7 @@ section {
   border-radius: 6px;
   cursor: pointer;
   flex-shrink: 0;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .carousel-btn:hover {
@@ -584,30 +766,24 @@ section {
   color: var(--yellow);
 }
 
-.carousel-dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 16px;
+/* ---------- 7. PROJECTS + MODAL ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 24px;
 }
 
-.carousel-dots button {
-  width: 12px;
-  height: 12px;
+.card {
   background: var(--white);
   border: 2px solid var(--black);
-  border-radius: 2px;
-  cursor: pointer;
-  padding: 0;
+  border-radius: 8px;
 }
 
-.carousel-dots button.active {
-  background: var(--black);
-}
-
-/* ---- project cards ---- */
 .project {
-  padding: 0;                /* photos sit flush with the card edge */
+  padding: 0;                      /* photos sit flush with the card edge */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
@@ -656,7 +832,7 @@ section {
   text-decoration: underline;
 }
 
-/* ---- mini-carousel inside each project card ---- */
+/* --- mini-carousel inside each project card --- */
 .mini-carousel {
   position: relative;
   overflow: hidden;
@@ -688,7 +864,7 @@ section {
   border: 2px solid var(--black);
   border-radius: 4px;
   cursor: pointer;
-  opacity: 0;                /* appear on card hover */
+  opacity: 0;                      /* appear on card hover */
   transition: opacity 0.15s;
 }
 
@@ -723,13 +899,13 @@ section {
   background: var(--black);
 }
 
-/* ---- project photo popup (modal) ---- */
+/* --- project detail popup (modal) --- */
 .modal-overlay {
-  display: none;             /* hidden until a card is clicked */
+  display: none;                   /* hidden until a card is clicked */
   position: fixed;
   inset: 0;
   background: rgba(17, 17, 17, 0.75);
-  z-index: 10000;            /* above the nav dock */
+  z-index: 10000;                  /* above the nav dock */
   padding: 20px;
 }
 
@@ -778,15 +954,6 @@ section {
   color: var(--yellow);
 }
 
-/* the STAR-method project description */
-.modal-desc {
-  font-size: 0.9rem;
-  line-height: 1.55;
-  border-left: 4px solid var(--yellow);
-  padding: 4px 0 4px 14px;
-  margin-bottom: 14px;
-}
-
 .modal-view {
   display: flex;
   align-items: center;
@@ -817,6 +984,7 @@ section {
   border-radius: 4px;
   cursor: pointer;
   opacity: 0.5;
+  transition: opacity 0.15s ease;
 }
 
 .modal-thumbs img.active {
@@ -824,7 +992,89 @@ section {
   box-shadow: 3px 3px 0 var(--black);
 }
 
-/* ---- skills pills ---- */
+/* --- blog-style write-up inside the modal (built by script.js) --- */
+.modal-body {
+  margin-top: 18px;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.modal-body .modal-story {
+  border-left: 4px solid var(--yellow);
+  padding: 4px 0 4px 14px;
+  margin: 0 0 16px;
+}
+
+.modal-body .modal-story + .modal-story {
+  margin-top: -6px;
+}
+
+/* stack summary: Technologies / Framework / Languages rows */
+.modal-meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  background: #f7f7f7;
+  border: 1.5px solid var(--black);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.modal-meta dt {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  align-self: center;
+}
+
+.modal-meta dd {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.modal-body h4 {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 18px 0 8px;
+}
+
+.modal-body h4::before {
+  content: "// ";
+  color: var(--black);
+  opacity: 0.4;
+}
+
+.modal-body ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.modal-body li {
+  margin-bottom: 4px;
+}
+
+.modal-body p {
+  margin: 0;
+}
+
+/* ---------- 8. SKILLS ---------- */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px 40px;
+}
+
+/* Tools list is the longest — let it span the full row */
+.skill-group:nth-child(5) {
+  grid-column: 1 / -1;
+}
+
 .skill-title {
   font-size: 0.9rem;
   text-transform: uppercase;
@@ -846,6 +1096,12 @@ section {
   border: 2px solid var(--black);
   border-radius: 6px;
   padding: 7px 14px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 3px 0 var(--black);
 }
 
 /* highlighted pill — inverted on the yellow section so it stands out */
@@ -854,31 +1110,58 @@ section {
   color: var(--yellow);
 }
 
-/* ---- experience timeline details ---- */
+/* ---------- 9. EXPERIENCE TIMELINE ----------
+   Connected vertical line with round dots; most recent on top.
+   The .current item gets a filled yellow dot. */
 .timeline {
+  position: relative;
   margin-left: 8px;
   max-width: 720px;
+  padding-left: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+/* the connecting line */
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--black);
 }
 
 .t-item {
   position: relative;
 }
 
+/* the dot on the line */
 .t-item::before {
   content: "";
   position: absolute;
-  left: -33px;
-  top: 6px;
+  left: -39px;                     /* centers the dot on the 2px line */
+  top: 4px;
   width: 12px;
   height: 12px;
+  background: var(--white);
+  border: 2.5px solid var(--black);
+  border-radius: 50%;
+}
+
+/* current role — filled yellow dot with a soft ring */
+.t-item.current::before {
   background: var(--yellow);
-  border: 2px solid var(--black);
+  box-shadow: 0 0 0 4px rgba(232, 242, 76, 0.55);
 }
 
 .t-item .when {
   font-family: var(--mono);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 1px;
   background: var(--yellow);
   border: 1.5px solid var(--black);
   border-radius: 4px;
@@ -888,9 +1171,38 @@ section {
 }
 
 .t-item h3 { font-size: 1rem; }
-.t-item p  { font-size: 0.92rem; margin: 4px 0 0; }
 
-/* ---- footer / contact ---- */
+.t-company {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: block;
+  margin: 3px 0 8px;
+  opacity: 0.65;
+}
+
+.t-item p {
+  font-size: 0.92rem;
+  margin: 0 0 8px;
+}
+
+.t-highlights {
+  margin: 0 0 10px;
+  padding-left: 20px;
+  font-size: 0.9rem;
+}
+
+.t-highlights li {
+  margin-bottom: 3px;
+}
+
+.t-item .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ---------- 10. FOOTER / CONTACT ---------- */
 footer {
   background: var(--black);
   color: var(--white);
@@ -910,6 +1222,31 @@ footer p {
   flex-wrap: wrap;
   margin-bottom: 34px;
 }
+
+.btn {
+  display: inline-flex;            /* keeps icon + label on one line */
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  padding: 12px 20px;
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+              background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);     /* subtle hover lift */
+}
+
+.btn:active {
+  transform: translate(2px, 2px);
+}
+
+.btn svg { flex-shrink: 0; }
 
 .btn-resume {
   background: var(--yellow);
@@ -933,6 +1270,11 @@ footer p {
   color: var(--black);
 }
 
+/* footer buttons sit on black — use a yellow focus ring there */
+footer a:focus-visible {
+  outline-color: var(--yellow);
+}
+
 .copyright {
   font-family: var(--mono);
   font-size: 0.75rem;
@@ -941,9 +1283,92 @@ footer p {
   margin: 0;
 }
 
-/* ---------- 8. MOBILE ENGINE TUNING ---------- */
+/* ---------- 11. SCROLL-REVEAL ANIMATIONS ----------
+   script.js adds .visible when an element scrolls into view.
+   Elements start slightly lower + transparent, then ease up. */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* gentle stagger so stacked cards cascade instead of popping at once */
+.edu-card.reveal:nth-child(2)  { transition-delay: 0.1s; }
+.edu-card.reveal:nth-child(3)  { transition-delay: 0.2s; }
+.grid .project.reveal:nth-child(2) { transition-delay: 0.1s; }
+.grid .project.reveal:nth-child(3) { transition-delay: 0.2s; }
+
+/* accessibility: honor "reduce motion" system setting */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .flip-card-inner,
+  .mini-track,
+  .strip-item,
+  .strip-item img,
+  .strip-item figcaption {
+    transition: none;
+  }
+
+  .scroll-line,
+  .type-cursor {
+    animation: none;
+  }
+}
+
+/* ---------- 12. MOBILE TUNING ---------- */
+
+/* below 880px the inline nav links no longer fit the capsule —
+   switch to the ••• dropdown menu */
+@media (max-width: 880px) {
+  .nav-links { display: none; }
+  .nav-toggle-btn { display: flex; }
+  .nav-dock { min-width: 250px; }
+  .nav-dock-inner { justify-content: space-between; }
+}
+
 @media (max-width: 680px) {
-  .slide img   { height: 240px; }
+  /* gallery strip turns vertical: collapsed photos are short bars,
+     tapping one expands it downward like an accordion */
+  .photo-strip {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .strip-item {
+    flex: none;
+    height: 64px;
+    transition: height 0.5s ease, box-shadow 0.3s ease;
+  }
+
+  .strip-item.active {
+    flex: none;
+    height: 400px;
+    box-shadow: 6px 6px 0 var(--black);
+  }
+
+  /* spine labels lie flat again on mobile */
+  .strip-item::after {
+    writing-mode: horizontal-tb;
+    transform: none;
+    left: auto;
+    right: 12px;
+    bottom: auto;
+    top: 12px;
+    padding: 3px 8px;
+  }
+
   #modal-img   { height: 240px; }
 
   .modal-thumbs img {
@@ -955,18 +1380,37 @@ footer p {
     width: 36px;
     height: 36px;
   }
+
+  /* education zig-zag flattens on small screens */
+  .edu-card:nth-child(even) { margin-left: 0; }
+
+  .skills-grid { grid-template-columns: 1fr; }
+
+  .modal-meta {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .modal-meta dd { margin-bottom: 8px; }
 }
 
 @media (max-width: 500px) {
-  .nav-dock {
-    top: 16px;
-  }
+  .nav-dock { top: 16px; }
 
-  .hero {
-    padding-top: 100px;
-  }
+  .hero { padding-top: 100px; }
 
   .massive-text-line {
     -webkit-text-stroke: 1px var(--black);
   }
+
+  .hero-kicker {
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    padding: 0 16px;
+  }
+
+  section { padding: 64px 0; }
+
+  .timeline { padding-left: 26px; }
+  .t-item::before { left: -33px; }
 }

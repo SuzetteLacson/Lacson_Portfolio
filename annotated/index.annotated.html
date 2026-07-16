@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<!-- <!DOCTYPE html> = tells the browser "this is modern HTML5". It MUST be the very
+     first line of the file. Without it, browsers fall back to "quirks mode", an old
+     compatibility mode where CSS sizing behaves differently and layouts break. -->
+
+<!-- ============================================================================
+     index.annotated.html — STUDY COPY of index.html (fully commented)
+
+     THIS FILE IS A DUPLICATE FOR LEARNING. The real site runs on ../index.html.
+     Nothing here is edited except the comments and 3 paths (see below), so you can
+     read this side-by-side with the original and they will match line for line.
+
+     PATHS CHANGED IN THIS COPY ONLY (because this file sits one folder deeper):
+       style.css   -> style.annotated.css     (the commented CSS)
+       script.js   -> script.annotated.js     (the commented JS)
+       images/...  -> ../images/...           (go up one folder to find images)
+
+     ------------------------------------------------------------------------
+     WHAT THIS FILE'S JOB IS
+     HTML is the SKELETON. It holds the content and says what each piece MEANS
+     (this is a heading, this is a navigation bar, this is an article). It does
+     NOT decide colours, sizes, or movement:
+       - style.css  decides how it LOOKS
+       - script.js  decides how it BEHAVES
+     That 3-way split is called "separation of concerns" and it is the single
+     most useful thing to name if a supervisor asks why there are three files.
+
+     SECTION MAP (the order things appear on the page, matching the nav):
+       NAV -> HERO -> 01 ABOUT -> 02 GALLERY -> 03 PROJECTS (+ modal)
+           -> 04 SKILLS -> 05 EXPERIENCE -> CONTACT (footer)
+============================================================================ -->
+
+<html lang="en">
+<!-- lang="en" tells screen readers to pronounce the page in English, and tells
+     Google what language to index it as. One attribute, real accessibility win. -->
+
+<head>
+<!-- <head> = information ABOUT the page. Nothing in here is drawn on screen.
+     It holds the title, the SEO description, the fonts, and the CSS link. -->
+
+  <meta charset="UTF-8">
+  <!-- charset=UTF-8 = the character encoding. It's what lets special characters
+       (é, ✦, ✕, ‹, ›, ©) display correctly instead of turning into garbage like "Ã©". -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- THE MOBILE LINE. Without this, a phone pretends to be a ~980px-wide desktop
+       and zooms the whole page out, so everything is tiny.
+         width=device-width  = "use the phone's real width"
+         initial-scale=1.0   = "don't zoom in or out on load"
+       Every CSS media query in style.css depends on this line existing. -->
+
+  <!-- ===== TITLE + SEO (search engines / social media link previews) ===== -->
+
+  <title>Suzette Lacson — Computer Engineer / QA Automation</title>
+  <!-- Shows in the browser tab, and is the blue clickable headline on Google. -->
+
+  <meta name="description" content="Portfolio of Suzette Lacson — Computer Engineering student focused on QA automation, AI-powered tools, web development, and Arduino/embedded projects.">
+  <!-- The grey summary paragraph under the title in Google results. Not shown on the page. -->
+
+  <meta property="og:title" content="Suzette Lacson — Computer Engineer">
+  <meta property="og:description" content="QA automation, AI tools, web development, and robotics projects.">
+  <meta property="og:image" content="../images/Me.jpg">
+  <!-- "og" = Open Graph, a standard invented by Facebook and now used by LinkedIn,
+       Messenger, Discord, Slack, etc. These three lines control the preview CARD
+       that appears when someone pastes your portfolio link into a chat: the title,
+       the blurb, and the thumbnail image. Without them the link looks bare. -->
+
+  <!-- ===== FONTS: loaded from Google Fonts (an external service) ===== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- preconnect = a performance hint: "browser, you WILL need these two servers in
+       a moment — start the connection handshake now, in parallel, instead of waiting."
+       Shaves off a few hundred milliseconds of font-loading delay. Purely optional. -->
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- The actual font download. Reading the URL:
+         family=JetBrains+Mono  -> the monospace/"code" font, used for headings
+         wght@500;700;800;900   -> only download these 4 weights (fewer = faster)
+         &family=Inter          -> the second font, used for body text
+         display=swap           -> IMPORTANT: show text immediately in a fallback
+                                   font, then swap in the real font when it arrives.
+                                   Without this, text is INVISIBLE while fonts load. -->
+
+  <!-- ===== CONNECT THE DESIGN FILE ===== -->
+  <link rel="stylesheet" href="style.annotated.css">
+  <!-- This one line is the entire link between HTML and CSS. Delete it and the page
+       still works perfectly — it just becomes plain black text on white, no layout.
+       (In the real ../index.html this points to "style.css".) -->
+</head>
+
+<body>
+<!-- <body> = everything the visitor actually SEES. -->
+
+<!-- ============================================================================
+     FLOATING CAPSULE NAV — the black pill that stays stuck at the top
+     Desktop: brand + inline links, and a YELLOW PILL that follows whichever
+              section you're currently looking at (that's the "scrollspy",
+              driven from script.js section 2b — JS only adds the .active class,
+              CSS draws the pill).
+     Mobile:  the links don't fit, so they collapse into the ••• dropdown card.
+              (The switch happens at 880px — see style.css section 12.)
+============================================================================ -->
+  <nav class="nav-dock">
+  <!-- <nav> instead of <div>: a SEMANTIC tag. It means "this is the site's main
+       navigation". Screen readers can jump straight to it. Looks identical to a
+       div — the difference is meaning, not appearance. -->
+
+    <div class="nav-dock-inner">
+    <!-- Inner wrapper exists purely so CSS can flexbox the row (brand | links | button)
+         separately from the outer capsule's background and rounded shape. -->
+
+      <a href="#top" class="nav-brand">suzette.dev</a>
+      <!-- href="#top" = an ANCHOR LINK. The "#" means "stay on this page and scroll to
+           the element whose id is 'top'" — that's the <header id="top"> further down.
+           The smooth glide is CSS (`scroll-behavior: smooth`), not JavaScript. -->
+
+      <!-- Inline links — visible on desktop only (CSS hides these under 880px) -->
+      <ul class="nav-links">
+      <!-- <ul> = unordered list. A menu IS a list of links, so this is the correct tag.
+           The bullet points are removed in CSS with `list-style: none`. -->
+        <li><a href="#about"      class="nav-link" data-section="about">About</a></li>
+        <li><a href="#gallery"    class="nav-link" data-section="gallery">Gallery</a></li>
+        <li><a href="#projects"   class="nav-link" data-section="projects">Projects</a></li>
+        <li><a href="#skills"     class="nav-link" data-section="skills">Skills</a></li>
+        <li><a href="#experience" class="nav-link" data-section="experience">Experience</a></li>
+        <li><a href="#contact"    class="nav-link" data-section="contact">Contact</a></li>
+        <!-- Two different attributes doing two different jobs on each link:
+               href="#about"          -> what the BROWSER does (scroll to that section)
+               data-section="about"   -> what JAVASCRIPT reads (which link to highlight)
+             "data-*" is HTML's official way to attach your own custom data to an
+             element. Any attribute starting with data- is legal and is ignored by the
+             browser, but JS can read it via element.dataset.section. This is how the
+             scrollspy knows link <-> section pairings without hard-coding a list in JS. -->
+      </ul>
+
+      <!-- Mobile menu button (the ••• ) -->
+      <button class="nav-toggle-btn" id="menuToggleBtn" aria-label="Open navigation menu" aria-expanded="false">
+      <!-- <button> not <div>: buttons are keyboard-focusable and Enter/Space-clickable for free.
+           aria-label   = the button's text is just three dots, which a screen reader would
+                          read as "dot dot dot". This gives it a real spoken name.
+           aria-expanded= tells screen readers whether the menu is currently open or closed.
+                          script.js flips it between "true"/"false" — it is NOT decoration,
+                          it's the state the screen reader announces. -->
+        <span>•</span><span>•</span><span>•</span>
+      </button>
+    </div>
+
+    <!-- Expanded dropdown card (mobile) — hidden by default via CSS `display: none`.
+         script.js adds the class .show, and CSS's `.nav-dropdown.show { display: block }`
+         makes it appear. NOTE THE PATTERN — it repeats everywhere in this project:
+         JS never sets styles directly; JS toggles a CLASS, CSS does the visuals. -->
+    <div class="nav-dropdown" id="navDropdown">
+    <!-- id="navDropdown" — an id must be UNIQUE on the page. It's the hook JS grabs
+         with document.getElementById("navDropdown"). Rule of thumb used in this project:
+           id    = a single specific element, usually for JS to find
+           class = a style, reusable on many elements -->
+      <div class="dropdown-header">
+        <span class="dropdown-brand">suzette.dev</span>
+        <button class="dropdown-close-btn" id="menuCloseBtn" aria-label="Close navigation menu">&times;</button>
+        <!-- &times; = an HTML entity for the × symbol. Entities are escape codes for
+             characters that are awkward to type or reserved (&amp; = &, &lt; = <). -->
+      </div>
+      <ul class="dropdown-links">
+        <li><a href="#top"        class="dropdown-pill">Home</a></li>
+        <li><a href="#about"      class="dropdown-pill" data-section="about">About Me</a></li>
+        <li><a href="#gallery"    class="dropdown-pill" data-section="gallery">Gallery</a></li>
+        <li><a href="#projects"   class="dropdown-pill" data-section="projects">Projects</a></li>
+        <li><a href="#skills"     class="dropdown-pill" data-section="skills">Skills</a></li>
+        <li><a href="#experience" class="dropdown-pill" data-section="experience">Experience</a></li>
+        <li><a href="#contact"    class="dropdown-pill" data-section="contact">Contact</a></li>
+        <!-- Same data-section attributes as the desktop links, so ONE scrollspy loop in
+             script.js highlights both menus at once. It selects "[data-section]" — every
+             element that has the attribute — regardless of which menu it lives in. -->
+      </ul>
+    </div>
+  </nav>
+
+<!-- ============================================================================
+     HERO — the full-screen opening (giant name + flip photo + typewriter)
+============================================================================ -->
+  <header class="hero" id="top">
+  <!-- <header> = the introductory block of the page. id="top" is the scroll target
+       for the "suzette.dev" brand link and the mobile "Home" pill. -->
+    <div class="wrap hero-centerpiece">
+    <!-- TWO classes on one element, doing two separate jobs — very common technique:
+           .wrap             -> shared width limiter (max 1100px, centred) reused site-wide
+           .hero-centerpiece -> the hero-only flex column that centres everything
+         Keeping them separate means .wrap stays reusable instead of being copy-pasted. -->
+
+      <p class="hero-kicker">CRAFTING CODE, TESTS &amp; ROBOTS — LIPA CITY, PH</p>
+      <!-- "Kicker" is a magazine/newspaper term for the small line above a headline.
+           &amp; is written instead of a bare "&" because "&" starts an entity in HTML. -->
+
+      <!-- Giant typographic name stack -->
+      <div class="massive-name-container">
+      <!-- This wrapper gets `position: relative` in CSS, which turns it into the
+           ANCHOR that the photo capsule positions itself against. Without relative
+           here, the absolutely-positioned photo below would centre itself on the
+           whole page instead of on the name. -->
+
+        <h1 class="massive-text-line">SUZETTE</h1>
+        <!-- <h1> = the most important heading. Best practice is one meaningful <h1>
+             per page; here the name is split across two lines for the visual stack. -->
+
+        <!-- Interactive 3D flip capsule (also a link to the About section) -->
+        <a href="#about" class="oval-photo-frame" aria-label="Go to About section">
+        <!-- It's an <a>, not a div, because it genuinely navigates. aria-label gives it a
+             spoken name — otherwise a screen reader announces only the image's alt text. -->
+          <div class="flip-card-inner">
+          <!-- The 3D flip is 100% CSS, ZERO JavaScript. The mechanism:
+                 parent .oval-photo-frame has `perspective`      -> creates 3D depth
+                 this .flip-card-inner has `transform-style: preserve-3d`
+                 on hover it gets `transform: rotateY(180deg)`   -> the spin
+                 both faces have `backface-visibility: hidden`   -> hides the mirrored side
+               See style.css section 4 for the actual rules. -->
+            <!-- FRONT SIDE: main photo -->
+            <div class="flip-card-front">
+              <img class="hero-photo" src="../images/Me.jpg" alt="Portrait of Suzette Lacson">
+              <!-- alt = the text a screen reader speaks, and what shows if the image
+                   fails to load. Required for accessibility on every meaningful image. -->
+            </div>
+            <!-- BACK SIDE: second photo -->
+            <div class="flip-card-back">
+              <img class="hero-photo" src="../images/ME2.png" alt="Suzette Lacson, alternate photo">
+              <!-- Note this one is .png while the front is .jpg — file extensions must
+                   match the real file EXACTLY, including capital letters, or you get a
+                   broken image once it's on a live server (Windows is forgiving about
+                   case; Linux web servers are not). -->
+            </div>
+          </div>
+        </a>
+
+        <h1 class="massive-text-line">LACSON</h1>
+      </div>
+
+      <div class="diamond-divider">✦</div>
+      <!-- Purely decorative character divider. -->
+
+      <!-- Animated role typewriter — the typing logic is script.js section 7 -->
+      <p class="typewriter-line"><span id="typewriter"></span><span class="type-cursor">▌</span></p>
+      <!-- The first span is EMPTY on purpose: JavaScript fills it letter by letter with
+           .textContent. The second span is the blinking cursor, blinked by a CSS
+           @keyframes animation (not JS). If JS fails to load, you simply see the cursor. -->
+
+      <p class="hero-tagline">
+        I'm Suzette Lacson — an aspiring developer passionately creating
+        automated solutions, QA systems, and hardware builds.
+      </p>
+
+      <div class="scroll-indicator">
+        <span class="scroll-line"></span>
+        <!-- An EMPTY span. It has no text — CSS gives it a width, height and background
+             so it's just a drawn line, pulsing via a CSS animation. Empty elements used
+             purely as "shapes for CSS to paint" are a normal, accepted technique. -->
+        <span class="scroll-text">SCROLL</span>
+      </div>
+
+    </div>
+  </header>
+
+<!-- ============================================================================
+     01 / ABOUT — told in two "scrolls": a terminal intro, then the education arc
+============================================================================ -->
+  <section id="about">
+  <!-- <section> = a distinct thematic chunk of the page.
+       id="about" does DOUBLE duty:
+         1. the nav's href="#about" scrolls here
+         2. script.js's scrollspy observes this element and matches its id against
+            each link's data-section value -->
+    <div class="wrap">
+      <h2>01 / About</h2>
+      <!-- Heading levels must not skip: h1 (hero) -> h2 (section) -> h3 (items inside).
+           Screen-reader users navigate by heading level, so the order is real structure,
+           not just font size. Size is set in CSS. -->
+
+      <!-- ····· scroll 1: the intro ····· -->
+      <p class="about-chapter reveal">// first, a quick intro</p>
+      <!-- class="reveal" = the scroll-fade-in hook. It appears on ~20 elements here.
+           How it works, end to end:
+             1. CSS gives .reveal    -> opacity: 0 (invisible, shifted down 26px)
+             2. script.js watches it with IntersectionObserver
+             3. when it scrolls into view, JS adds the class .visible
+             4. CSS's .reveal.visible -> opacity: 1, and `transition` animates the change
+           JS decides WHEN. CSS decides WHAT IT LOOKS LIKE. No animation library. -->
+
+      <!-- Developer Terminal UI — a fake terminal window, built from plain divs -->
+      <div class="terminal reveal">
+        <div class="terminal-header">
+          <div class="terminal-buttons">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <!-- The three macOS window dots. Again: empty spans, drawn entirely by CSS
+                 (12px wide, 12px tall, border-radius 50% = a circle). -->
+          </div>
+          <div class="terminal-title">suzette@dev-machine: ~</div>
+        </div>
+
+        <!-- Interactive code tabs -->
+        <div class="terminal-tabs">
+          <button class="tab-btn active" id="btn-profile" onclick="switchTab('profile')">profile.json</button>
+          <button class="tab-btn" id="btn-bio" onclick="switchTab('bio')">bio.md</button>
+          <!-- onclick="switchTab('profile')" = an INLINE event handler. It calls the
+               switchTab() function defined in script.js section 6, passing 'profile'.
+               The ids follow a deliberate naming convention that switchTab() relies on:
+                 button  id="btn-profile"   <-- "btn-" + name
+                 content id="tab-profile"   <-- "tab-" + name
+               So the function can find both from just the word 'profile'. If you add a
+               third tab, you must follow the same btn-/tab- naming or it won't switch.
+
+               HONEST NOTE FOR YOUR REPORT: inline onclick is the beginner-friendly way,
+               and it's what this project uses. The more modern approach is
+               addEventListener in the JS file (which this project DOES use for the nav
+               and gallery). Both are valid; mixing them is a small inconsistency, not a
+               bug. If asked "would you change anything?", this is a good honest answer. -->
+        </div>
+
+        <div class="terminal-body">
+          <!-- Tab 1: profile.json -->
+          <div id="tab-profile" class="tab-content active">
+          <!-- Both tabs are ALWAYS in the HTML. Only the one with class .active is shown
+               (CSS: .tab-content { display: none } / .tab-content.active { display: block }).
+               Switching tabs = moving one class. Nothing is created or destroyed. -->
+<pre><code><span class="key">"candidate"</span>: {
+  <span class="key">"name"</span>: <span class="string">"Suzette Lacson"</span>,
+  <span class="key">"role"</span>: <span class="string">"Computer Engineering Student"</span>,
+  <span class="key">"currently"</span>: <span class="string">"QA Automation Intern @ Pick.A.Roo"</span>,
+  <span class="key">"passions"</span>: [<span class="string">"QA Automation"</span>, <span class="string">"Arduino / Hardware"</span>, <span class="string">"App Development"</span>],
+  <span class="key">"interests"</span>: [<span class="string">"Robotics"</span>, <span class="string">"Content Creation"</span>, <span class="string">"Gaming"</span>]
+}</code></pre>
+          <!-- <pre> = "preformatted": the ONE tag where spaces and line breaks are kept
+               exactly as typed. Everywhere else in HTML, 10 spaces collapse into 1.
+               That's why this block is jammed against the left margin with no indenting —
+               any indentation added here would SHOW UP on the page.
+               <code> = semantic "this text is source code".
+               The syntax colours are fake: each <span class="key"> / class="string">
+               is just coloured by CSS. No syntax-highlighting library involved. -->
+          </div>
+
+          <!-- Tab 2: bio.md — hidden until switchTab('bio') adds .active -->
+          <div id="tab-bio" class="tab-content">
+            <h3># Bio</h3>
+            <p>Hi, I'm Suzette — a Computer Engineering student who likes turning manual, repetitive work into software that runs on its own. My focus right now is QA automation: I'm interning at Pick.A.Roo, where I write automated tests for a real production mobile app.</p>
+            <p>Outside of testing, I build things — Arduino robots, AI-powered tools, and small web platforms — and lately I've been getting into mobile app development. If it can be automated, scripted, or soldered, I'm probably interested in it.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ····· scroll 2: the education arc ····· -->
+      <p class="about-chapter reveal">// then, where I studied — it wasn't a straight line</p>
+
+      <div class="edu-track">
+      <!-- A flex COLUMN (see CSS section 5). The zig-zag indent is done with
+           `.edu-card:nth-child(even) { margin-left: 56px }` — CSS counts the cards
+           itself, so you never have to add a class to every second card. -->
+
+        <!-- School 1: current -->
+        <article class="edu-card reveal">
+        <!-- <article> = a self-contained piece of content that would still make sense
+             if you lifted it out on its own. A school entry qualifies. -->
+          <span class="edu-years">PRESENT</span>
+          <h3>University of Batangas — Lipa</h3>
+          <span class="edu-degree">B.S. Computer Engineering</span>
+          <p>Where I found the right fit. I serve as Multimedia Manager of the Brahman Institute of Computer Engineering Students and I'm a student member of ICpEP.SE Region 4-A. Most of my time here goes to embedded systems, automation, and an unreasonable number of breadboards.</p>
+        </article>
+
+        <!-- School 2 — being the 2nd child, CSS indents this one right (the zig-zag) -->
+        <article class="edu-card reveal">
+          <span class="edu-years">2021 — 2023</span>
+          <h3>Lyceum of the Philippines University — Batangas</h3>
+          <span class="edu-degree">B.S. Nursing</span>
+          <p>Plot twist: I started college in nursing. Two years in — Dean's Lister for both semesters of A.Y. 2021–2022, a Supreme Student Council scholar, and a Jr. Nightingales year representative — I realized I liked building systems more than memorizing them, so I made the jump to engineering.</p>
+        </article>
+
+        <!-- School 3 -->
+        <article class="edu-card reveal">
+          <span class="edu-years">2018 — 2021</span>
+          <h3>The Nazareth School</h3>
+          <span class="edu-degree">STEM Strand, Senior High School</span>
+          <p>Where it all started. Graduated with honors in Grades 11–12, earned the TNS Spotlights certification, and played for the badminton school varsity. The STEM strand gave me my first real taste of engineering — and it stuck.</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+<!-- ============================================================================
+     02 / GALLERY — the expanding photo strip
+     THE IDEA: every photo stands side by side in one row like books on a shelf.
+     The active one grows wide and full-colour; the rest stay as thin grey slivers
+     with vertical "book spine" labels. Hover / tap / keyboard-focus to expand.
+
+     HOW THE EXPANDING IS DONE (a genuinely nice trick worth explaining out loud):
+       - every photo gets  flex: 1     (equal share of the row)
+       - the active one gets flex: 3.5 (3.5x the share of the others)
+       - CSS has `transition: flex`    (so the change ANIMATES instead of snapping)
+     JavaScript's entire job is moving the .active class. The animation is all CSS.
+============================================================================ -->
+  <section id="gallery" class="yellow-bg">
+  <!-- .yellow-bg = a reusable class that paints a section yellow with black borders.
+       Used here and on Skills, so alternating sections break up the white. -->
+    <div class="wrap">
+      <h2>02 / Gallery</h2>
+      <p class="section-sub">Pick a tab, then hover or tap a photo to expand it.</p>
+
+      <!-- Category tabs: each button shows only the photos whose data-category
+           matches its data-filter value. -->
+      <div class="gallery-tabs reveal" id="galleryTabs">
+        <button class="gallery-tab active" data-filter="events"  aria-pressed="true">Events</button>
+        <button class="gallery-tab"        data-filter="arduino" aria-pressed="false">Arduino Projects</button>
+        <button class="gallery-tab"        data-filter="certs"   aria-pressed="false">Certs</button>
+        <!-- data-filter on the BUTTON is matched against data-category on the PHOTOS.
+             That pairing is the whole filter system — script.js just compares the two
+             strings. Add a button with data-filter="foo" and photos with
+             data-category="foo" and filtering works with ZERO new JavaScript.
+
+             aria-pressed="true"/"false" = tells a screen reader this is a toggle button
+             and whether it's currently pressed. script.js keeps it in sync with .active.
+             .active is for the EYES (CSS), aria-pressed is for the EARS (screen reader) —
+             you need both, which is why the JS sets both together. -->
+      </div>
+
+      <div class="photo-strip reveal" id="photoStrip">
+      <!-- id="photoStrip" is what script.js grabs to run the whole gallery. -->
+
+        <!-- ····· EVENTS ····· -->
+        <figure class="strip-item" data-category="events" data-num="001" data-label="PICK-A-ROO" tabindex="0">
+        <!-- <figure> + <figcaption> = the semantic pair for "an image with a caption".
+             Reading the custom attributes — each is used somewhere specific:
+               data-category -> read by script.js, decides which tab shows this photo
+               data-num      -> printed by CSS as the little number chip, via
+                                `content: attr(data-num)` in a ::before pseudo-element
+               data-label    -> printed by CSS as the vertical spine text, via
+                                `content: attr(data-label)` in ::after
+             So data-num and data-label are TEXT DRAWN BY CSS, not by HTML or JS.
+             attr() pulling an attribute into CSS content is the trick that lets you add
+             a photo without writing any extra markup for the chip or the label.
+
+             tabindex="0" = makes a normally non-focusable element reachable by the Tab
+             key, so keyboard users can expand photos too. (0 = "join the natural tab
+             order in document order"; never use positive numbers, they reorder the page.) -->
+          <img src="../images/interns.jpg" alt="Pick-A-Roo internship team">
+          <!-- NOTE: no loading="lazy" on this first one — it's likely the first photo a
+               visitor sees, so it should load immediately. All the others below are lazy. -->
+          <figcaption>Pick-A-Roo Internship</figcaption>
+          <!-- Hidden until this photo expands: CSS slides it up with translateY. -->
+        </figure>
+
+        <figure class="strip-item" data-category="events" data-num="002" data-label="DAY ONE" tabindex="0">
+          <img src="../images/internshipw_id.jpg" alt="First day of internship with company ID" loading="lazy">
+          <!-- loading="lazy" = don't download this image until the visitor scrolls near
+               it. One attribute, real speed win on an image-heavy page, no JS needed. -->
+          <figcaption>Internship onboarding at AGILE Digital Ventures</figcaption>
+        </figure>
+
+        <figure class="strip-item" data-category="events" data-num="003" data-label="PIC 2025" tabindex="0">
+          <img src="../images/PIC_EVENT.jpg" alt="Philippine Innovation Conference 2025" loading="lazy">
+          <figcaption>Philippine Innovation Conference 2025 — Tatak Future</figcaption>
+        </figure>
+
+        <figure class="strip-item" data-category="events" data-num="004" data-label="TEAM EVENT" tabindex="0">
+          <img src="../images/event_pickaroo.jpg" alt="Pick-A-Roo company event" loading="lazy">
+          <figcaption>Pick-A-Roo team event</figcaption>
+        </figure>
+
+        <!-- ····· ARDUINO PROJECTS ····· (hidden until the Arduino tab is clicked) -->
+        <figure class="strip-item" data-category="arduino" data-num="001" data-label="ARDUINO DAYS" tabindex="0">
+          <img src="../images/withArduino.jpg" alt="Working with Arduino" loading="lazy">
+          <figcaption>Working with Arduino activities</figcaption>
+        </figure>
+
+        <figure class="strip-item" data-category="arduino" data-num="002" data-label="MAZEBOT" tabindex="0">
+          <img src="../images/mzebot_bot.jpg" alt="MazeBot robot up close" loading="lazy">
+          <figcaption>MazeBot — the robot up close</figcaption>
+        </figure>
+
+        <figure class="strip-item" data-category="arduino" data-num="003" data-label="THE MAZE" tabindex="0">
+          <img src="../images/mzebot_maze.jpg" alt="MazeBot navigating the maze" loading="lazy">
+          <figcaption>MazeBot navigating the maze</figcaption>
+        </figure>
+
+        <figure class="strip-item" data-category="arduino" data-num="004" data-label="ME + BOT" tabindex="0">
+          <img src="../images/me_w_bot.jpg" alt="Suzette with the MazeBot" loading="lazy">
+          <figcaption>Me with our MazeBot</figcaption>
+        </figure>
+
+        <figure class="strip-item" data-category="arduino" data-num="005" data-label="BOT SQUAD" tabindex="0">
+          <img src="../images/mzebotgrouppic.jpg" alt="MazeBot team group picture" loading="lazy">
+          <figcaption>The MazeBot team</figcaption>
+        </figure>
+
+        <!-- ····· CERTS ·····
+             These two still point at placeholder .svg files — replacing them with real
+             scans is a to-do, not a mistake in the code. -->
+        <figure class="strip-item" data-category="certs" data-num="001" data-label="CCNA 1" tabindex="0">
+          <img src="../images/activity1.svg" alt="Cisco CCNA 1 certificate" loading="lazy">
+          <figcaption>Cisco CCNA 1 — certificate photo coming soon</figcaption>
+        </figure>
+
+        <figure class="strip-item" data-category="certs" data-num="002" data-label="CCNA 2" tabindex="0">
+          <img src="../images/activity2.svg" alt="Cisco CCNA 2 certificate" loading="lazy">
+          <figcaption>Cisco CCNA 2 — certificate photo coming soon</figcaption>
+        </figure>
+
+      </div>
+    </div>
+  </section>
+
+<!-- ============================================================================
+     03 / PROJECTS — three cards. Click one to open the detail popup (modal).
+
+     IMPORTANT ARCHITECTURE POINT (worth saying out loud in a defence):
+     The cards below contain NO photos in the HTML. The <div class="mini-carousel">
+     is an EMPTY box. script.js reads the project data, builds the <img> tags, the
+     dots and the arrows, and injects them. Same for every word in the popup.
+     Everything comes from ONE object in script.js called `projectPhotos`.
+     That's a mini version of what React/Vue do: data in one place, UI generated
+     from it — so adding a project means editing data, not writing markup.
+============================================================================ -->
+  <section id="projects">
+    <div class="wrap">
+      <h2>03 / Projects</h2>
+      <p class="section-sub">Photos slide automatically — click a card for the full story.</p>
+      <div class="grid">
+      <!-- .grid uses CSS Grid with `repeat(auto-fill, minmax(290px, 1fr))`, which means
+           "fit as many 290px-minimum columns per row as will fit, then stretch them to
+           share the space". It reflows from 3 columns to 2 to 1 as the screen narrows
+           with NO media query. See style.css section 7. -->
+
+        <!-- Project 1 -->
+        <article class="card project reveal" onclick="openProject('SUZENTINEL')">
+        <!-- The string 'SUZENTINEL' is a KEY. It must match a key in the projectPhotos
+             object in script.js EXACTLY, including capitals — JS object keys are
+             case-sensitive, so 'suzentinel' would silently open nothing.
+             (Note the inconsistency in the original: this key is ALL CAPS while the
+             other two are lowercase. It works, but consistent casing would be tidier.) -->
+          <div class="mini-carousel" data-project="SUZENTINEL"></div>
+          <!-- EMPTY ON PURPOSE. script.js section 5 finds every .mini-carousel, reads
+               data-project to know which photos to use, and builds the slider inside it. -->
+          <h3>SUZENTINEL</h3>
+          <div class="tags"><span class="tag">Python</span><span class="tag">Computer Vision</span><span class="tag">Flask</span></div>
+          <p>An AI-powered computer vision system that monitors user activity, tracks screen time, and provides real-time productivity insights.</p>
+          <span class="view-more">▸ view details &amp; photos</span>
+          <!-- Just a text hint. The real click target is the whole <article> above. -->
+        </article>
+
+        <!-- Project 2 -->
+        <article class="card project reveal" onclick="openProject('mazebot')">
+          <div class="mini-carousel" data-project="mazebot"></div>
+          <h3>MazeBot 2026</h3>
+          <div class="tags"><span class="tag">Arduino</span><span class="tag">C++</span><span class="tag">Robotics</span></div>
+          <p>An autonomous maze-solving robot built with Arduino that navigates using sensors and obstacle detection algorithms.</p>
+          <span class="view-more">▸ view details &amp; photos</span>
+        </article>
+
+        <!-- Project 3 -->
+        <article class="card project reveal" onclick="openProject('amari')">
+          <div class="mini-carousel" data-project="amari"></div>
+          <h3>Amari Booking Platform</h3>
+          <div class="tags"><span class="tag">HTML / CSS / JS</span><span class="tag">SQL</span><span class="tag">Web</span></div>
+          <p>A web-based booking platform developed for Amari Staycation that enables guests to check availability and make online reservations.</p>
+          <span class="view-more">▸ view details &amp; photos</span>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+<!-- ============================================================================
+     PROJECT DETAIL POPUP (MODAL)
+     "Modal" = a window that opens ON TOP of the page and takes focus until closed.
+     It's always present in the HTML but hidden with `display: none` until
+     openProject() adds the class .show. It sits here at the bottom, outside the
+     projects section, because it belongs to the whole page rather than one card.
+============================================================================ -->
+  <div class="modal-overlay" id="modal" onclick="closeProject()">
+  <!-- The dark full-screen backdrop. onclick here = "clicking the dark area closes it",
+       one of the three ways to close (the others are the ✕ button and the Esc key). -->
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="event.stopPropagation()">
+    <!-- onclick="event.stopPropagation()" IS THE IMPORTANT ONE. Here's the problem it fixes:
+         clicks BUBBLE — a click inside the white box also counts as a click on the dark
+         overlay behind it, because the box sits inside the overlay. Without this line, the
+         popup would slam shut the moment you clicked anything inside it. stopPropagation()
+         says "this click stops here, don't tell my parent". Same trick appears in
+         script.js on the carousel arrows so clicking ‹ › doesn't also open the popup.
+
+         role="dialog"            -> tells assistive tech this is a dialog window
+         aria-modal="true"        -> "the rest of the page is inert while I'm open"
+         aria-labelledby="modal-title" -> the dialog's spoken title is the text of the
+                                          element with id="modal-title" (the h3 below) -->
+      <div class="modal-top">
+        <h3 id="modal-title">Project</h3>
+        <!-- The word "Project" is just a placeholder. openProject() overwrites it with
+             the real title via .textContent. -->
+        <button class="modal-close" id="modal-close-btn" onclick="closeProject()" aria-label="Close project details">✕</button>
+        <!-- script.js focuses this button when the popup opens, so a keyboard user is
+             immediately on "Close" rather than lost somewhere behind the popup. -->
+      </div>
+
+      <div class="modal-view">
+        <button class="carousel-btn" onclick="movePhoto(-1)" aria-label="Previous project photo">‹</button>
+        <img id="modal-img" alt="Project photo">
+        <!-- No src! JS sets both .src and .alt every time you change photo. -->
+        <button class="carousel-btn" onclick="movePhoto(1)" aria-label="Next project photo">›</button>
+        <!-- movePhoto(-1) and movePhoto(1) — one function, direction passed as a number.
+             -1 = back one, +1 = forward one. Neater than writing two near-identical
+             functions, and script.js wraps around so it never hits the end. -->
+      </div>
+
+      <div class="modal-thumbs" id="modal-thumbs"></div>
+      <!-- Empty — JS builds one clickable thumbnail per photo. -->
+
+      <div id="modal-body" class="modal-body"></div>
+      <!-- Empty — JS builds the ENTIRE write-up here (story, tech table, features,
+           challenges, contribution) from the project data, via buildWriteUp(). -->
+    </div>
+  </div>
+
+<!-- ============================================================================
+     04 / SKILLS — plain grouped lists of pills
+============================================================================ -->
+  <section id="skills" class="yellow-bg">
+    <div class="wrap">
+      <h2>04 / Skills</h2>
+
+      <div class="skills-grid">
+      <!-- CSS Grid again, with auto-fit + minmax(300px, 1fr) — same responsive idea as
+           the project cards: columns fit themselves to the screen with no media query. -->
+
+        <div class="skill-group reveal">
+          <h3 class="skill-title">Programming Languages</h3>
+          <div class="pills">
+            <span class="pill">Python</span>
+            <span class="pill">C++</span>
+            <span class="pill">JavaScript</span>
+            <span class="pill">SQL</span>
+            <!-- To add a skill, copy one <span class="pill"> line. Nothing else to touch. -->
+          </div>
+        </div>
+
+        <div class="skill-group reveal">
+          <h3 class="skill-title">Frontend</h3>
+          <div class="pills">
+            <span class="pill">HTML</span>
+            <span class="pill">CSS</span>
+            <span class="pill">JavaScript</span>
+          </div>
+        </div>
+
+        <div class="skill-group reveal">
+          <h3 class="skill-title">Frameworks &amp; Libraries</h3>
+          <div class="pills">
+            <span class="pill">Flask</span>
+            <!-- Worth noticing: Flask is here because of SUZENTINEL (a Python project).
+                 THIS WEBSITE itself uses no framework at all. -->
+          </div>
+        </div>
+
+        <div class="skill-group reveal">
+          <h3 class="skill-title">QA &amp; Automation</h3>
+          <div class="pills">
+            <span class="pill">Maestro</span>
+            <span class="pill">Android Studio</span>
+            <span class="pill">Google Apps Script</span>
+          </div>
+        </div>
+
+        <div class="skill-group reveal">
+        <!-- This is the 5th .skill-group, and CSS targets it with :nth-child(5) to make
+             it span the full row (`grid-column: 1 / -1`) because the list is long.
+             CAREFUL: that rule is position-based. If you reorder the groups, the wrong
+             one goes full-width. -->
+          <h3 class="skill-title">Tools &amp; Platforms</h3>
+          <div class="pills">
+            <span class="pill">Git / GitHub</span>
+            <span class="pill">VS Code</span>
+            <span class="pill">Arduino IDE</span>
+            <span class="pill">Oracle VM VirtualBox (Linux Mint)</span>
+            <span class="pill">LM Studio</span>
+            <span class="pill">AI tools (ChatGPT, Claude)</span>
+            <span class="pill">AutoCAD / Fusion 360</span>
+            <span class="pill">Tinkercad / Multisim</span>
+            <span class="pill">Trello / Notion</span>
+            <span class="pill">Microsoft Office / Google Workspace</span>
+          </div>
+        </div>
+
+        <div class="skill-group reveal">
+          <h3 class="skill-title">Certifications</h3>
+          <div class="pills">
+            <span class="pill hl">Cisco Certified Network Associate (CCNA) 1 &amp; 2</span>
+            <!-- TWO classes: .pill for the shape, .hl to invert the colours (black bg,
+                 yellow text) so it stands out on the yellow section. This is CSS class
+                 composition — a base class plus a modifier — rather than a whole new class. -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+<!-- ============================================================================
+     05 / EXPERIENCE — a vertical timeline, newest at the top
+     The connecting line and the dots are NOT images and NOT divs. They're CSS
+     pseudo-elements: `.timeline::before` draws the 2px vertical line, and each
+     `.t-item::before` draws one circle on it. See style.css section 9.
+============================================================================ -->
+  <section id="experience">
+    <div class="wrap">
+      <h2>05 / Experience</h2>
+      <div class="timeline">
+
+        <div class="t-item current reveal">
+        <!-- .current is a MODIFIER class — it only changes the dot to filled yellow with
+             a glow ring. Move it to a different entry and the highlight moves with it. -->
+          <span class="when">JUN 2026 — AUG 2026 · CURRENT</span>
+          <h3>IT Intern, QA Automation</h3>
+          <span class="t-company">Pick.A.Roo by AGILE Digital Ventures · Taguig City</span>
+          <p>QA for the Pick.A.Roo Merchant App — part of Megaworld's on-demand lifestyle delivery platform. I write automated UI tests and work inside a real Agile/Scrum development cycle.</p>
+          <ul class="t-highlights">
+            <li>Developed automation test flows for the Merchant App using Maestro and Android Studio</li>
+            <li>Rotated across the QA, iOS, and Android teams for hands-on exposure to each</li>
+            <li>Joined daily stand-ups and collaborative sprint work with the dev teams</li>
+          </ul>
+          <div class="tags"><span class="tag">Maestro</span><span class="tag">Android Studio</span><span class="tag">Agile / Scrum</span></div>
+          <!-- .tag is reused from the project cards — write the style once, use it in two
+               sections. That reuse is exactly the benefit of classes over inline styles. -->
+        </div>
+
+        <div class="t-item reveal">
+          <span class="when">JUN 2025 — PRESENT</span>
+          <h3>Airbnb Operations Coordinator</h3>
+          <span class="t-company">Amari Staycation · Filinvest Alabang, Muntinlupa</span>
+          <p>I run the day-to-day of an Airbnb property — bookings, guest communication, calendar coordination — while quietly automating the repetitive parts. This role is also where the Amari booking platform project came from.</p>
+          <ul class="t-highlights">
+            <li>Managed bookings, guest messaging, and daily property operations</li>
+            <li>Supported admin work and social media marketing for the property</li>
+            <li>Proposed and built the web-based booking platform to replace manual tracking</li>
+          </ul>
+          <div class="tags"><span class="tag">Google Workspace</span><span class="tag">Trello / Notion</span><span class="tag">Web</span></div>
+        </div>
+
+        <div class="t-item reveal">
+          <span class="when">JUL 2023 — SEP 2023</span>
+          <h3>Sales Consultant</h3>
+          <span class="t-company">KIA · Lipa City</span>
+          <p>Handled direct sales for brand-new Kia vehicles. Not a tech role — but it taught me how to talk to people, handle pressure, and follow a process, which turns out to matter in engineering too.</p>
+          <ul class="t-highlights">
+            <li>Built sales funnels for cold and hot customer leads</li>
+            <li>Helped implement and improve the dealership's sales process</li>
+            <li>Provided quality customer service for every client concern</li>
+          </ul>
+          <!-- No .tags div here — the layout doesn't break, because CSS only styles what
+               exists. Optional blocks can simply be left out. -->
+        </div>
+
+        <div class="t-item reveal">
+          <span class="when">PRESENT · SCHOOL ORG</span>
+          <h3>Multimedia Manager</h3>
+          <span class="t-company">Brahman Institute of Computer Engineering Students · University of Batangas</span>
+          <p>I handle multimedia and creatives for our Computer Engineering student organization — publication materials, event coverage, and visual content for org activities.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+<!-- ============================================================================
+     CONTACT / FOOTER
+============================================================================ -->
+  <footer id="contact">
+  <!-- <footer> is semantic, and id="contact" makes it the scrollspy's last target.
+       Because the footer is short it may never cross the middle of the screen, so
+       script.js has a special "if scrolled to the bottom, force Contact active"
+       fallback. That's a real edge case worth knowing about if you're asked. -->
+    <div class="wrap">
+      <h2>Let's build something.</h2>
+      <p>I'm open to internships and entry-level roles in QA automation and software testing. Off the clock you'll find me wiring up Arduinos and learning mobile app development — happy to talk shop about either.</p>
+
+      <div class="footer-links">
+        <a class="btn btn-resume" href="../images/SUZETTE B. LACSON_CV_Tech_Updated.pdf" download>
+        <!-- download = the browser SAVES the file instead of opening it in a tab.
+             (The CV living inside images/ is untidy but harmless — it's just a folder.) -->
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <!-- The icons are INLINE SVG — vector shapes written directly into the HTML.
+               No icon library (no Font Awesome), so there's nothing extra to download.
+                 viewBox="0 0 24 24" = the drawing's internal coordinate grid, so the
+                                       icon scales to any size without blurring
+                 stroke="currentColor" = THE CLEVER BIT: the icon automatically takes the
+                                       text colour of its button. So when the button
+                                       inverts on hover, the icon inverts with it — with
+                                       no extra CSS for the icon at all.
+                 aria-hidden="true"  = hide from screen readers. Correct here, because the
+                                       button already says "Download resume" — announcing
+                                       the icon too would just be noise. -->
+          Download resume
+        </a>
+        <a class="btn btn-ghost" href="mailto:lacsonsuzette03@gmail.com">
+        <!-- mailto: opens the visitor's email app with the address filled in. -->
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+          Email
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/SuzetteLacson" target="_blank" rel="noopener">
+        <!-- target="_blank" = open in a NEW tab.
+             rel="noopener"  = a SECURITY must-have whenever you use target="_blank".
+                 Without it, the page you open can reach back and control your tab
+                 through window.opener (a known phishing trick called tabnabbing).
+                 It also gives a small performance win. Rule: _blank always gets noopener. -->
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.75 2.69 1.25 3.34.95.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.7 5.39-5.26 5.67.41.35.77 1.05.77 2.12 0 1.53-.01 2.76-.01 3.14 0 .3.2.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+          <!-- This one uses fill="currentColor" (a solid filled logo) while the resume and
+               email icons use stroke (outlined line-art). Same currentColor idea either way. -->
+          GitHub
+        </a>
+        <a class="btn btn-ghost" href="https://www.linkedin.com/in/suzettelacson/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+
+      <p class="copyright">© 2026 Suzette · built with HTML, CSS &amp; a little JavaScript</p>
+    </div>
+  </footer>
+
+  <!-- ===== THE SCRIPT LINK ===== -->
+  <script src="script.annotated.js"></script>
+  <!-- WHY THIS IS THE LAST LINE, NOT IN THE <head>:
+       The browser reads the file top to bottom. Putting the script at the very bottom
+       means all the HTML above already exists by the time the JS runs — so when the JS
+       calls document.getElementById("photoStrip"), the element is guaranteed to be there.
+       If this were in the <head>, the JS would run against an empty page and quietly find
+       nothing. (This is also why some parts of script.js are wrapped in a
+       "DOMContentLoaded" listener — a belt-and-braces version of the same protection.)
+
+       "No inline scripts" is also a deliberate choice: all behaviour lives in one file.
+       (In the real ../index.html this points to "script.js".) -->
+</body>
+</html>
