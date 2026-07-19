@@ -38,9 +38,17 @@
        (drawn on a <canvas> by script.js §10; sits behind everything) -->
   <canvas id="bgGrid" aria-hidden="true"></canvas>
 
-  <!-- Floating code glyphs — drift down the page forever (pure CSS
-       animation). Fixed layer, so they follow you through every section.
-       EDIT-ME: change the symbols freely; add/remove <span>s at will. -->
+  <!-- Falling tech objects — drift down the page forever (pure CSS
+       animation). Fixed layer, so they follow you through EVERY section,
+       yellow ones included. Three kinds of faller:
+         · plain code glyphs        (<span>…</span>)
+         · mini keyboard keycaps    (<span class="kf">…</span>) — note the
+           Q and A caps… because QA ✦ — they echo the Skills keyboard
+         · tiny tech icons as SVGs  (<span class="icon">…</span>):
+           monitor, microchip (Arduino), bug (QA!), phone (app dev),
+           and a mouse cursor
+       EDIT-ME: change symbols/letters freely; add/remove <span>s at will
+       (each span gets its lane & speed from style.css nth-child rules). -->
   <div id="floatLayer" aria-hidden="true">
     <span>&lt;/&gt;</span>
     <span class="accent">✦</span>
@@ -58,6 +66,18 @@
     <span>::</span>
     <span>[ ]</span>
     <span>=&gt;</span>
+    <!-- mini keycaps -->
+    <span class="kf">Q</span>
+    <span class="kf">A</span>
+    <span class="kf">CTRL</span>
+    <span class="kf">ESC</span>
+    <span class="kf">↵</span>
+    <!-- tech icons: monitor · microchip · bug · phone · cursor -->
+    <span class="icon"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M9 21h6M12 17v4"/></svg></span>
+    <span class="icon icon-accent"><svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M9.5 2v4M14.5 2v4M9.5 18v4M14.5 18v4M2 9.5h4M2 14.5h4M18 9.5h4M18 14.5h4"/></svg></span>
+    <span class="icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="14" rx="5" ry="6"/><path d="M12 8V6M9 6 7 3M15 6l2-3M7 12H3M7 16H4M17 12h4M17 16h3M12 8v12"/></svg></span>
+    <span class="icon icon-accent"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M10.5 18.5h3"/></svg></span>
+    <span class="icon"><svg viewBox="0 0 24 24"><path d="M5 3l14 8.5-6.5 1.8L10 20z"/></svg></span>
   </div>
 
   <!-- The yellow diamond that chases the mouse (script.js §12) -->
@@ -194,56 +214,127 @@
     <div class="wrap">
       <h2>01 / About</h2>
 
-      <!-- ····· scroll 1: the intro ····· -->
-      <p class="about-chapter reveal">// first, a quick intro</p>
+      <!-- ····· scroll 1: the spotlight intro ·····
+           My photo sits center stage and the facts float AROUND me,
+           each with a hand-drawn arrow pointing back at the photo —
+           like a creator-intro video frame, but interactive:
+             · the photo wipes open when you scroll to it (CSS clip-path)
+             · the notes pop in one at a time (staggered scroll-reveal)
+             · the arrows DRAW themselves (SVG stroke-dash animation)
+             · moving the mouse makes the notes drift at different
+               depths — a parallax effect (script.js §13)
+             · hovering a note lifts it and highlights its arrow
+           EDIT-ME: each fact is one .orbit-note — edit the text freely.
+           On phones the notes simply stack under the photo (no arrows). -->
+      <p class="about-chapter reveal">// first, a quick intro — meet me</p>
 
-      <div class="about-intro-grid">
+      <div class="about-spotlight reveal" id="aboutSpotlight">
 
-        <!-- Portrait wipes into view when scrolled to (CSS clip-path) -->
-        <div class="about-photo reveal">
+        <!-- center stage: the portrait -->
+        <div class="spotlight-photo">
           <img src="images/ME2.png" alt="Suzette Lacson" draggable="false">
-          <span class="about-photo-chip">hello, it's me ✦</span>
+          <span class="spotlight-chip">hello, it's me ✦</span>
         </div>
 
-        <!-- Developer Terminal UI -->
-        <div class="terminal reveal">
+        <!-- ── the floating facts (3 left, 3 right) ──
+             each .orbit-pin handles WHERE the note sits + the parallax
+             drift; the .orbit-note inside is the visible card. -->
+        <aside class="orbit-pin n1">
+          <div class="orbit-note">
+            <span class="note-label">role</span>
+            <p>Computer Engineering student at the University of Batangas — Lipa.</p>
+            <svg class="note-arrow" viewBox="0 0 80 44" aria-hidden="true">
+              <path class="arrow-line" d="M4 24 C 28 6, 52 8, 74 20"/>
+              <path class="arrow-head" d="M61 11 L 74 20 L 59 27"/>
+            </svg>
+          </div>
+        </aside>
+
+        <aside class="orbit-pin n2">
+          <div class="orbit-note">
+            <span class="note-label">passions</span>
+            <p>QA automation · Arduino &amp; hardware · learning app development.</p>
+            <svg class="note-arrow" viewBox="0 0 80 44" aria-hidden="true">
+              <path class="arrow-line" d="M4 24 C 28 6, 52 8, 74 20"/>
+              <path class="arrow-head" d="M61 11 L 74 20 L 59 27"/>
+            </svg>
+          </div>
+        </aside>
+
+        <aside class="orbit-pin n3">
+          <div class="orbit-note">
+            <span class="note-label">status</span>
+            <p>Open to internships and entry-level QA &amp; software testing roles.</p>
+            <svg class="note-arrow" viewBox="0 0 80 44" aria-hidden="true">
+              <path class="arrow-line" d="M4 24 C 28 6, 52 8, 74 20"/>
+              <path class="arrow-head" d="M61 11 L 74 20 L 59 27"/>
+            </svg>
+          </div>
+        </aside>
+
+        <aside class="orbit-pin n4">
+          <div class="orbit-note">
+            <span class="note-label">currently</span>
+            <p>QA Automation intern at Pick.A.Roo — writing automated tests for a real production app.</p>
+            <svg class="note-arrow" viewBox="0 0 80 44" aria-hidden="true">
+              <path class="arrow-line" d="M4 24 C 28 6, 52 8, 74 20"/>
+              <path class="arrow-head" d="M61 11 L 74 20 L 59 27"/>
+            </svg>
+          </div>
+        </aside>
+
+        <aside class="orbit-pin n5">
+          <div class="orbit-note">
+            <span class="note-label">off the clock</span>
+            <p>Robotics builds, content creation, and a healthy amount of gaming.</p>
+            <svg class="note-arrow" viewBox="0 0 80 44" aria-hidden="true">
+              <path class="arrow-line" d="M4 24 C 28 6, 52 8, 74 20"/>
+              <path class="arrow-head" d="M61 11 L 74 20 L 59 27"/>
+            </svg>
+          </div>
+        </aside>
+
+        <aside class="orbit-pin n6">
+          <div class="orbit-note">
+            <span class="note-label">fuel</span>
+            <p>Coffee + breadboards — most ideas show up after the first cup.</p>
+            <svg class="note-arrow" viewBox="0 0 80 44" aria-hidden="true">
+              <path class="arrow-line" d="M4 24 C 28 6, 52 8, 74 20"/>
+              <path class="arrow-head" d="M61 11 L 74 20 L 59 27"/>
+            </svg>
+          </div>
+        </aside>
+
+      </div><!-- /about-spotlight -->
+
+      <!-- ····· the longer version: bio, in the dev terminal ····· -->
+      <p class="about-chapter reveal">// the longer version</p>
+
+      <div class="terminal reveal">
         <div class="terminal-header">
+          <!-- window dots, in the site's own palette (yellow/white/outline) -->
           <div class="terminal-buttons">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
           </div>
           <div class="terminal-title">suzette@dev-machine: ~</div>
         </div>
 
-        <!-- Interactive code tabs -->
         <div class="terminal-tabs">
-          <button class="tab-btn active" id="btn-profile" onclick="switchTab('profile')">profile.json</button>
-          <button class="tab-btn" id="btn-bio" onclick="switchTab('bio')">bio.md</button>
+          <button class="tab-btn active" id="btn-bio" onclick="switchTab('bio')">bio.md</button>
         </div>
 
         <div class="terminal-body">
-          <!-- Tab 1: profile.json -->
-          <div id="tab-profile" class="tab-content active">
-<pre><code><span class="key">"candidate"</span>: {
-  <span class="key">"name"</span>: <span class="string">"Suzette Lacson"</span>,
-  <span class="key">"role"</span>: <span class="string">"Computer Engineering Student"</span>,
-  <span class="key">"currently"</span>: <span class="string">"QA Automation Intern @ Pick.A.Roo"</span>,
-  <span class="key">"passions"</span>: [<span class="string">"QA Automation"</span>, <span class="string">"Arduino / Hardware"</span>, <span class="string">"App Development"</span>],
-  <span class="key">"interests"</span>: [<span class="string">"Robotics"</span>, <span class="string">"Content Creation"</span>, <span class="string">"Gaming"</span>]
-}</code></pre>
-          </div>
-
-          <!-- Tab 2: bio.md -->
-          <div id="tab-bio" class="tab-content">
+          <div id="tab-bio" class="tab-content active">
+            <!-- the fake command that "printed" this file -->
+            <p class="term-prompt"><span class="prompt-user">suzette@dev-machine</span>:~$ cat bio.md</p>
             <h3># Bio</h3>
             <p>Hi, I'm Suzette — a Computer Engineering student who likes turning manual, repetitive work into software that runs on its own. My focus right now is QA automation: I'm interning at Pick.A.Roo, where I write automated tests for a real production mobile app.</p>
             <p>Outside of testing, I build things — Arduino robots, AI-powered tools, and small web platforms — and lately I've been getting into mobile app development. If it can be automated, scripted, or soldered, I'm probably interested in it.</p>
           </div>
         </div>
       </div>
-
-      </div><!-- /about-intro-grid -->
 
       <!-- ····· scroll 2: the education arc ····· -->
       <p class="about-chapter reveal">// then, where I studied — it wasn't a straight line</p>
@@ -278,17 +369,31 @@
     </div>
   </section>
 
-  <!-- ==================== 02 / GALLERY (EXPANDING PHOTO STRIP) ====================
-       Portrait-friendly interactive strip: all photos stand side by side,
-       the active one expands to full color while the rest collapse into
-       slivers with vertical labels. Hover / tap / focus to expand.
-       Auto-cycles every few seconds (logic in script.js).
-       EDIT-ME: to add a photo, copy a <figure> block, change the image,
-       the data-num / data-label chips, and the caption. -->
+  <!-- ==================== 02 / GALLERY (3D RING) ====================
+       Photos stand on an invisible rotating circle (3D carousel).
+       Drag it sideways, press the keycap arrows, or let it auto-spin.
+       NO-GAPS RULE: if a tab has only a few photos, script.js §3
+       repeats the whole set around the circle until it's full — so
+       the ring never shows empty holes between pictures.
+
+       ═══ EDIT-ME: HOW TO ADD A PHOTO ═════════════════════════════════
+       1. Drop your image file into the images/ folder.
+       2. Copy the template below and paste it next to its category
+          brothers inside the ring:
+
+          <figure class="ring-item" data-category="events" data-num="005">
+            <img src="images/YOUR_PHOTO.jpg" alt="Describe the photo" loading="lazy" draggable="false">
+            <figcaption>Your caption here</figcaption>
+          </figure>
+
+       3. Change data-category to events / arduino / certs, bump the
+          data-num, and write the caption. That's it — the circle
+          re-spaces itself automatically; JavaScript needs no edits.
+       ═════════════════════════════════════════════════════════════════ -->
   <section id="gallery" class="yellow-bg">
     <div class="wrap">
       <h2>02 / Gallery</h2>
-      <p class="section-sub">Pick a tab, then drag the ring — or use the arrows.</p>
+      <p class="section-sub">Pick a tab, then drag the ring — or press the arrows.</p>
 
       <!-- Category tabs: each button shows only the photos whose
            data-category matches its data-filter value.
@@ -300,10 +405,9 @@
         <button class="gallery-tab"        data-filter="certs"   aria-pressed="false">Certs</button>
       </div>
 
-      <!-- 3D rotating ring: photos stand on an invisible carousel ring.
-           Drag it sideways, use the arrows, or let it auto-spin.
-           The front photo shows in full color with its caption. -->
-      <div class="ring-stage reveal">
+      <!-- The 3D ring. The ‹ › keycap arrows float right at the ring's
+           edges, close to the photos. -->
+      <div class="ring-stage reveal" id="ringStage">
         <button class="ring-btn" id="ringPrev" aria-label="Rotate to previous photo">‹</button>
 
         <div class="ring-scene" id="ringScene">

@@ -41,6 +41,16 @@ Study companion for the site. Each topic: what it is, why it matters, where it l
 - **What:** `perspective` (camera depth) on the parent, `transform-style: preserve-3d` (children keep 3D positions), `rotateY() translateZ()` (rotate around vertical axis, push outward), `backface-visibility: hidden` (hide a card's reverse).
 - **Where:** `.ring-scene` / `.ring` / `.ring-item`, and `.id-badge` / `.badge-inner` / `.badge-face`.
 - **Key insight:** the ring's photos never move individually — JS rotates ONE parent and geometry does the rest.
+- **The no-gaps rule:** a circle can't look full with 2 photos on it, so `applyFilter()` clones the tab's set until the ring holds ≥ 8, and the radius formula `(itemW + AIR) / (2 · sin(π / count))` seats neighbors ~12px apart. Cloning DOM nodes (`cloneNode(true)`) is the technique to remember.
+
+### CSS variables as a JS→CSS data bridge (About parallax)
+- **What:** JS writes two numbers (`--mx`, `--my`) onto a container with `style.setProperty`; CSS turns them into six different motions via `calc(var(--mx) × var(--depth) × -1px)` — each note declares its own `--depth`.
+- **Where:** `#aboutSpotlight` + `.orbit-pin` rules; `script.js` §13.
+- **Why:** JS computes, CSS renders — one write per frame instead of touching six elements, and the effect is tunable entirely from the stylesheet.
+
+### SVG stroke-dash "self-drawing" lines
+- **What:** give a path `stroke-dasharray` equal to its own length, offset it fully (`stroke-dashoffset: 90`) so it's invisible, then transition the offset to 0 — the line appears to draw itself.
+- **Where:** the `.note-arrow` arrows around the About photo.
 
 ### clip-path reveals
 - **What:** `clip-path: inset(0 100% 0 0)` hides an element by clipping 100% from the right; animating to `inset(0)` "wipes" it open.
@@ -60,8 +70,8 @@ Study companion for the site. Each topic: what it is, why it matters, where it l
 - **Performance:** transform + opacity are the two properties browsers animate on the GPU without re-layout. Everything ambient here sticks to them.
 
 ### Media queries & `prefers-reduced-motion`
-- Breakpoints: 880px (nav collapses, hero stacks), 680px (ring shrinks, grids stack), 500px (fine-tuning).
-- `@media (prefers-reduced-motion: reduce)` switches off *every* animation — swing, ring, glyphs, cursor. That's a real accessibility requirement, not decoration.
+- Breakpoints: 880px (nav collapses, hero stacks, About spotlight flattens to a grid), 680px (ring shrinks, grids stack), 500px (fine-tuning).
+- `@media (prefers-reduced-motion: reduce)` switches off *every* animation — swing, ring, spotlight, fallers, cursor. That's a real accessibility requirement, not decoration.
 
 ---
 

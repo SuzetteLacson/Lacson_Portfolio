@@ -64,6 +64,12 @@ img {
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 24px;
+  /* lifts every section's CONTENT above the falling-objects layer
+     (#floatLayer sits at z-index 0): the fallers drift over section
+     backgrounds — yellow ones included — but always BEHIND the text,
+     cards, and photos, so nothing ever becomes hard to read */
+  position: relative;
+  z-index: 1;
 }
 
 section {
@@ -129,16 +135,21 @@ section .wrap > h2::after {
   z-index: 10001;                  /* above the nav dock */
 }
 
-/* ---- floating code glyphs (pure CSS — zero JavaScript) ----
-   A fixed layer of faint mono symbols drifting down the page.
-   Because the layer is position:fixed, the glyphs stay with you
-   through every section. Negative animation-delays start each glyph
-   mid-fall so the screen is never empty on load.
+/* ---- falling tech objects (pure CSS — zero JavaScript) ----
+   A fixed layer of faint code glyphs, mini keycaps, and tech icons
+   drifting down the page. Because the layer is position:fixed, the
+   fallers stay with you through every section of the site. Negative
+   animation-delays start each one mid-fall so the screen is never
+   empty on load.
+   STACKING: the layer sits at z-index 0 — ABOVE section backgrounds
+   (so it stays visible over the yellow Gallery/Skills sections) but
+   BELOW every .wrap content block (z-index 1). The dot-grid canvas
+   stays at -1, underneath everything.
    PERFORMANCE: only `transform` animates → GPU-composited, no layout. */
 #floatLayer {
   position: fixed;
   inset: 0;
-  z-index: -1;                     /* behind content, above the dot grid */
+  z-index: 0;
   pointer-events: none;
   overflow: hidden;
 }
@@ -149,8 +160,12 @@ section .wrap > h2::after {
   font-family: var(--mono);
   font-weight: 700;
   color: rgba(17, 17, 17, 0.12);   /* faint — never fights the text */
+  /* --fo = each faller's full opacity: the keyframes fade every
+     faller in at the top and out at the bottom, peaking at this value
+     (plain glyphs stay at 1 because their color is already faint) */
+  --fo: 1;
   animation: floatFall linear infinite;
-  will-change: transform;
+  will-change: transform, opacity;
 }
 
 /* the two ✦ get the brand yellow with a soft dark outline */
@@ -177,9 +192,83 @@ section .wrap > h2::after {
 #floatLayer span:nth-child(15) { left: 72%; font-size: 1.1rem;  animation-duration: 49s; animation-delay: -28s; }
 #floatLayer span:nth-child(16) { left: 97%; font-size: 1.4rem;  animation-duration: 41s; animation-delay: -22s; }
 
+/* mini falling KEYCAPS — same recipe as the Skills keyboard caps
+   (border + hard shadow underneath), shrunk down and made faint.
+   The Q and A caps falling together are a little QA joke ✦ */
+#floatLayer span.kf {
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  color: rgba(17, 17, 17, 0.6);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1.5px solid rgba(17, 17, 17, 0.5);
+  border-radius: 6px;
+  padding: 4px 8px;
+  box-shadow: 0 3px 0 rgba(17, 17, 17, 0.5);
+  --fo: 0.32;                      /* keycaps peak at 32% opacity */
+}
+
+/* falling tech ICONS — inline SVGs drawn with strokes only, so they
+   inherit the faint blueprint look (monitor, chip, bug, phone, cursor) */
+#floatLayer span.icon {
+  --fo: 0.3;                       /* icons peak at 30% opacity */
+}
+
+#floatLayer span.icon svg {
+  display: block;
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: rgba(17, 17, 17, 0.8);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* two icons get a yellow-filled body so the brand color falls too */
+#floatLayer span.icon-accent svg rect {
+  fill: rgba(232, 242, 76, 0.85);
+}
+
+/* lanes, sizes, and speeds for the new fallers (children 17–26) */
+#floatLayer span:nth-child(17) { left: 9%;  animation-duration: 40s; animation-delay: -14s; }
+#floatLayer span:nth-child(18) { left: 19%; animation-duration: 47s; animation-delay: -31s; }
+#floatLayer span:nth-child(19) { left: 34%; animation-duration: 52s; animation-delay: -6s;  }
+#floatLayer span:nth-child(20) { left: 55%; animation-duration: 45s; animation-delay: -24s; }
+#floatLayer span:nth-child(21) { left: 79%; animation-duration: 38s; animation-delay: -42s; }
+#floatLayer span:nth-child(22) { left: 14%; animation-duration: 50s; animation-delay: -9s;  }
+#floatLayer span:nth-child(23) { left: 41%; animation-duration: 44s; animation-delay: -27s; }
+#floatLayer span:nth-child(24) { left: 60%; animation-duration: 56s; animation-delay: -19s; }
+#floatLayer span:nth-child(25) { left: 83%; animation-duration: 42s; animation-delay: -35s; }
+#floatLayer span:nth-child(26) { left: 30%; animation-duration: 46s; animation-delay: -48s; }
+
+/* the fall itself: not a straight drop anymore — each faller
+     · fades IN just below the top edge and OUT before the bottom
+       (no more popping into / out of existence),
+     · sways gently side to side while rotating a little, like paper
+       falling through air. Odd children sway right first, even
+       children left first (floatFallSway below), so the layer never
+       looks like everything is marching in step. */
 @keyframes floatFall {
-  from { transform: translateY(0) rotate(0deg); }
-  to   { transform: translateY(125vh) rotate(20deg); }
+  0%   { transform: translateY(0)      translateX(0)     rotate(0deg);   opacity: 0; }
+  8%   { opacity: var(--fo); }
+  30%  { transform: translateY(37vh)   translateX(22px)  rotate(9deg); }
+  60%  { transform: translateY(74vh)   translateX(-16px) rotate(-6deg); }
+  92%  { opacity: var(--fo); }
+  100% { transform: translateY(125vh)  translateX(14px)  rotate(12deg);  opacity: 0; }
+}
+
+/* the mirror image of the fall, for even-numbered fallers */
+@keyframes floatFallSway {
+  0%   { transform: translateY(0)      translateX(0)     rotate(0deg);   opacity: 0; }
+  8%   { opacity: var(--fo); }
+  30%  { transform: translateY(37vh)   translateX(-22px) rotate(-9deg); }
+  60%  { transform: translateY(74vh)   translateX(16px)  rotate(6deg); }
+  92%  { opacity: var(--fo); }
+  100% { transform: translateY(125vh)  translateX(-14px) rotate(-12deg); opacity: 0; }
+}
+
+#floatLayer span:nth-child(even) {
+  animation-name: floatFallSway;
 }
 
 /* ---- custom cursor ----
@@ -213,6 +302,34 @@ a, button, .keycap, [role="button"] {
 .section-sub {
   margin: -12px 0 28px;
   font-size: 0.95rem;
+}
+
+/* ---- justified body text (print-style typography) ----
+   Every LONG description paragraph is justified — flush on both the
+   left AND right edge — so text blocks read like a printed page:
+   education cards, the bio, experience entries, project blurbs, the
+   project pop-up write-ups, and the footer intro.
+   hyphens: auto lets the browser break long words at syllables, so
+   justifying never stretches a line into big awkward word gaps.
+   (Short labels, captions, and the narrow spotlight notes stay
+   left-aligned on purpose — justification needs line length to
+   breathe; on tiny columns it punches holes into the text.) */
+.edu-card p,
+.t-item > p,
+.project p,
+.tab-content p,
+.modal-body p,
+footer > .wrap > p {
+  text-align: justify;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
+/* book convention: when a block has SEVERAL paragraphs, the first
+   starts flush and every following one gets a first-line indent */
+.tab-content p + p,
+.modal-body .modal-story + .modal-story {
+  text-indent: 1.6em;
 }
 
 /* keyboard focus — visible on white or yellow backgrounds */
@@ -764,45 +881,67 @@ button:focus-visible {
   margin-top: 0;
 }
 
-/* --- intro: portrait + terminal side by side --- */
-.about-intro-grid {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 28px;
-  align-items: stretch;
+/* --- the SPOTLIGHT intro: photo center, facts orbiting around it ---
+   The container is a positioned stage: the portrait sits in the middle
+   (normal flow, centered) and each fact is pinned around it with
+   position:absolute. Three layers of motion:
+     1. reveal  — photo wipes open (clip-path), notes pop in staggered,
+                  arrows draw themselves (stroke-dash) when .visible
+                  lands (added by the scroll observer in script.js §2c)
+     2. idle    — the photo "breathes" up and down forever (photoFloat)
+     3. cursor  — script.js §13 writes --mx / --my (−1…1) onto the
+                  container; each pin turns that into its own drift via
+                  calc(), scaled by its --depth → depth parallax.
+   On phones (≤880px) the stage flattens into a simple grid. */
+.about-spotlight {
+  position: relative;
+  padding: 30px 0 40px;
 }
 
-/* the ME2 portrait "wipes" open left→right when scrolled into view:
-   it starts fully clipped (clip-path hides 100% from the right) and
-   the .visible class — added by the scroll observer — un-clips it */
-.about-photo {
+/* the container itself must NOT fade/slide like generic .reveal
+   elements — its children run their own choreography instead */
+.about-spotlight.reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.spotlight-photo {
   position: relative;
+  width: min(320px, 70vw);
+  height: 430px;
+  margin: 0 auto;
   border: 2px solid var(--black);
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
   background: var(--white);
-  min-height: 340px;
-  box-shadow: 8px 8px 0 var(--yellow), 8px 8px 0 2px var(--black);
+  box-shadow: 10px 10px 0 var(--yellow), 10px 10px 0 2px var(--black);
+  animation: photoFloat 7s ease-in-out infinite;   /* gentle breathing */
 }
 
-.about-photo img {
+/* slow idle float so the center never feels frozen */
+@keyframes photoFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-9px); }
+}
+
+.spotlight-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.about-photo.reveal {
-  opacity: 1;                      /* override the generic fade... */
-  transform: none;
-  clip-path: inset(0 100% 0 0);    /* ...this hides it instead */
-  transition: clip-path 0.9s cubic-bezier(0.65, 0, 0.35, 1) 0.15s;
+/* the wipe-in: fully clipped from the right until .visible arrives */
+.about-spotlight.reveal .spotlight-photo {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.9s cubic-bezier(0.65, 0, 0.35, 1) 0.1s;
 }
 
-.about-photo.reveal.visible {
+.about-spotlight.reveal.visible .spotlight-photo {
   clip-path: inset(0 0 0 0);       /* wipe complete — fully shown */
 }
 
-.about-photo-chip {
+.spotlight-chip {
   position: absolute;
   bottom: 12px;
   left: 12px;
@@ -815,20 +954,188 @@ button:focus-visible {
   padding: 3px 10px;
 }
 
-/* --- developer terminal --- */
+/* --- the orbit pins: WHERE each fact sits + the parallax drift ---
+   The pin is invisible — it only positions and moves. Splitting pin
+   (parallax) from note (reveal/hover) keeps the transforms from
+   fighting over the same element. */
+.orbit-pin {
+  position: absolute;
+  width: 240px;
+  will-change: transform;
+  /* the parallax drift: container's --mx/--my × this pin's --depth.
+     Each pin gets a different depth, so notes drift by different
+     amounts — that difference is what reads as 3D. */
+  transform: translate(
+    calc(var(--mx, 0) * var(--depth, 10) * -1px),
+    calc(var(--my, 0) * var(--depth, 10) * -1px)
+  );
+}
+
+/* six positions (3 left, 3 right) + how deep each one drifts */
+.orbit-pin.n1 { left: 1%;  top: 6px;    --depth: 18; }
+.orbit-pin.n2 { left: 0;   top: 41%;    --depth: 9;  }
+.orbit-pin.n3 { left: 2%;  bottom: 12px; --depth: 14; }
+.orbit-pin.n4 { right: 1%; top: 20px;   --depth: 12; }
+.orbit-pin.n5 { right: 0;  top: 45%;    --depth: 16; }
+.orbit-pin.n6 { right: 2%; bottom: 20px; --depth: 10; }
+
+/* --- the visible fact card --- */
+.orbit-note {
+  position: relative;
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 10px;
+  padding: 12px 14px 10px;
+  box-shadow: 5px 5px 0 rgba(17, 17, 17, 0.14);
+  transition: transform 0.45s cubic-bezier(0.34, 1.4, 0.44, 1),
+              opacity 0.4s ease,
+              box-shadow 0.2s ease;
+}
+
+/* hover: the note lifts and gets the signature yellow under-shadow */
+.orbit-note:hover {
+  transform: translateY(-5px);
+  box-shadow: 6px 6px 0 var(--yellow), 6px 6px 0 2px var(--black);
+  z-index: 3;
+}
+
+.note-label {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: var(--yellow);
+  border: 1.5px solid var(--black);
+  border-radius: 4px;
+  padding: 1px 7px;
+  margin-bottom: 6px;
+}
+
+.orbit-note p {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* --- the hand-drawn arrows pointing back at the photo ---
+   One curved SVG per note, hanging off the side that faces the photo.
+   Left-side notes point right; right-side notes reuse the SAME arrow
+   mirrored with scaleX(-1). Each is tilted so it aims at the center. */
+.note-arrow {
+  position: absolute;
+  top: 26%;
+  width: 74px;
+  height: 42px;
+  fill: none;
+  stroke: var(--black);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* left notes: arrow exits to the RIGHT, aimed at the photo */
+.n1 .note-arrow,
+.n2 .note-arrow,
+.n3 .note-arrow { right: -80px; }
+.n1 .note-arrow { transform: rotate(22deg); }
+.n2 .note-arrow { transform: rotate(0deg); }
+.n3 .note-arrow { transform: rotate(-22deg); }
+
+/* right notes: same arrow, mirrored to exit LEFT */
+.n4 .note-arrow,
+.n5 .note-arrow,
+.n6 .note-arrow { left: -80px; }
+.n4 .note-arrow { transform: scaleX(-1) rotate(22deg); }
+.n5 .note-arrow { transform: scaleX(-1) rotate(0deg); }
+.n6 .note-arrow { transform: scaleX(-1) rotate(-22deg); }
+
+/* hovering a note highlights its arrow with a yellow offset shadow */
+.orbit-note:hover .note-arrow {
+  filter: drop-shadow(2px 2px 0 var(--yellow));
+}
+
+/* --- reveal choreography: notes pop in one at a time --- */
+.about-spotlight.reveal .orbit-note {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.about-spotlight.reveal.visible .orbit-note {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* each note waits a little longer than the previous one */
+.about-spotlight.reveal.visible .n1 .orbit-note { transition-delay: 0.30s; }
+.about-spotlight.reveal.visible .n4 .orbit-note { transition-delay: 0.42s; }
+.about-spotlight.reveal.visible .n2 .orbit-note { transition-delay: 0.54s; }
+.about-spotlight.reveal.visible .n5 .orbit-note { transition-delay: 0.66s; }
+.about-spotlight.reveal.visible .n3 .orbit-note { transition-delay: 0.78s; }
+.about-spotlight.reveal.visible .n6 .orbit-note { transition-delay: 0.90s; }
+
+/* …but hover must react INSTANTLY, so cancel any waiting delay */
+.about-spotlight.reveal.visible .orbit-note:hover {
+  transition-delay: 0s;
+}
+
+/* the arrows draw themselves: the line is dashed with ONE dash as
+   long as the whole path; sliding the dash offset from 90 → 0
+   "draws" the stroke. The arrowhead fades in right after. */
+.arrow-line {
+  stroke-dasharray: 90;
+  stroke-dashoffset: 90;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.arrow-head {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.about-spotlight.reveal.visible .arrow-line { stroke-dashoffset: 0; }
+.about-spotlight.reveal.visible .arrow-head { opacity: 1; }
+
+/* the draw starts only after its own note has landed */
+.about-spotlight.reveal.visible .n1 .arrow-line { transition-delay: 0.65s; }
+.about-spotlight.reveal.visible .n4 .arrow-line { transition-delay: 0.77s; }
+.about-spotlight.reveal.visible .n2 .arrow-line { transition-delay: 0.89s; }
+.about-spotlight.reveal.visible .n5 .arrow-line { transition-delay: 1.01s; }
+.about-spotlight.reveal.visible .n3 .arrow-line { transition-delay: 1.13s; }
+.about-spotlight.reveal.visible .n6 .arrow-line { transition-delay: 1.25s; }
+.about-spotlight.reveal.visible .n1 .arrow-head { transition-delay: 1.25s; }
+.about-spotlight.reveal.visible .n4 .arrow-head { transition-delay: 1.37s; }
+.about-spotlight.reveal.visible .n2 .arrow-head { transition-delay: 1.49s; }
+.about-spotlight.reveal.visible .n5 .arrow-head { transition-delay: 1.61s; }
+.about-spotlight.reveal.visible .n3 .arrow-head { transition-delay: 1.73s; }
+.about-spotlight.reveal.visible .n6 .arrow-head { transition-delay: 1.85s; }
+
+/* --- developer terminal ---
+   Restyled to live INSIDE the site's own 3-color language: pure black
+   window, yellow accents, white text — no more off-palette mac-style
+   red/green dots. Centered, same max-width as the education cards, so
+   the About column reads as one balanced block. */
 .terminal {
-  background: #1a1a1a;
+  background: var(--black);
   border: 3px solid var(--black);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 8px 8px 0 var(--yellow);
+  /* the signature double shadow: yellow slab + thin black outline —
+     same recipe as the spotlight photo above it */
+  box-shadow: 8px 8px 0 var(--yellow), 8px 8px 0 2px var(--black);
+  max-width: 760px;
+  margin: 0 auto;                  /* centered under the spotlight */
 }
 
 .terminal-header {
-  background: #2d2d2d;
+  background: #1d1d1d;
   padding: 12px 20px;
   display: flex;
   align-items: center;
+  border-bottom: 1px solid #2a2a2a;
 }
 
 .terminal-buttons {
@@ -844,12 +1151,13 @@ button:focus-visible {
   display: block;
 }
 
-.dot.red    { background: #ff5f56; }
-.dot.yellow { background: #ffbd2e; }
-.dot.green  { background: #27c93f; }
+/* window dots in the site's palette: yellow · white · outline */
+.terminal-buttons .dot:nth-child(1) { background: var(--yellow); }
+.terminal-buttons .dot:nth-child(2) { background: var(--white); }
+.terminal-buttons .dot:nth-child(3) { border: 1.5px solid rgba(255, 255, 255, 0.5); }
 
 .terminal-title {
-  color: #999;
+  color: rgba(255, 255, 255, 0.5);
   font-family: var(--mono);
   font-size: 0.8rem;
 }
@@ -857,9 +1165,9 @@ button:focus-visible {
 .terminal-tabs {
   display: flex;
   gap: 4px;
-  background: #2d2d2d;
+  background: #1d1d1d;
   padding: 0 12px;
-  border-bottom: 1px solid var(--black);
+  border-bottom: 1px solid #2a2a2a;
 }
 
 .tab-btn {
@@ -867,7 +1175,7 @@ button:focus-visible {
   font-size: 0.8rem;
   padding: 9px 14px;
   background: transparent;
-  color: #aaa;
+  color: rgba(255, 255, 255, 0.45);
   border: none;
   cursor: pointer;
   border-bottom: 2px solid transparent;
@@ -883,18 +1191,24 @@ button:focus-visible {
 
 .terminal-body {
   padding: 20px;
-  color: #f8f8f2;
+  color: var(--white);
   font-family: var(--mono);
 }
 
-.terminal-body pre {
-  margin: 0;
-  white-space: pre-wrap;
-  font-size: 0.88rem;
+/* the fake "$ cat bio.md" command line above the bio
+   (selector includes .tab-content so it outranks the generic
+   `.tab-content p` rule that would set the sans font) */
+.tab-content p.term-prompt {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0 0 14px;
 }
 
-.key    { color: var(--yellow); }
-.string { color: #8be98b; }
+.prompt-user {
+  color: var(--yellow);
+  font-weight: 700;
+}
 
 .tab-content h3 {
   color: var(--yellow);
@@ -903,39 +1217,46 @@ button:focus-visible {
 }
 
 .tab-content p {
-  color: #ddd;
+  color: #ececec;
   font-family: var(--sans);
   font-size: 0.95rem;
 }
 
 .tab-content p + p { margin-top: 10px; }
 
-/* --- education cards: a connected mini-timeline --- */
+/* --- education cards: a connected mini-timeline ---
+   Centered like the terminal above (same 760px width, margin auto),
+   so the whole About column reads as one balanced stack. The spine
+   rail runs in the LEFT MARGIN just outside the cards — clearly
+   visible top to bottom — with a yellow dot for each school pinned
+   onto it. The track also counts the schools: each card gets a big
+   faint 01 / 02 / 03 watermark from a CSS counter (zero extra HTML). */
 .edu-track {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 22px;
-  max-width: 720px;
-  padding-left: 34px;
+  max-width: 760px;
+  margin: 0 auto;                  /* centered under the terminal */
+  counter-reset: school;           /* powers the 01/02/03 watermarks */
 }
 
-/* the spine line connecting the schools */
+/* the spine rail — in the margin at the cards' left, always visible */
 .edu-track::before {
   content: "";
   position: absolute;
-  left: 6px;
+  left: -16px;
   top: 12px;
   bottom: 12px;
   width: 2px;
   background: var(--black);
 }
 
-/* a dot on the spine for each school */
+/* a yellow dot on the rail for each school */
 .edu-card::before {
   content: "";
   position: absolute;
-  left: -34px;                     /* centers the dot on the spine */
+  left: -24px;                     /* centers the dot on the rail */
   top: 24px;
   width: 12px;
   height: 12px;
@@ -944,12 +1265,28 @@ button:focus-visible {
   border-radius: 50%;
 }
 
+/* big faint chapter number, top-right of each card (CSS counter) */
+.edu-card::after {
+  counter-increment: school;
+  content: "0" counter(school);
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-family: var(--mono);
+  font-size: 2rem;
+  font-weight: 900;
+  color: rgba(17, 17, 17, 0.07);
+  pointer-events: none;
+}
+
 .edu-card {
   position: relative;
   background: var(--white);
   border: 2px solid var(--black);
   border-radius: 8px;
   padding: 22px 24px;
+  /* a soft resting shadow so the cards sit ON the page, not in it */
+  box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.08);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -989,13 +1326,13 @@ button:focus-visible {
   margin: 0;
 }
 
-/* ---------- 6. GALLERY PHOTO STRIP ----------
-   Portrait-friendly "expanding strip": all photos stand in one row.
-   The active one grows wide (flex: 3.5) and shows in full color;
-   the rest collapse into grayscale slivers (flex: 1) with a number
-   chip on top and a vertical label at the bottom — like book spines.
-   Hover, tap, or keyboard-focus a sliver to expand it.
-   The tabs above the strip filter photos by data-category. */
+/* ---------- 6. GALLERY 3D RING ----------
+   Photos stand on an invisible rotating circle (3D carousel).
+   THE NO-GAPS RULE: script.js §3 repeats a tab's photo set around
+   the circle until it holds at least 8 photos, and sizes the radius
+   so neighbors sit almost touching — so the ring is always full,
+   with no empty holes, no matter how few photos a category has.
+   The tabs above the ring filter photos by data-category. */
 .gallery-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -1027,18 +1364,14 @@ button:focus-visible {
 }
 
 /* --- the 3D ring ---
-   Photos stand on an invisible circular carousel (3D cover-flow).
-   Each item gets rotateY(angle) translateZ(radius) from script.js;
+   Each photo gets rotateY(angle) translateZ(radius) from script.js;
    spinning the whole .ring brings a different photo to the front.
    The front photo is full color and shows its caption. */
 .ring-stage {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  position: relative;
 }
 
 .ring-scene {
-  flex: 1;
   height: 470px;
   perspective: 1300px;             /* how "deep" the 3D looks */
   touch-action: pan-y;             /* sideways drag spins, vertical still scrolls */
@@ -1130,23 +1463,46 @@ button:focus-visible {
   opacity: 1;
 }
 
-/* the ‹ › buttons beside the ring */
+/* --- the ‹ › keycap arrows ---
+   They FLOAT at the ring's edges (absolute, vertically centered)
+   instead of standing far off to the sides — and they're styled like
+   the Skills keycaps: hard shadow underneath, and pressing one sinks
+   it into its own shadow, exactly like a real key. */
 .ring-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 14px;
+  z-index: 6;
+  width: 48px;
+  height: 48px;
+  font-family: var(--mono);
   font-size: 1.5rem;
   font-weight: 700;
-  width: 44px;
-  height: 44px;
+  line-height: 1;
+  color: var(--black);
   background: var(--white);
   border: 2px solid var(--black);
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
-  flex-shrink: 0;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  box-shadow: 0 5px 0 var(--black);
+  transition: transform 0.08s ease, box-shadow 0.08s ease,
+              background-color 0.15s ease;
+}
+
+#ringNext {
+  left: auto;
+  right: 14px;
 }
 
 .ring-btn:hover {
-  background: var(--black);
-  color: var(--yellow);
+  background: var(--yellow);
+}
+
+/* the keycap press: sink into the shadow */
+.ring-btn:active {
+  transform: translateY(calc(-50% + 4px));
+  box-shadow: 0 1px 0 var(--black);
 }
 
 /* arrow buttons — shared by the project modal photo viewer */
@@ -1366,7 +1722,17 @@ button:focus-visible {
   flex: 1;
   width: 100%;
   height: 380px;
-  object-fit: cover;
+  /* min-width: 0 is the BUG FIX for the disappearing › arrow:
+     a flex item refuses to shrink below its content's natural size,
+     and an <img>'s "natural size" is the file's real pixel width —
+     so a 1592px-wide screenshot (SUZENTINEL slide 2) forced the row
+     wider than the modal and shoved the next-arrow out of view.
+     min-width: 0 tells flexbox "you may shrink this image". */
+  min-width: 0;
+  /* contain (not cover) so wide dashboard screenshots are shown
+     WHOLE instead of cropped — important for app screenshots */
+  object-fit: contain;
+  background: #f7f7f7;
   border: 2px solid var(--black);
   border-radius: 6px;
 }
@@ -1844,9 +2210,34 @@ footer.section-in > .wrap {
     transition: none;
   }
 
-  /* the About portrait just appears instead of wiping in */
-  .about-photo.reveal {
+  /* the About spotlight appears fully assembled — no wipe, no float,
+     no staggered pops, arrows already drawn */
+  .spotlight-photo {
+    animation: none;
+  }
+
+  .about-spotlight.reveal .spotlight-photo {
     clip-path: none;
+    transition: none;
+  }
+
+  .about-spotlight.reveal .orbit-note {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .orbit-pin {
+    transform: none;
+  }
+
+  .arrow-line {
+    stroke-dashoffset: 0;
+    transition: none;
+  }
+
+  .arrow-head {
+    opacity: 1;
     transition: none;
   }
 
@@ -1884,6 +2275,28 @@ footer.section-in > .wrap {
   }
 
   .lanyard-strap { height: 110px; }
+
+  /* the About spotlight flattens: photo on top, notes in a 2-column
+     grid below it. The arrows + parallax only make sense when the
+     notes surround a centered photo, so both switch off here. */
+  .about-spotlight {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 10px 0 0;
+  }
+
+  .spotlight-photo {
+    grid-column: 1 / -1;
+  }
+
+  .orbit-pin {
+    position: static;
+    width: auto;
+    transform: none;
+  }
+
+  .note-arrow { display: none; }
 }
 
 @media (max-width: 680px) {
@@ -1896,12 +2309,17 @@ footer.section-in > .wrap {
     margin: -150px 0 0 -100px;
   }
 
-  /* the About intro stacks: photo on top, terminal below */
-  .about-intro-grid {
-    grid-template-columns: 1fr;
+  .ring-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+    left: 8px;
   }
 
-  .about-photo { min-height: 300px; }
+  #ringNext {
+    left: auto;
+    right: 8px;
+  }
 
   /* keyboard rows lose their sideways stagger and just wrap */
   .kb-row:nth-child(2),
@@ -1951,6 +2369,11 @@ footer.section-in > .wrap {
   }
 
   section { padding: 64px 0; }
+
+  /* very narrow phones: the About fact notes go single-column */
+  .about-spotlight {
+    grid-template-columns: 1fr;
+  }
 
   .timeline { padding-left: 26px; }
   .t-item::before { left: -33px; }

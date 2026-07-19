@@ -3,7 +3,7 @@
    Handles:
      1. Project data (photos + blog-style write-ups)
      2. Capsule nav (mobile dropdown + scrollspy + scroll-reveal)
-     3. Gallery 3D ring (tabs + drag-to-spin + auto-spin)
+     3. Gallery 3D ring (tabs + drag-to-spin + auto-spin + no-gaps fill)
      4. Project detail modal (photo viewer + write-up renderer)
      5. Project card mini-carousels
      6. About terminal tab switcher
@@ -13,7 +13,8 @@
     10. Interactive dot-grid background (canvas)
     11. Scroll progress line
     12. Cursor trail (the yellow diamond chasing the mouse)
-   (The falling code glyphs are pure CSS — see #floatLayer in style.css)
+    13. About spotlight parallax (the fact notes drift with the mouse)
+   (The falling tech objects are pure CSS — see #floatLayer in style.css)
 ========================================================== */
 
 /* ---------- 1. PROJECT DATA ----------
@@ -47,7 +48,7 @@ const projectPhotos = {
       "Flask dashboard with live productivity insights",
       "Runs quietly in the background while you work"
     ],
-    challenges: "Getting the vision pipeline to run continuously without eating the CPU was the hardest part. I had to tune how often frames get processed and keep the dashboard queries light, so the tool never slows down the machine it's supposed to be monitoring.",
+    challenges: "One of the main challenges was reducing false-positive detections and preventing the computer vision pipeline from lagging. I optimized the system by adjusting the frame rate, which improved performance and made the monitoring process run more smoothly.",
     contribution: "Solo project — I designed the architecture, wrote the Python detection logic, and built the Flask dashboard end to end.",
     photos: [
       "images/SUZENTINEL_CS_IMAGES_DOCU/DASHBOARDTIMER.png",
@@ -86,8 +87,8 @@ const projectPhotos = {
   amari: {
     title: "Amari Staycation — Booking Platform",
     story: [
-      "This one came straight from my day job. At Amari Staycation, reservations were tracked manually, and I watched the same bottlenecks happen every week — double-checking dates, chasing confirmations, updating calendars by hand.",
-      "So I proposed and built a web-based booking platform: guests can check availability and reserve online, with a SQL database keeping every booking accurate behind the scenes. It modernized how the property handles reservations and cut out most of the manual back-and-forth."
+      "This project was inspired by my experience at Amari Staycation, where reservations, invoices, and calendar updates were handled manually. Staff often had to edit invoices individually, verify bookings across platforms, and update availability records by hand, which created delays and increased the risk of scheduling errors. These recurring operational bottlenecks motivated our team to develop a more efficient and centralized reservation management solution.",
+      "Our team developed a web-based booking and reservation platform with a SQL database backend that allows guests to check availability, make reservations online, and automatically generate invoices, reducing repetitive administrative work. The system was also designed with the goal of supporting Airbnb calendar synchronization for more accurate booking management while providing the business with a more professional online presence, improved customer trust, and a direct reservation channel."
     ],
     tech: "Web-based booking system with a SQL database backend",
     framework: "None — plain HTML, CSS & JavaScript",
@@ -98,8 +99,8 @@ const projectPhotos = {
       "SQL-backed records so dates never double-book",
       "Simple management view for the operations side"
     ],
-    challenges: "A booking system is only useful if availability is never wrong. Most of my time went into designing the SQL side — making sure dates couldn't overlap and records stayed consistent no matter how bookings came in.",
-    contribution: "I built the platform end to end — frontend, booking flow, and the SQL database design — while coordinating requirements with the operations side (which, conveniently, was also me).",
+    challenges: "One of the biggest challenges was integrating the booking system, invoice automation, database records, and planned Airbnb calendar synchronization into a single platform while coordinating tasks within the group. We also revised the interface several times to match the client’s preferred workflow, which helped me improve my teamwork, communication, and system integration skills.",
+    contribution: "I contributed to the project planning, design, and frontend development of the booking platform. I helped design the reservation and invoice workflow, implemented the user interface using HTML, CSS, and JavaScript, and collaborated with the team to align the system with the client’s operational needs and preferred design.",
     photos: [
       "images/project3.svg",
       "images/activity3.svg",
@@ -277,33 +278,41 @@ document.addEventListener("DOMContentLoaded", () => {
    The math: photo i sits at  rotateY(i * step) translateZ(radius),
    where step = 360° / photo count. Rotating the parent .ring by
    -i * step brings photo i to the front — so JS only ever changes
-   ONE number (the ring's angle) and CSS 3D does the rest. */
+   ONE number (the ring's angle) and CSS 3D does the rest.
+
+   THE NO-GAPS RULE: a circle with only 2–4 photos on it shows big
+   empty holes between them. So applyFilter() REPEATS the tab's photo
+   set (cloning the <figure>s) until the circle holds at least
+   MIN_SLOTS photos, and ringRadius() sizes the circle so neighbors
+   sit almost touching (AIR px apart). Full ring, every tab, always.
+   Adding photos in index.html needs zero changes here. */
 const photoRing   = document.getElementById("photoRing");
 const ringScene   = document.getElementById("ringScene");
+const ringStage   = document.getElementById("ringStage");
 const galleryTabs = document.querySelectorAll(".gallery-tab");
 
 if (photoRing && ringScene) {
-  const allRingItems = Array.from(photoRing.querySelectorAll(".ring-item"));
-  let ringVisible = [];        // photos of the currently chosen tab
+  const originalItems = Array.from(photoRing.querySelectorAll(".ring-item"));
+  const MIN_SLOTS = 8;         // a full-looking circle needs at least this many
+  const AIR       = 12;        // px of air between neighboring photos
+  let ringVisible = [];        // everything standing on the circle (incl. repeats)
   let ringStep    = 0;         // degrees between neighboring photos
   let ringAngle   = 0;         // the ring's current rotation
   let ringHovered = false;
   let draggingRing = false;
 
-  // the circle sizes itself from the PHOTO COUNT, so the gaps stay
-  // balanced no matter how many photos a tab has (add more photos →
-  // the ring simply grows). Geometry: neighboring photos sit one
-  // chord apart, and chord = 2 × radius × sin(180° / count), so the
-  // radius that makes them *just about* touch (+24px of air) is:
+  // the circle sizes itself from the SLOT COUNT: neighboring photos
+  // sit one chord apart, and chord = 2 × radius × sin(180° / count),
+  // so the radius that makes them almost touch (+AIR px) is:
   function ringRadius() {
     const count = Math.max(ringVisible.length, 2);
     const itemW = ringVisible[0] ? ringVisible[0].offsetWidth : 260;
-    const snug   = (itemW + 24) / (2 * Math.sin(Math.PI / count));
+    const snug   = (itemW + AIR) / (2 * Math.sin(Math.PI / count));
     const maxFit = ringScene.clientWidth / 2 - itemW / 4;  // don't spill out
     return Math.max(170, Math.min(snug, Math.max(maxFit, 200)));
   }
 
-  // place the visible photos evenly around the circle
+  // place the photos evenly around the circle
   function layoutRing() {
     if (!ringVisible.length) return;
     const r = ringRadius();
@@ -327,13 +336,30 @@ if (photoRing && ringScene) {
     applyRingRotation();
   }
 
-  // show one category and rebuild the circle for it
+  // show one category and rebuild a FULL circle for it
   function applyFilter(category) {
-    allRingItems.forEach(item => {
+    // 1. throw away the repeats made for the previous tab
+    photoRing.querySelectorAll(".ring-clone").forEach(clone => clone.remove());
+
+    // 2. show only this tab's real photos
+    originalItems.forEach(item => {
       item.classList.toggle("hidden", item.dataset.category !== category);
       item.classList.remove("front");
     });
-    ringVisible = allRingItems.filter(item => !item.classList.contains("hidden"));
+    const chosen = originalItems.filter(item => !item.classList.contains("hidden"));
+
+    // 3. the no-gaps rule: repeat the whole set (in order) until the
+    //    circle is full — e.g. 2 certs become A·B·A·B·A·B·A·B
+    ringVisible = chosen.slice();
+    while (chosen.length && ringVisible.length < MIN_SLOTS) {
+      chosen.forEach(src => {
+        const clone = src.cloneNode(true);
+        clone.classList.add("ring-clone");
+        photoRing.appendChild(clone);
+        ringVisible.push(clone);
+      });
+    }
+
     ringAngle = 0;
     layoutRing();
     applyRingRotation();
@@ -350,7 +376,7 @@ if (photoRing && ringScene) {
     });
   });
 
-  // arrow buttons
+  // keycap arrow buttons (they float at the ring's edges)
   document.getElementById("ringPrev").addEventListener("click", () => spinRing(-1));
   document.getElementById("ringNext").addEventListener("click", () => spinRing(1));
 
@@ -387,8 +413,8 @@ if (photoRing && ringScene) {
   ringScene.addEventListener("pointercancel", endRingDrag);
 
   // pause auto-spin while the visitor is exploring
-  ringScene.addEventListener("mouseenter", () => { ringHovered = true; });
-  ringScene.addEventListener("mouseleave", () => { ringHovered = false; });
+  ringStage.addEventListener("mouseenter", () => { ringHovered = true; });
+  ringStage.addEventListener("mouseleave", () => { ringHovered = false; });
 
   // auto-spin every 5s (skipped for reduced-motion users)
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -397,8 +423,11 @@ if (photoRing && ringScene) {
     }, 5000);
   }
 
-  // re-space the circle if the window is resized
+  // re-space the circle if the window is resized — and once more after
+  // the full page load, in case the first measurement happened before
+  // the final layout settled (e.g. a scrollbar appearing late)
   window.addEventListener("resize", layoutRing);
+  window.addEventListener("load", layoutRing);
 
   applyFilter("events");   // matches the tab marked active in the HTML
 }
@@ -989,4 +1018,69 @@ if (cursorTrail
       `translate(${trailX - 6}px, ${trailY - 6}px) rotate(45deg) scale(${grow})`;
     requestAnimationFrame(chase);
   })();
+}
+
+/* ---------- 13. ABOUT SPOTLIGHT PARALLAX ----------
+   Makes the About fact-notes drift as the mouse moves over the
+   spotlight, each at its own depth — which is what sells the "notes
+   floating around me in space" illusion.
+
+   DATA TRANSFER (JS → CSS): this code never touches a note directly.
+   It converts the cursor position into two numbers between −1 and 1
+   (--mx and --my) and writes them onto the CONTAINER as CSS custom
+   properties. Over in style.css, every .orbit-pin runs
+       translate( calc(--mx × --depth × -1px), … )
+   with its own --depth value — so one pair of numbers moves six notes
+   by six different amounts. CSS variables act as the data bridge.
+
+   The values are eased with lerp (move 8% of the remaining distance
+   each frame), so the notes glide instead of twitching.
+   Desktop-mouse only, and off for reduced-motion users. */
+const spotlightEl = document.getElementById("aboutSpotlight");
+
+if (spotlightEl
+    && window.matchMedia("(pointer: fine)").matches
+    && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+
+  let aimMX = 0, aimMY = 0;   // where the cursor wants the drift to be
+  let curMX = 0, curMY = 0;   // where the drift actually is right now
+  let driftRunning = false;
+
+  spotlightEl.addEventListener("pointermove", (e) => {
+    const box = spotlightEl.getBoundingClientRect();
+    // cursor position inside the spotlight, mapped to −1 … 1
+    aimMX = ((e.clientX - box.left) / box.width  - 0.5) * 2;
+    aimMY = ((e.clientY - box.top)  / box.height - 0.5) * 2;
+    startDrift();
+  });
+
+  // mouse leaves → every note glides back to its home position
+  spotlightEl.addEventListener("pointerleave", () => {
+    aimMX = 0;
+    aimMY = 0;
+    startDrift();
+  });
+
+  // only run the animation loop while there's distance left to cover
+  function startDrift() {
+    if (!driftRunning) {
+      driftRunning = true;
+      requestAnimationFrame(driftStep);
+    }
+  }
+
+  function driftStep() {
+    curMX += (aimMX - curMX) * 0.08;
+    curMY += (aimMY - curMY) * 0.08;
+
+    // the hand-off to CSS: two custom properties on the container
+    spotlightEl.style.setProperty("--mx", curMX.toFixed(4));
+    spotlightEl.style.setProperty("--my", curMY.toFixed(4));
+
+    if (Math.abs(aimMX - curMX) > 0.002 || Math.abs(aimMY - curMY) > 0.002) {
+      requestAnimationFrame(driftStep);
+    } else {
+      driftRunning = false;         // arrived — stop burning frames
+    }
+  }
 }
