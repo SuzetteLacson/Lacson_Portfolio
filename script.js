@@ -102,10 +102,10 @@ const projectPhotos = {
     challenges: "One of the biggest challenges was integrating the booking system, invoice automation, database records, and planned Airbnb calendar synchronization into a single platform while coordinating tasks within the group. We also revised the interface several times to match the client’s preferred workflow, which helped me improve my teamwork, communication, and system integration skills.",
     contribution: "I contributed to the project planning, design, and frontend development of the booking platform. I helped design the reservation and invoice workflow, implemented the user interface using HTML, CSS, and JavaScript, and collaborated with the team to align the system with the client’s operational needs and preferred design.",
     photos: [
-      "images/project3.svg",
-      "images/activity3.svg",
-      "images/activity1.svg",
-      "images/activity4.svg"
+      "images/AMARI/AmariLogo.png",
+      "images/AMARI/homepage.png",
+      "images/AMARI/bookastay.png",
+      "images/AMARI/invoice.png"
     ]
   }
 };
@@ -178,6 +178,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }, { passive: true });
+  }
+
+  /* --- 2b-bis. hide the falling objects while the hero is on screen —
+         they fade back in the moment you scroll into any other section.
+         (See body.hero-in-view in style.css §2.) --- */
+  const heroEl = document.getElementById("top");
+
+  if ("IntersectionObserver" in window && heroEl) {
+    const heroSpy = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        document.body.classList.toggle("hero-in-view", entry.isIntersecting);
+      });
+    }, { threshold: 0.4 });
+
+    heroSpy.observe(heroEl);
   }
 
   /* --- 2c. scroll-reveal: fade/slide elements in as they appear --- */
@@ -350,8 +365,11 @@ if (photoRing && ringScene) {
 
     // 3. the no-gaps rule: repeat the whole set (in order) until the
     //    circle is full — e.g. 2 certs become A·B·A·B·A·B·A·B
+    //    EXCEPTION: certs are real documents, not decorative photos —
+    //    repeating them reads as a mistake, so that tab shows its
+    //    actual set only, gaps and all.
     ringVisible = chosen.slice();
-    while (chosen.length && ringVisible.length < MIN_SLOTS) {
+    while (category !== "certs" && chosen.length && ringVisible.length < MIN_SLOTS) {
       chosen.forEach(src => {
         const clone = src.cloneNode(true);
         clone.classList.add("ring-clone");

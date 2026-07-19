@@ -152,6 +152,14 @@ section .wrap > h2::after {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  transition: opacity 0.4s ease;
+}
+
+/* hides the fallers while the hero (first screen) is in view — body
+   gets this class from the IntersectionObserver in script.js §2b-bis.
+   Fades back in once you scroll into any other section. */
+body.hero-in-view #floatLayer {
+  opacity: 0;
 }
 
 #floatLayer span {
@@ -1337,7 +1345,12 @@ button:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 22px;
+  margin-top: 10px;
+  margin-bottom: 50px;
+  /* keeps the tabs tappable even if a 3D ring card visually bleeds
+     upward into this row — see .ring-stage below */
+  position: relative;
+  z-index: 5;
 }
 
 .gallery-tab {
@@ -1369,6 +1382,10 @@ button:focus-visible {
    The front photo is full color and shows its caption. */
 .ring-stage {
   position: relative;
+  z-index: 1;
+  /* breathing room so the 3D-perspective cards never visually crowd
+     the tabs above them */
+  margin-top: 10px;
 }
 
 .ring-scene {
@@ -1408,6 +1425,15 @@ button:focus-visible {
   background: var(--white);
   filter: grayscale(70%) brightness(0.85);  /* side photos are muted */
   transition: filter 0.4s ease;
+}
+
+/* certs are actual landscape documents, not portrait photos — give
+   that tab's cards their own wider/shorter frame so certificates
+   read correctly instead of getting squeezed into a tall portrait. */
+.ring-item[data-category="certs"] {
+  width: 500px;
+  height: 300px;
+  margin: -150px 0 0 -250px;
 }
 
 .ring-item.hidden {
@@ -2307,6 +2333,12 @@ footer.section-in > .wrap {
     width: 200px;
     height: 300px;
     margin: -150px 0 0 -100px;
+  }
+
+  .ring-item[data-category="certs"] {
+    width: 280px;
+    height: 198px;
+    margin: -99px 0 0 -140px;
   }
 
   .ring-btn {

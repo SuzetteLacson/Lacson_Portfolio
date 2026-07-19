@@ -178,7 +178,7 @@
                 <span class="badge-slot" aria-hidden="true"></span>
                 <img class="badge-photo" src="images/Me.jpg" alt="" draggable="false">
                 <p class="badge-name">SUZETTE<br>LACSON</p>
-                <p class="badge-role">QA AUTOMATION · CpE STUDENT</p>
+                <p class="badge-role"> IT INTERN · CpE STUDENT</p>
                 <div class="badge-barcode" aria-hidden="true"></div>
                 <p class="badge-id">ID NO. 2026-QA-001</p>
               </div>
@@ -308,7 +308,7 @@
       </div><!-- /about-spotlight -->
 
       <!-- ····· the longer version: bio, in the dev terminal ····· -->
-      <p class="about-chapter reveal">// the longer version</p>
+      <p class="about-chapter reveal">// more about me</p>
 
       <div class="terminal reveal">
         <div class="terminal-header">
@@ -393,7 +393,7 @@
   <section id="gallery" class="yellow-bg">
     <div class="wrap">
       <h2>02 / Gallery</h2>
-      <p class="section-sub">Pick a tab, then drag the ring — or press the arrows.</p>
+      <p class="section-sub">Choose a category, then drag the ring or use the arrows to explore the gallery.</p>
 
       <!-- Category tabs: each button shows only the photos whose
            data-category matches its data-filter value.
@@ -402,7 +402,7 @@
       <div class="gallery-tabs reveal" id="galleryTabs">
         <button class="gallery-tab active" data-filter="events"  aria-pressed="true">Events</button>
         <button class="gallery-tab"        data-filter="arduino" aria-pressed="false">Arduino Projects</button>
-        <button class="gallery-tab"        data-filter="certs"   aria-pressed="false">Certs</button>
+        <button class="gallery-tab"        data-filter="certs"   aria-pressed="false">Certificates</button>
       </div>
 
       <!-- The 3D ring. The ‹ › keycap arrows float right at the ring's
@@ -415,63 +415,65 @@
 
             <!-- ····· EVENTS ····· -->
             <figure class="ring-item" data-category="events" data-num="001">
-              <img src="images/interns.jpg" alt="Pick-A-Roo internship team" draggable="false">
-              <figcaption>Pick-A-Roo Internship</figcaption>
+              <img src="images/EVENTS/event_pickaroo.jpg" alt="Pick-A-Roo internship" draggable="false">
+              <figcaption>IT Intern | Pick.A.Roo by ADV</figcaption>
             </figure>
 
             <figure class="ring-item" data-category="events" data-num="002">
-              <img src="images/internshipw_id.jpg" alt="First day of internship with company ID" loading="lazy" draggable="false">
-              <figcaption>Internship onboarding at AGILE Digital Ventures</figcaption>
+              <img src="images/EVENTS/DEVCON2024.jpg" alt="DEVCON EVENT 2024" loading="lazy" draggable="false">
+              <figcaption>Tech Nexus 2024:Empowering Campus Innovators</figcaption>
             </figure>
 
             <figure class="ring-item" data-category="events" data-num="003">
-              <img src="images/PIC_EVENT.jpg" alt="Philippine Innovation Conference 2025" loading="lazy" draggable="false">
+              <img src="images/EVENTS/PIC_EVENT.jpg" alt="Philippine Innovation Conference 2025" loading="lazy" draggable="false">
               <figcaption>Philippine Innovation Conference 2025 — Tatak Future</figcaption>
             </figure>
 
             <figure class="ring-item" data-category="events" data-num="004">
-              <img src="images/event_pickaroo.jpg" alt="Pick-A-Roo company event" loading="lazy" draggable="false">
-              <figcaption>Pick-A-Roo team event</figcaption>
+              <img src="images/EVENTS/BACC2025.jpg" alt="BACC 2025" loading="lazy" draggable="false">
+              <figcaption>Batangas AI and Cybersecurity Congress 2025</figcaption>
             </figure>
 
             <!-- ····· ARDUINO PROJECTS ····· -->
             <figure class="ring-item" data-category="arduino" data-num="001">
               <img src="images/withArduino.jpg" alt="Working with Arduino" loading="lazy" draggable="false">
-              <figcaption>Working with Arduino activities</figcaption>
+              <figcaption>DC Motor Project</figcaption>
             </figure>
 
             <figure class="ring-item" data-category="arduino" data-num="002">
-              <img src="images/mzebot_bot.jpg" alt="MazeBot robot up close" loading="lazy" draggable="false">
-              <figcaption>MazeBot — the robot up close</figcaption>
+              <img src="images/ARDUINO'S/CALC_ARD.png" alt="MazeBot robot up close" loading="lazy" draggable="false">
+              <figcaption>Calculator Project</figcaption>
             </figure>
 
             <figure class="ring-item" data-category="arduino" data-num="003">
-              <img src="images/mzebot_maze.jpg" alt="MazeBot navigating the maze" loading="lazy" draggable="false">
-              <figcaption>MazeBot navigating the maze</figcaption>
+              <img src="images/ARDUINO'S/KEYPAD_ARD.jpg" alt="MazeBot navigating the maze" loading="lazy" draggable="false" style="transform: scale(1.35); transform-origin: center 78%;">
+              <figcaption>KeyPad Project</figcaption>
             </figure>
 
             <figure class="ring-item" data-category="arduino" data-num="004">
-              <img src="images/me_w_bot.jpg" alt="Suzette with the MazeBot" loading="lazy" draggable="false">
-              <figcaption>Me with our MazeBot</figcaption>
-            </figure>
-
-            <figure class="ring-item" data-category="arduino" data-num="005">
-              <img src="images/mzebotgrouppic.jpg" alt="MazeBot team group picture" loading="lazy" draggable="false">
-              <figcaption>The MazeBot team</figcaption>
+              <img src="images/ARDUINO'S/BLINKING_ARD.jpg" alt="Suzette with the MazeBot" loading="lazy" draggable="false">
+              <figcaption>Blinking LED Project</figcaption>
             </figure>
 
             <!-- ····· CERTS ·····
-                 EDIT-ME: these two are placeholders — take photos/scans of
-                 your CCNA certificates, drop them into images/, and replace
-                 the .svg paths below. -->
+                 EDIT-ME: to add another cert, copy a <figure> block,
+                 point src at the new file in images/CERTS/, and give it
+                 the next data-num. This tab never repeats photos to fill
+                 the ring (see script.js applyFilter), so gaps are normal
+                 with only a few certs. -->
             <figure class="ring-item" data-category="certs" data-num="001">
-              <img src="images/activity1.svg" alt="Cisco CCNA 1 certificate" loading="lazy" draggable="false">
-              <figcaption>Cisco CCNA 1 — certificate photo coming soon</figcaption>
+              <img src="images/CERTS/ICEPEP_LACSON_SUZETTE.jpg" alt="ICpEP Certificate of Student Membership" loading="lazy" draggable="false">
+              <figcaption>ICpEP — Certificate of Student Membership</figcaption>
             </figure>
 
             <figure class="ring-item" data-category="certs" data-num="002">
-              <img src="images/activity2.svg" alt="Cisco CCNA 2 certificate" loading="lazy" draggable="false">
-              <figcaption>Cisco CCNA 2 — certificate photo coming soon</figcaption>
+              <img src="images/CERTS/Suzette B. Lacson_BACC2025.jpg" alt="Batangas AI and Cybersecurity Congress 2025 certificate" loading="lazy" draggable="false">
+              <figcaption>Batangas AI &amp; Cybersecurity Congress 2025</figcaption>
+            </figure>
+
+            <figure class="ring-item" data-category="certs" data-num="003">
+              <img src="images/CERTS/Tech Nexus Certificate of Recognition.jpg" alt="Campus DEVCON Tech Nexus 2024 certificate of recognition" loading="lazy" draggable="false">
+              <figcaption>Campus DEVCON — Tech Nexus 2024</figcaption>
             </figure>
 
           </div>
@@ -489,7 +491,7 @@
   <section id="projects">
     <div class="wrap">
       <h2>03 / Projects</h2>
-      <p class="section-sub">Photos slide automatically — click a card for the full story.</p>
+      <p class="section-sub">Click a project card to explore the full story! </p>
       <div class="grid">
 
         <!-- Project 1 -->
