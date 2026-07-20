@@ -77,10 +77,10 @@ const projectPhotos = {
     challenges: "Sensor readings in the real world are messy — walls reflect differently, batteries drain, and the same code behaves differently between runs. Most of our debugging time went into calibrating the sensors and adding tolerances so the robot made consistent decisions.",
     contribution: "I focused on programming the navigation and obstacle-detection logic and calibrating the sensors, alongside hands-on debugging with the team during test runs.",
     photos: [
-      "images/mzebot_bot.jpg",
-      "images/mzebot_maze.jpg",
-      "images/me_w_bot.jpg",
-      "images/mzebotgrouppic.jpg"
+      "images/MazeBot/mzebot_bot.jpg",
+      "images/MazeBot/mzebot_maze.jpg",
+      "images/MazeBot/me_w_bot.jpg",
+      "images/MazeBot/mzebotgrouppic.jpg"
     ]
   },
 
