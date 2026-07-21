@@ -1,6 +1,6 @@
 /* ==========================================================
    script.js — Portfolio Core Engine
-   Handles:
+   Handles: 
      1. Project data (photos + blog-style write-ups)
      2. Capsule nav (mobile dropdown + scrollspy + scroll-reveal)
      3. Gallery 3D ring (tabs + drag-to-spin + auto-spin + no-gaps fill)
