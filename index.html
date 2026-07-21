@@ -30,8 +30,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <!-- Scroll progress line — fills left→right as you scroll (script.js §11) -->
+  
   <div id="scrollProgress" aria-hidden="true"></div>
 
   <!-- Interactive dot-grid background — dots glow yellow near the cursor
@@ -67,8 +66,13 @@
     <span>[ ]</span>
     <span>=&gt;</span>
     <!-- mini keycaps -->
-    <span class="kf">Q</span>
-    <span class="kf">A</span>
+    <span class="kf">S</span>
+    <span class="kf">U</span>
+    <span class="kf">Z</span>
+    <span class="kf">E</span>
+    <span class="kf">T</span>
+    <span class="kf">T</span>
+    <span class="kf">E</span>
     <span class="kf">CTRL</span>
     <span class="kf">ESC</span>
     <span class="kf">↵</span>
@@ -559,8 +563,12 @@
       <h2>04 / Skills</h2>
       <p class="section-sub">(hint: press a key)</p>
 
-      <!-- The "LCD screen" that reads out the pressed skill -->
-      <div class="skill-screen reveal">
+      <!-- The "LCD screen" that reads out the pressed skill.
+           aria-live="polite" = when JS changes this text, a screen reader
+           announces the new definition without interrupting whatever it
+           is already saying. Without it, blind users press a key and hear
+           nothing at all. -->
+      <div class="skill-screen reveal" aria-live="polite">
         <span class="screen-tag" id="screenTag">SKILLS.SYS</span>
         <p class="screen-text" id="screenText">TAP A KEY TO READ ABOUT IT_</p>
       </div>

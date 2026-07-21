@@ -29,8 +29,8 @@
      challenges   — what was hard and how it was handled
      contribution — what *I* specifically did
      photos       — image paths (first one shows on the card too)
-   NOTE: SUZENTINEL & amari still use placeholder .svg images —
-   drop real screenshots into images/ and update the paths. */
+   Photos live in per-project folders under images/ — keep new screenshots
+   there so the paths stay tidy. */
 const projectPhotos = {
 
   SUZENTINEL: {
